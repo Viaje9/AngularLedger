@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, type OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-ledger-overview',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
   ],
   templateUrl: './ledger-overview.component.html',
   styleUrl: './ledger-overview.component.css',
