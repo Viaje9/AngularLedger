@@ -14,6 +14,10 @@ export const routes: Routes = [
         path: 'addExpense',
         loadComponent: () => import('./features/add-expense/add-expense.component').then(m => m.AddExpenseComponent)
       },
+      {
+        path: 'budget',
+        loadComponent: () => import('./features/budget/budget.component').then(m => m.BudgetComponent)
+      },
     ],
   },
 ];

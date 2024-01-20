@@ -11,7 +11,25 @@ import { Component, type OnInit } from '@angular/core';
   styleUrl: './ledger-overview.component.css',
 })
 export class LedgerOverviewComponent implements OnInit {
-
-  ngOnInit(): void { }
+  ledgerItems = [
+    {
+      id: 1,
+      category: 'test',
+      name: 'test',
+      description: 'test',
+      amount: 100,
+      date: new Date(),
+    }
+  ]
+  ngOnInit(): void {
+    this.ledgerItems = Array.from({ length: 30 }, (_, i) => i + 1).map((i) => ({
+      id: i,
+      category: 'test',
+      name: 'test',
+      description: 'test',
+      amount: 100,
+      date: new Date(),
+    }))
+  }
 
 }

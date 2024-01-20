@@ -1,108 +1,103 @@
-<div class="bg-gray-100">
-  <!-- Top bar -->
-  <div class="bg-red-600 p-4 text-white">
-    <div class="flex justify-between items-center">
-      <div class="flex items-center">
-        <img
-          src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"
-          class="h-6 w-6"
-          alt="Calendar"
-        />
-        <span class="ml-2">2024/01/05</span>
+<div class="bg-gray-100 h-dvh">
+  <div class="min-h-max">
+    <div class="sticky top-0">
+      <!-- Top bar -->
+      <div class="bg-red-600 p-4 text-white">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center">
+            <img
+              src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"
+              class="h-6 w-6"
+              alt="Calendar"
+            />
+            <span class="ml-2">2024/01/05</span>
+          </div>
+          <button class="bg-red-800 p-2 rounded-full">
+            <img
+              src="https://img.icons8.com/ios-filled/50/ffffff/plus-math.png"
+              class="h-6 w-6"
+              alt="Add"
+            />
+          </button>
+        </div>
       </div>
-      <button class="bg-red-800 p-2 rounded-full">
+
+      <!-- Balance -->
+      <div class="bg-red-500 p-4 text-white">
+        <div class="flex justify-between items-center">
+          <span>TWD</span>
+          <span class="text-4xl">1,525</span>
+        </div>
+      </div>
+    </div>
+    <!-- Expense categories -->
+    <div class="bg-red-500 p-4 space-y-2">
+      @for (item of ledgerItems; track item.id) {
+      <div class="bg-red-600 p-2 flex justify-between items-center">
+        <span>🥐 {{ item.category }}</span>
+        <span>${{ item.amount }}</span>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="sticky bottom-0">
+    <!-- Budget progress -->
+    <div class="bg-red-300 p-4 text-red-800">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <img
+            src="https://img.icons8.com/ios-filled/50/fa314a/sheep.png"
+            class="h-6 w-6"
+            alt="Sheep"
+          />
+          <span class="ml-2 text-lg">87%</span>
+        </div>
+        <div>
+          <span class="text-2xl">$10,475</span> /
+          <span class="text-xl">$12,000</span>
+        </div>
+      </div>
+      <div class="text-xs">
+        <span>剩餘預算</span>
+        <span>預算總額</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex justify-around items-center bg-gray-200 p-4">
+      <button>
         <img
-          src="https://img.icons8.com/ios-filled/50/ffffff/plus-math.png"
+          src="https://img.icons8.com/ios-filled/50/000000/home.png"
           class="h-6 w-6"
-          alt="Add"
+          alt="Home"
         />
+        <span class="block text-xs">支出</span>
+      </button>
+      <button>
+        <img
+          src="https://img.icons8.com/ios-filled/50/000000/rise.png"
+          class="h-6 w-6"
+          alt="Trends"
+        />
+        <span class="block text-xs">收入</span>
+      </button>
+      <button>
+        <img
+          src="https://img.icons8.com/ios-filled/50/000000/bar-chart.png"
+          class="h-6 w-6"
+          alt="Statistics"
+        />
+        <span class="block text-xs">統計</span>
+      </button>
+      <button>
+        <img
+          src="https://img.icons8.com/ios-filled/50/000000/settings.png"
+          class="h-6 w-6"
+          alt="Settings"
+        />
+        <span class="block text-xs">設定</span>
       </button>
     </div>
-  </div>
-
-  <!-- Balance -->
-  <div class="bg-red-500 p-4 text-white">
-    <div class="flex justify-between items-center">
-      <span>TWD</span>
-      <span class="text-4xl">1,525</span>
-    </div>
-  </div>
-
-  <!-- Expense categories -->
-  <div class="bg-red-500 p-4 space-y-2">
-    <div class="bg-red-600 p-2 flex justify-between items-center">
-      <span>🥐 食慾</span>
-      <span>$70</span>
-    </div>
-    <div class="bg-red-600 p-2 flex justify-between items-center">
-      <span>🍴 住宿</span>
-      <span>$1,300</span>
-    </div>
-    <div class="bg-red-600 p-2 flex justify-between items-center">
-      <span>🍜 代餐</span>
-      <span>$110</span>
-    </div>
-    <div class="bg-red-600 p-2 flex justify-between items-center">
-      <span>🥤 飲料</span>
-      <span>$45</span>
-    </div>
-  </div>
-
-  <!-- Budget progress -->
-  <div class="bg-red-300 p-4 text-red-800">
-    <div class="flex justify-between items-center">
-      <div class="flex items-center">
-        <img
-          src="https://img.icons8.com/ios-filled/50/fa314a/sheep.png"
-          class="h-6 w-6"
-          alt="Sheep"
-        />
-        <span class="ml-2 text-lg">87%</span>
-      </div>
-      <div>
-        <span class="text-2xl">$10,475</span> /
-        <span class="text-xl">$12,000</span>
-      </div>
-    </div>
-    <div class="text-xs">
-      <span>剩餘預算</span>
-      <span>預算總額</span>
-    </div>
-  </div>
-
-  <!-- Navigation -->
-  <div class="flex justify-around items-center bg-gray-200 p-4">
-    <button>
-      <img
-        src="https://img.icons8.com/ios-filled/50/000000/home.png"
-        class="h-6 w-6"
-        alt="Home"
-      />
-      <span class="block text-xs">支出</span>
-    </button>
-    <button>
-      <img
-        src="https://img.icons8.com/ios-filled/50/000000/rise.png"
-        class="h-6 w-6"
-        alt="Trends"
-      />
-      <span class="block text-xs">收入</span>
-    </button>
-    <button>
-      <img
-        src="https://img.icons8.com/ios-filled/50/000000/bar-chart.png"
-        class="h-6 w-6"
-        alt="Statistics"
-      />
-      <span class="block text-xs">統計</span>
-    </button>
-    <button>
-      <img
-        src="https://img.icons8.com/ios-filled/50/000000/settings.png"
-        class="h-6 w-6"
-        alt="Settings"
-      />
-      <span class="block text-xs">設定</span>
-    </button>
   </div>
 </div>
