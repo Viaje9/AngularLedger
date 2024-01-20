@@ -1,0 +1,11 @@
+.icon {
+  width: 40px;
+  height: 40px;
+  background-color: #d1d5db;
+  /* mask: url(https://unsplash.it/40/40) no-repeat center; */
+  mask-size: cover;
+  display: inline-block;
+}
+.active-icon {
+  background-color: #111827;
+}
