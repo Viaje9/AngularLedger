@@ -6,6 +6,11 @@
   mask-size: cover;
   display: inline-block;
 }
+
 .active-icon {
   background-color: #111827;
+}
+
+.transition {
+  transform: all 0.5s ease-out;
 }
