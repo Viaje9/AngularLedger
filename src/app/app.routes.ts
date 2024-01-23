@@ -8,15 +8,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./features/ledger-overview/ledger-overview.component').then(m => m.LedgerOverviewComponent)
-      },
-      {
-        path: 'addExpense',
-        loadComponent: () => import('./features/add-expense/add-expense.component').then(m => m.AddExpenseComponent)
-      },
-      {
-        path: 'budget',
-        loadComponent: () => import('./features/budget/budget.component').then(m => m.BudgetComponent)
+        loadChildren: () => import('./features/ledger/ledger.routes').then(m => m.LEDGER_ROUTES)
       },
       {
         path: 'setting',
