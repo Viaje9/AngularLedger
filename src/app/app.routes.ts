@@ -18,6 +18,10 @@ export const routes: Routes = [
         path: 'budget',
         loadComponent: () => import('./features/budget/budget.component').then(m => m.BudgetComponent)
       },
+      {
+        path: 'setting',
+        loadChildren: () => import('./features/setting/setting.routes').then(m => m.SETTING_ROUTES)
+      },
     ],
   },
 ];
