@@ -53,9 +53,9 @@ export class AddExpenseComponent implements OnInit {
 
     const dragStart$ = merge(mouseDown$, touchStart$);
     const dragEnd$ = merge(mouseUp$, touchEnd$);
-
-    dragStart$.subscribe(this.onDragStart.bind(this));
-    dragEnd$.subscribe(this.onDragEnd.bind(this));
+//
+//     dragStart$.subscribe(this.onDragStart.bind(this));
+//     dragEnd$.subscribe(this.onDragEnd.bind(this));
 
   }
 
@@ -69,19 +69,28 @@ export class AddExpenseComponent implements OnInit {
     this.isDropScroll = true
   }
 
+  onSwipeRight(): void {
+    console.log('onSwipeRight');
+  }
+
+  onSwipeLeft(): void {
+    console.log('onSwipeLeft');
+
+  }
+
   onDragEnd(): void {
-    console.log('onDragEnd');
-
-    // if (!this.isDropScroll) return
-    this.isDropScroll = false
-    const scrollLeft = this.scrollTagsRef.nativeElement.scrollLeft
-    this.findClosestNum = this.findClosest(scrollLeft)
-    console.log(this.findClosest(scrollLeft), scrollLeft);
-
-    this.scrollTagsRef.nativeElement.scrollTo({
-      left: this.findClosest(scrollLeft),
-      behavior: 'smooth'
-    })
+//     console.log('onDragEnd');
+//
+//     // if (!this.isDropScroll) return
+//     this.isDropScroll = false
+//     const scrollLeft = this.scrollTagsRef.nativeElement.scrollLeft
+//     this.findClosestNum = this.findClosest(scrollLeft)
+//     console.log(this.findClosest(scrollLeft), scrollLeft);
+//
+//     this.scrollTagsRef.nativeElement.scrollTo({
+//       left: this.findClosest(scrollLeft),
+//       behavior: 'smooth'
+//     })
     // fromEvent(this.scrollTagsRef.nativeElement, 'scroll').pipe(debounceTime(100)).subscribe(() => {
     //   if(this.findClosest(scrollLeft) !== scrollLeft) {
     //     this.scrollTagsRef.nativeElement.scrollTo({
