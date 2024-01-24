@@ -8,18 +8,14 @@
       <div></div>
     </div>
     <div class="space-y-2">
+      @for (item of tagList$ | async; track item) {
       <div class="flex items-center justify-between px-4 py-3 bg-gray-700">
         <div class="flex items-center">
-          <i class="fas fa-arrow-left"></i>
+          <i [ngClass]="item.tagIconName"></i>
         </div>
-        <span> 類別管理 &gt; </span>
+        <span> {{ item.tagName }} &gt; </span>
       </div>
-      <div class="flex items-center justify-between px-4 py-3 bg-gray-700">
-        <div class="flex items-center">
-          <i class="fas fa-arrow-left"></i>
-        </div>
-        <span> 類別管理 &gt; </span>
-      </div>
+      }
     </div>
   </div>
   <div class="sticky bottom-0">

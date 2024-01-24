@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, type OnInit } from '@angular/core';
+import { Component, inject, type OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Firestore, collectionData, collection, orderBy, query } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-tags-manage',
@@ -14,6 +16,21 @@ import { RouterModule } from '@angular/router';
 })
 export class TagsManageComponent implements OnInit {
 
+  tagList$!: Observable<TagInfo[]>
+
+  constructor(private firestore: Firestore) {
+    const itemCollection = collection(this.firestore, 'tagList')
+    this.tagList$ = collectionData(query(itemCollection, orderBy('sort', 'desc'))) as Observable<TagInfo[]>;
+
+
+  }
   ngOnInit(): void { }
 
+
+}
+
+interface TagInfo {
+  tagIconName: string;
+  tagName: string;
+  sort: number;
 }
