@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, type OnInit, ViewChild, ElementRef } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { debounceTime, fromEvent, merge } from 'rxjs';
+import { Firestore, collection, collectionData, orderBy, query } from '@angular/fire/firestore';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { TagInfo } from '@src/app/core/models/tag.model';
+import { debounceTime, fromEvent, merge, take } from 'rxjs';
 
 @Component({
   selector: 'app-add-expense',
@@ -22,7 +24,14 @@ export class AddExpenseComponent implements OnInit {
   currentTagGroupPage = 0
   translateFactor = 'translate(0, 0)'
 
-  tagsGroup: string[] = ['Food', 'Transport', 'Entertainment', 'Other'];
+  tagsGroup: TagInfo[][] = [];
+
+  selectedTagId = '';
+  constructor(
+    private route: ActivatedRoute
+  ) {
+    this.tagsGroup = this.route.snapshot.data['tagListGroup'];
+  }
   ngOnInit(): void {
 
   }
@@ -48,6 +57,13 @@ export class AddExpenseComponent implements OnInit {
       const translate = this.currentTagGroupPage * 100
       this.translateFactor = `translate(-${translate}%, 0)`
     }
+  }
 
+  onTagClick(tagId: string) {
+    if (this.selectedTagId === tagId) {
+      this.selectedTagId = ''
+    } else {
+      this.selectedTagId = tagId
+    }
   }
 }
