@@ -1,16 +1,14 @@
-import { CommonModule } from '@angular/common';
 import { Component, type OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Firestore, collection, collectionData, orderBy, query } from '@angular/fire/firestore';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { TagInfo } from '@src/app/core/models/tag.model';
-import { debounceTime, fromEvent, merge, take } from 'rxjs';
+import { ModalService } from '@src/app/core/services/modal.service';
+import { SharedModule } from '@src/app/shared/shared.module';
 
 @Component({
   selector: 'app-add-expense',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
+    SharedModule
   ],
   templateUrl: './add-expense.component.html',
   styleUrl: './add-expense.component.css',
@@ -23,12 +21,14 @@ export class AddExpenseComponent implements OnInit {
   maxTagGroupPage = 0
   currentTagGroupPage = 0
   translateFactor = 'translate(0, 0)'
+  price = 0
 
   tagsGroup: TagInfo[][] = [];
 
   selectedTagId = '';
   constructor(
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private modalService: ModalService,
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
   }
@@ -64,6 +64,17 @@ export class AddExpenseComponent implements OnInit {
       this.selectedTagId = ''
     } else {
       this.selectedTagId = tagId
+    }
+  }
+
+  async onClickSave() {
+    if (!this.selectedTagId || !this.price) {
+      this.modalService.openConfirm({
+        content: '請輸入金額與選擇標籤',
+        okText: '確認',
+        showCancelBtn: false,
+      });
+
     }
   }
 }
