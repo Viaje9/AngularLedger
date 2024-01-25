@@ -5,6 +5,7 @@ import { CollectionReference, DocumentData, Firestore, addDoc, collection, getDo
 import { FormsModule } from '@angular/forms';
 import { Observable, ReplaySubject, map, take } from 'rxjs';
 import { LoaderService } from 'src/app/core/services/loader.service';
+import { TagInfo } from '@src/app/core/models/tag.model';
 
 @Component({
   selector: 'app-add-tag',
@@ -134,9 +135,3 @@ export class AddTagComponent implements OnInit {
 }
 
 
-interface TagInfo {
-  tagIconName: string;
-  tagName: string;
-  sort: number;
-  id: string;
-}

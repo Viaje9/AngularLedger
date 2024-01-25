@@ -6,6 +6,7 @@ import { Observable, tap } from 'rxjs';
 import { SharedModule } from '@src/app/shared/shared.module';
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { LoaderService } from '@src/app/core/services/loader.service';
+import { TagInfo } from '@src/app/core/models/tag.model';
 
 @Component({
   selector: 'app-tags-manage',
@@ -93,11 +94,4 @@ export class TagsManageComponent implements OnInit {
       this.loaderService.stop()
     })
   }
-}
-
-interface TagInfo {
-  tagIconName: string;
-  tagName: string;
-  sort: number;
-  id: string;
 }
