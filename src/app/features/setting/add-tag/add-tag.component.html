@@ -13,6 +13,7 @@
       >
       <input
         [(ngModel)]="tagname"
+        autocomplete="off"
         id="tagName"
         type="text"
         class="w-full bg-gray-800 rounded border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-900 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
@@ -29,10 +30,15 @@
       </button>
       }
     </div>
-    <div class="flex justify-around items-center bg-gray-500 p-4">
-      <button (click)="onClickAddTag()">
+    <div class="flex w-full">
+      <button (click)="onClickAddTag()" class="bg-gray-500 p-4 flex-1">
         <i class="fas fa-plus"></i>
       </button>
+      @if (docId) {
+      <button (click)="onClickAddTag()" class="bg-gray-600 p-4 flex-1">
+        <i class="fas fa-trash"></i>
+      </button>
+      }
     </div>
   </div>
 </div>

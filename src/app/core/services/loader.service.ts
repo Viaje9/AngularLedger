@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
+import { signal } from '@angular/core';
+
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoaderService {
-  private executingCounter = 0;
+  private executingCounter = signal(0)
   private loadingStatus$: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(false);
 
@@ -14,19 +16,19 @@ export class LoaderService {
   }
 
   start(): void {
-    this.executingCounter++;
+    this.executingCounter.update(current => current + 1);
 
-    if (this.executingCounter > 0) {
+    if (this.executingCounter() > 0) {
       this.loadingStatus$.next(true);
     }
   }
 
   stop(): void {
-    if (this.executingCounter > 0) {
-      this.executingCounter--;
+    if (this.executingCounter() > 0) {
+      this.executingCounter.update(current => current - 1);
     }
 
-    if (this.executingCounter <= 0) {
+    if (this.executingCounter() <= 0) {
       this.loadingStatus$.next(false);
     }
   }

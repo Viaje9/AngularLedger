@@ -9,7 +9,7 @@
     </div>
     <div class="space-y-2">
       @for (item of tagList$ | async; track item) {
-      <div class="flex items-center justify-between px-4 py-3 bg-gray-700">
+      <div class="flex items-center justify-between px-4 py-3 bg-gray-700" (click)="goToRemoveTag(item.id)">
         <div class="flex items-center">
           <i [ngClass]="item.tagIconName"></i>
         </div>
