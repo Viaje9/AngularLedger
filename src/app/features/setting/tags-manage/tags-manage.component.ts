@@ -4,12 +4,15 @@ import { Router, RouterModule } from '@angular/router';
 import { Firestore, collectionData, collection, orderBy, query, doc, getDocs, deleteDoc } from '@angular/fire/firestore';
 import { Observable, tap } from 'rxjs';
 import { SharedModule } from '@src/app/shared/shared.module';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-tags-manage',
   standalone: true,
   imports: [
-    SharedModule
+    SharedModule,
+    CdkDropList,
+    CdkDrag
   ],
   templateUrl: './tags-manage.component.html',
   styleUrl: './tags-manage.component.css',
