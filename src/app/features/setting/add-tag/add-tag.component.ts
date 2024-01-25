@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, type OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CollectionReference, DocumentData, Firestore, addDoc, collection, getDocs, query, orderBy, doc, docData, limit, collectionData, updateDoc } from '@angular/fire/firestore';
+import { CollectionReference, DocumentData, Firestore, addDoc, collection, getDocs, query, orderBy, doc, docData, limit, collectionData, updateDoc, deleteDoc } from '@angular/fire/firestore';
 import { FormsModule } from '@angular/forms';
-import { Observable, ReplaySubject, map } from 'rxjs';
+import { Observable, ReplaySubject, map, take } from 'rxjs';
 import { LoaderService } from 'src/app/core/services/loader.service';
 
 @Component({
@@ -52,7 +52,7 @@ export class AddTagComponent implements OnInit {
     const docId = this.router?.getCurrentNavigation()?.extras.state?.['docId']
     if (docId) {
       const docRef = doc(this.firestore, 'tagList', docId)
-      docData(docRef).subscribe((res) => {
+      docData(docRef).pipe(take(1)).subscribe((res) => {
         const result = res as TagInfo
         this.docId = docId;
         this.lastSort = result.sort;
@@ -62,7 +62,7 @@ export class AddTagComponent implements OnInit {
     } else {
       this.tagListCollection = collection(this.firestore, 'tagList')
       collectionData(query(collection(this.firestore, 'tagList'), orderBy('sort', 'desc'), limit(1)))
-        .pipe(map(e => e[0]['sort'] + 1)).subscribe(result => {
+        .pipe(map(e => e[0]['sort'] + 1)).pipe(take(1)).subscribe(result => {
           this.lastSort = result
         })
     }
@@ -95,7 +95,6 @@ export class AddTagComponent implements OnInit {
 
   async addTag(tagName: string, tagIconName: string) {
     this.loaderService.start()
-    console.log(this.docId);
 
     if (!this.docId) {
       await addDoc(this.tagListCollection, {
@@ -118,6 +117,19 @@ export class AddTagComponent implements OnInit {
         this.router.navigateByUrl('/setting/tagsManage');
       }).finally(() => this.loaderService.stop())
     }
+  }
+
+  async onClickRemoveTag() {
+    if (!this.docId) {
+      return
+    }
+    this.loaderService.start()
+    const docRef = doc(this.firestore, 'tagList', this.docId)
+    await deleteDoc(docRef).then(() => {
+      this.router.navigateByUrl('/setting/tagsManage');
+    }).catch(error => {
+      console.error('Error removing document: ', error);
+    }).finally(() => this.loaderService.stop())
   }
 }
 

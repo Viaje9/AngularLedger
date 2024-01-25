@@ -5,26 +5,43 @@
         <i class="fas fa-arrow-left"></i>
       </button>
       <h1 class="text-lg font-semibold">類別管理</h1>
-      <button>
+      <button (click)="doDropList()">
         <i class="fas fa-bars me-1"></i><span>排序</span>
       </button>
     </div>
-    <div class="space-y-2">
-      @for (item of tagList$ | async; track item) {
-      <div class="flex items-center justify-between px-4 py-3 bg-gray-700" (click)="goToRemoveTag(item.id)">
+    <div class="space-y-2" cdkDropList (cdkDropListDropped)="dropTag($event)">
+      @for (item of tagList ; track item.id) {
+      <div
+        cdkDrag
+        [cdkDragDisabled]="!isDrop"
+        class="flex items-center justify-between px-4 py-3 bg-gray-700"
+        (click)="goToRemoveTag(item.id)"
+      >
         <div class="flex items-center">
           <i [ngClass]="item.tagIconName"></i>
         </div>
-        <span> {{ item.tagName }} &gt; </span>
+        <span>
+          {{ item.tagName }}
+          @if (!isDrop) { &gt; } @else {
+          <i class="fas fa-bars me-1"></i>
+          }
+        </span>
       </div>
       }
     </div>
   </div>
   <div class="sticky bottom-0">
-    <div class="flex justify-around items-center bg-gray-500 p-4">
-      <button routerLink="/setting/addTag">
+    <div class="flex justify-around items-center bg-gray-500">
+      @if (!isDrop) {
+      <button class="p-4 flex-1" routerLink="/setting/addTag">
         <i class="fas fa-plus"></i>
       </button>
+      } @else {
+      <button (click)="onConfirm()" class="flex-1 p-4">確認</button>
+      <button (click)="doDropList()" class="flex-1 p-4 bg-gray-600">
+        取消
+      </button>
+      }
     </div>
   </div>
 </div>
