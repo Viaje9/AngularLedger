@@ -27,6 +27,7 @@ export class AddExpenseComponent implements OnInit {
   tagsGroup: TagInfo[][] = [];
 
   selectedTagId = '';
+  description = '';
   constructor(
     private route: ActivatedRoute,
     private modalService: ModalService,
@@ -82,6 +83,7 @@ export class AddExpenseComponent implements OnInit {
 
   onClickDescription() {
     this.modalService.openConfirm({
+      title: "備註",
       okText: '確認',
       showCancelBtn: false,
       outsideClose: true,

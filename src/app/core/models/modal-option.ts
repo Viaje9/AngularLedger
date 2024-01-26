@@ -37,6 +37,10 @@ export interface ModalOption {
    * **/
   showCancelBtn?: boolean;
   /**
+   * @description 是否置中，預設為 true
+   * **/
+  btnCenter?: boolean;
+  /**
    * @description 自定義content
    * **/
   contentTemplateRef?: TemplateRef<any>

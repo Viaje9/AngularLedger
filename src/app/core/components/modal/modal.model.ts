@@ -30,6 +30,10 @@ export interface ModalData {
    */
   showCancelBtn: boolean;
   /**
+   * @description 是否置中，預設為 true
+   * **/
+  btnCenter: boolean;
+  /**
    * @description 自定義component
    */
   contentTemplateRef?: TemplateRef<any>

@@ -23,6 +23,7 @@ export class ModalComponent implements OnInit {
   showCrossBtn = true;
   outsideClose = false;
   showCancelBtn = true
+  btnCenter = true
   templateRef?: TemplateRef<any>;
 
   constructor(
@@ -30,7 +31,7 @@ export class ModalComponent implements OnInit {
     public data: ModalData,
   ) {
     if (this.data) {
-      const { title, content, okText, cancelText, showCrossBtn, outsideClose, showCancelBtn, contentTemplateRef } =
+      const { title, content, okText, cancelText, showCrossBtn, outsideClose, showCancelBtn, contentTemplateRef, btnCenter } =
         data;
       this.title = title;
       this.content = content;
@@ -39,6 +40,7 @@ export class ModalComponent implements OnInit {
       this.showCrossBtn = showCrossBtn;
       this.outsideClose = outsideClose;
       this.showCancelBtn = showCancelBtn
+      this.btnCenter = btnCenter
       this.templateRef = contentTemplateRef
     }
   }

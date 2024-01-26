@@ -51,10 +51,18 @@
   ></div>
   }
 </div>
-<div class="bg-white py-4 border-t border-gray-300" (click)="onClickDescription()">
-  <div class="flex p-4 border-b items-center">
-    <i class="mr-4 fas fa-pencil-alt"></i>
-    <p>描述</p>
+<div
+  class="bg-white py-4 border-t border-gray-300"
+  (click)="onClickDescription()"
+>
+  <div class="flex p-4 border-b items-center justify-between">
+    <div class="flex items-center">
+      <i class="mr-4 fas fa-pencil-alt"></i>
+      <p>備註</p>
+    </div>
+    <span class="w-3/5 text-ellipsis overflow-hidden text-right text-nowrap">
+      {{ description }}
+    </span>
   </div>
   <!-- <div class="flex p-4 border-b items-center">
     <i class="mr-4 fas fa-file-invoice-dollar"></i>
@@ -67,5 +75,9 @@
 </div>
 
 <ng-template #templateRef>
-  test
+  <textarea
+    [(ngModel)]="description"
+    class="text-black w-full"
+    rows="10"
+  ></textarea>
 </ng-template>
