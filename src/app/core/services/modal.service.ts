@@ -48,6 +48,7 @@ export class ModalService {
       outsideClose = false,
       showCrossBtn = true,
       showCancelBtn = true,
+      contentTemplateRef,
     }: ModalOption) => ({
       data: {
         content,
@@ -56,7 +57,8 @@ export class ModalService {
         cancelText,
         outsideClose,
         showCrossBtn,
-        showCancelBtn
+        showCancelBtn,
+        contentTemplateRef
       }
     })
 

@@ -37,6 +37,10 @@
       <!-- Modal body -->
       <div class="p-4 md:p-5 space-y-4 text-white min-h-20">
         <p [innerHTML]="content"></p>
+
+        @if (templateRef) {
+        <ng-container *ngTemplateOutlet="templateRef"></ng-container>
+        }
       </div>
       <!-- Modal footer -->
       <div

@@ -1,8 +1,9 @@
+import { TemplateRef } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 
 export interface ModalOption {
   title?: string;
-  content: string | SafeHtml;
+  content?: string | SafeHtml;
   /**
    * @description 確認按鈕 callback
    * **/
@@ -35,4 +36,8 @@ export interface ModalOption {
    * @description 是否顯示取消按鈕
    * **/
   showCancelBtn?: boolean;
+  /**
+   * @description 自定義content
+   * **/
+  contentTemplateRef?: TemplateRef<any>
 }

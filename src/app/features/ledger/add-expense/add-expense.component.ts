@@ -1,4 +1,4 @@
-import { Component, type OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, type OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { ModalService } from '@src/app/core/services/modal.service';
@@ -17,11 +17,12 @@ import { SharedModule } from '@src/app/shared/shared.module';
 export class AddExpenseComponent implements OnInit {
   @ViewChild('scrollTags') scrollTagsRef!: ElementRef;
   @ViewChild('tagGroup') tagGroupRef!: ElementRef;
+  @ViewChild('templateRef') templateRef!: TemplateRef<any> | undefined;
 
   maxTagGroupPage = 0
   currentTagGroupPage = 0
   translateFactor = 'translate(0, 0)'
-  price = 0
+  price!: number;
 
   tagsGroup: TagInfo[][] = [];
 
@@ -73,8 +74,18 @@ export class AddExpenseComponent implements OnInit {
         content: '請輸入金額與選擇標籤',
         okText: '確認',
         showCancelBtn: false,
+        outsideClose: true,
       });
 
     }
+  }
+
+  onClickDescription() {
+    this.modalService.openConfirm({
+      okText: '確認',
+      showCancelBtn: false,
+      outsideClose: true,
+      contentTemplateRef: this.templateRef
+    });
   }
 }

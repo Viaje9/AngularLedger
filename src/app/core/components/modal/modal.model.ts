@@ -1,3 +1,4 @@
+import { TemplateRef } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 export interface ModalData {
   /**
@@ -28,5 +29,8 @@ export interface ModalData {
    * @description 是否顯示取消按鈕
    */
   showCancelBtn: boolean;
-
+  /**
+   * @description 自定義component
+   */
+  contentTemplateRef?: TemplateRef<any>
 }
