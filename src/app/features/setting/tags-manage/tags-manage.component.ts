@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, type OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Firestore, collectionData, collection, orderBy, query, doc, getDocs, deleteDoc, writeBatch } from '@angular/fire/firestore';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, tap, throwError } from 'rxjs';
 import { SharedModule } from '@src/app/shared/shared.module';
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { TagInfo } from '@src/app/core/models/tag.model';
+import { LedgerService } from '@src/app/core/services/ledger.service';
 
 @Component({
   selector: 'app-tags-manage',
@@ -28,13 +29,31 @@ export class TagsManageComponent implements OnInit {
   constructor(
     private firestore: Firestore,
     private router: Router,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private ledgerService: LedgerService
   ) {
-    const itemCollection = collection(this.firestore, 'tagList');
-    const tagList$ = collectionData(query(itemCollection, orderBy('sort', 'asc')), { idField: 'id' }) as Observable<TagInfo[]>;
-    tagList$.subscribe((data) => {
-      this.tagList = data;
+
+    this.ledgerService.getTagList().subscribe((data) => {
+      console.log('test', data);
+
+      this.tagList = data
     })
+
+    //     this.ledgerService.getTagList().then((data) => {
+    //       console.log(data);
+    //
+    //       // this.tagList = data
+    //     }).catch((error) => {
+    //       console.log(error);
+    //
+    //     })
+
+
+    // const itemCollection = collection(this.firestore, 'tagList');
+    // const tagList$ = collectionData(query(itemCollection, orderBy('sort', 'asc')), { idField: 'id' }) as Observable<TagInfo[]>;
+    // tagList$.subscribe((data) => {
+    //   this.tagList = data;
+    // })
   }
 
   ngOnInit(): void {
