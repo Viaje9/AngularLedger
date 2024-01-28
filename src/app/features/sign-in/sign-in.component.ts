@@ -42,7 +42,7 @@ export class SignInComponent implements OnInit {
               onOk: this.onRegister.bind(this, uid, email || '', displayName || ''),
             });
           }else {
-            this.router.navigateByUrl('/setting/tagsManage');
+            this.router.navigateByUrl('/');
             // this.modalService.openConfirm({
             //   content: '登入成功',
             //   okText: '確認',

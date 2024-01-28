@@ -6,7 +6,10 @@ import { FormsModule } from '@angular/forms';
 import { Observable, ReplaySubject, map, take } from 'rxjs';
 import { LoaderService } from 'src/app/core/services/loader.service';
 import { TagInfo } from '@src/app/core/models/tag.model';
+import { LedgerService } from '@src/app/core/services/ledger.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-add-tag',
   standalone: true,
@@ -48,24 +51,24 @@ export class AddTagComponent implements OnInit {
     private firestore: Firestore,
     private router: Router,
     private loaderService: LoaderService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private ledgerService: LedgerService
   ) {
     const docId = this.router?.getCurrentNavigation()?.extras.state?.['docId']
     if (docId) {
-      const docRef = doc(this.firestore, 'tagList', docId)
-      docData(docRef).pipe(take(1)).subscribe((res) => {
-        const result = res as TagInfo
-        this.docId = docId;
-        this.lastSort = result.sort;
-        this.selectedTag = result.tagIconName;
-        this.tagname = result.tagName;
+      this.ledgerService.getTagInfo(docId).then(docSnap => {
+        if (docSnap.exists()) {
+          const result = docSnap.data() as TagInfo
+          this.docId = docId;
+          this.lastSort = result.sort;
+          this.selectedTag = result.tagIconName;
+          this.tagname = result.tagName;
+        }
       })
     } else {
-      this.tagListCollection = collection(this.firestore, 'tagList')
-      collectionData(query(collection(this.firestore, 'tagList'), orderBy('sort', 'desc'), limit(1)))
-        .pipe(map(e => e[0]['sort'] + 1)).pipe(take(1)).subscribe(result => {
-          this.lastSort = result
-        })
+      this.ledgerService.getTagLastSort().pipe(untilDestroyed(this)).subscribe(result => {
+        this.lastSort = result
+      })
     }
 
   }
@@ -98,7 +101,7 @@ export class AddTagComponent implements OnInit {
     this.loaderService.start()
 
     if (!this.docId) {
-      await addDoc(this.tagListCollection, {
+      await this.ledgerService.addTagDoc({
         tagName,
         tagIconName,
         sort: this.lastSort
@@ -107,16 +110,15 @@ export class AddTagComponent implements OnInit {
       }).then(() => {
         this.router.navigateByUrl('/setting/tagsManage');
       }).finally(() => this.loaderService.stop())
+
     } else {
-      const docRef = doc(this.firestore, 'tagList', this.docId)
-      updateDoc(docRef, {
-        tagName,
-        tagIconName,
-      }).catch((error) => {
-        console.error("Error adding document: ", error);
-      }).then(() => {
-        this.router.navigateByUrl('/setting/tagsManage');
-      }).finally(() => this.loaderService.stop())
+      await this.ledgerService
+        .updateTagDoc(this.docId, tagIconName, tagName)
+        .catch((error) => {
+          console.error("Error adding document: ", error);
+        }).then(() => {
+          this.router.navigateByUrl('/setting/tagsManage');
+        }).finally(() => this.loaderService.stop())
     }
   }
 
@@ -125,8 +127,7 @@ export class AddTagComponent implements OnInit {
       return
     }
     this.loaderService.start()
-    const docRef = doc(this.firestore, 'tagList', this.docId)
-    await deleteDoc(docRef).then(() => {
+    await this.ledgerService.removeTagDoc(this.docId).then(() => {
       this.router.navigateByUrl('/setting/tagsManage');
     }).catch(error => {
       console.error('Error removing document: ', error);

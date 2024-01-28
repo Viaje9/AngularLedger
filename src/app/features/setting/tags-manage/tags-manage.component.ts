@@ -1,14 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, type OnInit } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-import { Firestore, collectionData, collection, orderBy, query, doc, getDocs, deleteDoc, writeBatch } from '@angular/fire/firestore';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { Component, type OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { SharedModule } from '@src/app/shared/shared.module';
-import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-tags-manage',
   standalone: true,
@@ -27,33 +26,16 @@ export class TagsManageComponent implements OnInit {
   isDrop = false;
 
   constructor(
-    private firestore: Firestore,
     private router: Router,
     private loaderService: LoaderService,
     private ledgerService: LedgerService
   ) {
 
-    this.ledgerService.getTagList().subscribe((data) => {
-      console.log('test', data);
+    this.ledgerService.getTagList().pipe(untilDestroyed(this)).subscribe((data) => {
+      console.log('data', data);
 
       this.tagList = data
     })
-
-    //     this.ledgerService.getTagList().then((data) => {
-    //       console.log(data);
-    //
-    //       // this.tagList = data
-    //     }).catch((error) => {
-    //       console.log(error);
-    //
-    //     })
-
-
-    // const itemCollection = collection(this.firestore, 'tagList');
-    // const tagList$ = collectionData(query(itemCollection, orderBy('sort', 'asc')), { idField: 'id' }) as Observable<TagInfo[]>;
-    // tagList$.subscribe((data) => {
-    //   this.tagList = data;
-    // })
   }
 
   ngOnInit(): void {
@@ -99,12 +81,7 @@ export class TagsManageComponent implements OnInit {
 
   async onConfirm() {
     this.loaderService.start()
-    const batch = writeBatch(this.firestore)
-    this.tagList.forEach((tag) => {
-      const docRef = doc(this.firestore, 'tagList', tag.id);
-      batch.update(docRef, { sort: tag.sort });
-    })
-    await batch.commit().then(() => {
+    await this.ledgerService.updateTagsSort(this.tagList).then(() => {
       this.isDrop = false
       this.keepTagList = []
     }).catch(error => {
