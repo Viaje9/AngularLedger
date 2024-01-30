@@ -3,12 +3,12 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 import { HammerModule } from '@angular/platform-browser';
-import 'hammerjs';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { Auth, getAuth, onAuthStateChanged, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { environment } from '../environments/environment';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import 'hammerjs';
 
 /**
  * https://github.com/angular/angular/issues/50447#issuecomment-1561531221
@@ -35,6 +35,7 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'
     }),
+    importProvidersFrom(BrowserAnimationsModule),
     importProvidersFrom(HammerModule),
   ]
 };
