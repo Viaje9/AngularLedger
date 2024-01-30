@@ -30,10 +30,7 @@ export class TagsManageComponent implements OnInit {
     private loaderService: LoaderService,
     private ledgerService: LedgerService
   ) {
-
     this.ledgerService.getTagList().pipe(untilDestroyed(this)).subscribe((data) => {
-      console.log('data', data);
-
       this.tagList = data
     })
   }
