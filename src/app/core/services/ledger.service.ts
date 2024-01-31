@@ -3,6 +3,7 @@ import { CollectionReference, DocumentData, Firestore, collection, collectionDat
 import { AuthService } from './auth.service';
 import { Observable, catchError, map, take, tap } from 'rxjs';
 import { TagInfo } from '../models/tag.model';
+import { TransactionType } from '../models/transaction-type.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +11,13 @@ import { TagInfo } from '../models/tag.model';
 export class LedgerService {
 
   tagsCollection!: CollectionReference<DocumentData, DocumentData>
+  expenseListCollection!: CollectionReference<DocumentData, DocumentData>
   constructor(
     private firestore: Firestore,
     private auth: AuthService
   ) {
     this.tagsCollection = collection(this.firestore, this.tagsPath);
+    this.expenseListCollection = collection(this.firestore, this.expenseListPath);
   }
 
 
@@ -22,16 +25,22 @@ export class LedgerService {
     return `users/${this.auth.userUid}/tags`
   }
 
-  getTagList() {
+  get expenseListPath() {
+    return `users/${this.auth.userUid}/expenseList`
+  }
+
+  /** tags start */
+
+  getTagList(type: TransactionType) {
     // 使用Snapshot快照
     // const userId = this.auth.userUid;
     // const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
     // const q = query(tagsCollection, where('userId', '==', userId));
     // const querySnapshot = await getDocs(q);
     // return querySnapshot.docs.map(doc => doc.data());
-
+    // where('transactionType', '==', type)
     // 使用collectionData
-    return collectionData(query(this.tagsCollection, orderBy('sort', 'asc')), { idField: 'id' }) as Observable<TagInfo[]>;
+    return collectionData(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'asc')), { idField: 'id' }) as Observable<TagInfo[]>;
   }
 
   getTagInfo(docId: string) {
@@ -39,15 +48,21 @@ export class LedgerService {
     return getDoc(docRef)
   }
 
-  getTagLastSort() {
-    return collectionData(query(this.tagsCollection, orderBy('sort', 'desc'), limit(1)))
-      .pipe(map(e => e[0]['sort'] + 1)).pipe(take(1))
+  getTagLastSort(type: TransactionType) {
+    return collectionData(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'desc'), limit(1)))
+      .pipe(map(e => {
+        if (e.length) {
+          return e[0]['sort'] + 1
+        }
+        return 0
+      })).pipe(take(1))
   }
 
   addTagDoc(data: {
     tagIconName: string,
     tagName: string,
     sort: number,
+    transactionType: TransactionType
   }) {
     return addDoc(this.tagsCollection, data)
   }
@@ -72,5 +87,27 @@ export class LedgerService {
       batch.update(docRef, { sort: tag.sort });
     })
     return batch.commit()
+  }
+
+  update(newTags: TagInfo[]) {
+    const batch = writeBatch(this.firestore)
+    newTags.forEach((tag) => {
+      const docRef = doc(this.firestore, this.tagsPath, tag.id);
+      batch.update(docRef, {
+        sort: tag.sort,
+        tagName: tag.tagName,
+        tagIconName: tag.tagIconName,
+        transactionType: tag.transactionType
+      });
+    })
+    return batch.commit()
+  }
+
+  /** tags end */
+
+  addExpense() {
+    // addDoc(this.expenseListCollection, {
+    //
+    // })
   }
 }

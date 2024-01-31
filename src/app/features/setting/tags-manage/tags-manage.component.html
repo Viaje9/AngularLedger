@@ -9,13 +9,35 @@
         <i class="fas fa-bars me-1"></i><span>排序</span>
       </button>
     </div>
+    <div class="flex justify-around items-center mb-3">
+      <button
+        (click)="onChangeTransactionType(TransactionTypeEnum.Expense)"
+        [ngClass]="{
+          'bg-gray-600': transactionType === TransactionTypeEnum.Expense
+        }"
+        class="w-1/2 p-4 border-y-2 border-gray-900"
+      >
+        <i class="fas fa-arrow-up"></i>
+        <span class="block text-xs">支出</span>
+      </button>
+      <button
+        (click)="onChangeTransactionType(TransactionTypeEnum.Income)"
+        [ngClass]="{
+          'bg-gray-600': transactionType === TransactionTypeEnum.Income
+        }"
+        class="w-1/2 p-4 border-y-2 border-gray-900"
+      >
+        <i class="fas fa-arrow-down"></i>
+        <span class="block text-xs">收入</span>
+      </button>
+    </div>
     <div class="space-y-2" cdkDropList (cdkDropListDropped)="dropTag($event)">
       @for (item of tagList ; track item.id) {
       <div
         cdkDrag
         [cdkDragDisabled]="!isDrop"
         class="flex items-center justify-between px-4 py-3 bg-gray-700"
-        (click)="goToRemoveTag(item.id)"
+        (click)="goToEditTag(item.id)"
       >
         <div class="flex items-center">
           <i [ngClass]="item.tagIconName"></i>
@@ -33,7 +55,7 @@
   <div class="sticky bottom-0">
     <div class="flex justify-around items-center bg-gray-500">
       @if (!isDrop) {
-      <button class="p-4 flex-1" routerLink="/setting/addTag">
+      <button class="p-4 flex-1" (click)="onClickAddTag()">
         <i class="fas fa-plus"></i>
       </button>
       } @else {

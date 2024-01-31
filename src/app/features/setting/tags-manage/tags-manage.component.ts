@@ -6,6 +6,10 @@ import { LoaderService } from '@src/app/core/services/loader.service';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
+import { TransactionType } from '@src/app/core/models/transaction-type.model';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { AddTagStatusEnum } from '../add-tag/add-tag.model';
 
 @UntilDestroy()
 @Component({
@@ -21,6 +25,15 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 })
 export class TagsManageComponent implements OnInit {
 
+  get TransactionTypeEnum() {
+    return TransactionTypeEnum
+  }
+
+  transactionType: TransactionType = this.TransactionTypeEnum.Expense
+
+  private readonly destroy$ = new Subject();
+  tagList$!: Observable<TagInfo[]>
+
   tagList: TagInfo[] = [];
   keepTagList: TagInfo[] = [];
   isDrop = false;
@@ -30,17 +43,42 @@ export class TagsManageComponent implements OnInit {
     private loaderService: LoaderService,
     private ledgerService: LedgerService
   ) {
-    this.ledgerService.getTagList().pipe(untilDestroyed(this)).subscribe((data) => {
-      this.tagList = data
-    })
+    this.transactionType = this.router?.getCurrentNavigation()?.extras.state?.['transactionType'] || this.TransactionTypeEnum.Expense
+    this.onChangeTransactionType(this.transactionType)
   }
 
   ngOnInit(): void {
   }
 
+  onChangeTransactionType(type: TransactionType) {
+    this.loaderService.start()
+    this.destroy$.next(true);
+    this.transactionType = type
+    this.tagList$ = this.ledgerService.getTagList(this.transactionType).pipe(untilDestroyed(this))
+    this.tagList$.pipe(takeUntil(this.destroy$)).subscribe((data) => {
+      this.loaderService.stop()
+      this.tagList = data
+    })
+  }
 
-  goToRemoveTag(id: string) {
-    this.router.navigate(['/setting/addTag'], { state: { docId: id } })
+
+  goToEditTag(id: string) {
+    this.router.navigate(['/setting/addTag'], {
+      state: {
+        docId: id,
+        transactionType: this.transactionType,
+        tagStatus: AddTagStatusEnum.Edit
+      }
+    })
+  }
+
+  onClickAddTag() {
+    this.router.navigate(['/setting/addTag'], {
+      state: {
+        transactionType: this.transactionType,
+        tagStatus: AddTagStatusEnum.Add
+      }
+    })
   }
 
   doDropList() {
@@ -82,6 +120,7 @@ export class TagsManageComponent implements OnInit {
       this.isDrop = false
       this.keepTagList = []
     }).catch(error => {
+      this.doDropList()
       console.error('Error in batch update:', error);
     }).finally(() => {
       this.loaderService.stop()
