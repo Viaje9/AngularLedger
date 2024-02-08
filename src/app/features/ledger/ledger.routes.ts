@@ -5,6 +5,7 @@ import { AddExpenseComponent } from './add-expense/add-expense.component';
 import { BudgetComponent } from './budget/budget.component';
 import { TagListGroupResolver } from '@src/app/features/ledger/add-expense/tag-list-group.resolver';
 import { AddExpenseInitDataResolver } from './add-expense/add-expense-init-data.resolver';
+import { AddIncomeComponent } from './add-income/add-income.component';
 
 export const LEDGER_ROUTES: Routes = [
   {
@@ -22,6 +23,10 @@ export const LEDGER_ROUTES: Routes = [
           tagListGroup: TagListGroupResolver,
           data: AddExpenseInitDataResolver
         }
+      },
+      {
+        path: 'addIncome',
+        component: AddIncomeComponent,
       },
       {
         path: 'budget',
