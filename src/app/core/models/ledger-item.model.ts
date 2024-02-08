@@ -10,7 +10,7 @@ export interface LedgerItem {
 }
 
 
-export interface AddExpenseItem {
+export interface AddLedgerItem {
   date: Date;
   price: string;
   tagId: string;

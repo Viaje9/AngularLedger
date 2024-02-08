@@ -83,8 +83,22 @@ export class LedgerOverviewComponent implements OnInit {
     private loaderService: LoaderService,
     private ledgerService: LedgerService
   ) {
+    const transactionType = router?.getCurrentNavigation()?.extras.state?.['transactionType'] as TransactionType
+    const date = router?.getCurrentNavigation()?.extras.state?.['date'] as Date
+    if (transactionType) {
+      this.transactionType = transactionType
+    }
+
+    if (date) {
+      this.currentDate = date
+    }
+
     if (this.transactionType === this.TransactionTypeEnum.Expense) {
       this.getExpenseList()
+    }
+
+    if(this.transactionType === this.TransactionTypeEnum.Income) {
+      this.getIncomeList()
     }
   }
 
@@ -109,6 +123,10 @@ export class LedgerOverviewComponent implements OnInit {
     if (this.transactionType === this.TransactionTypeEnum.Expense) {
       this.getExpenseList()
     }
+
+    if (this.transactionType === this.TransactionTypeEnum.Income) {
+      this.getIncomeList()
+    }
   }
 
   formateDate(date: Date) {
@@ -124,6 +142,15 @@ export class LedgerOverviewComponent implements OnInit {
         }
       })
     }
+
+    if (this.transactionType === this.TransactionTypeEnum.Income) {
+      this.router.navigate(['/addIncome'], {
+        state: {
+          incomeStatus: StatusEnum.Add,
+          date: this.currentDate
+        }
+      })
+    }
   }
 
   getExpenseList() {
@@ -135,12 +162,21 @@ export class LedgerOverviewComponent implements OnInit {
       })
   }
 
+  getIncomeList() {
+    this.loaderService.start()
+    this.ledgerService.getTodayIncomeList(this.currentDate).pipe(untilDestroyed(this))
+      .subscribe((incomeList) => {
+        this.ledgerItems = incomeList
+        this.loaderService.stop()
+      })
+  }
+
   totalAmount() {
     return this.ledgerItems.reduce((acc, item) => acc + parseInt(item.price), 0)
   }
 
   goToEditTag(item: LedgerItem) {
-    const stateData :EditExpenseInitData = {
+    const stateData: EditExpenseInitData = {
       expenseStatus: StatusEnum.Edit,
       docId: item.id,
       date: item.date,
@@ -152,6 +188,15 @@ export class LedgerOverviewComponent implements OnInit {
     this.router.navigate(['/addExpense'], {
       state: stateData
     })
+  }
+
+  changeTransactionType(type: TransactionType) {
+    this.transactionType = type
+    if (this.transactionType === this.TransactionTypeEnum.Expense) {
+      this.getExpenseList()
+    } else if (this.transactionType === this.TransactionTypeEnum.Income) {
+      this.getIncomeList()
+    }
   }
 }
 

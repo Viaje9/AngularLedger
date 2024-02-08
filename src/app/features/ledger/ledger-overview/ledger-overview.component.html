@@ -2,7 +2,13 @@
   <div class="min-h-max">
     <div class="sticky top-0">
       <!-- Top bar -->
-      <div class="bg-red-600 p-4 text-white">
+      <div
+        [ngClass]="{
+        'bg-red-600': transactionType === TransactionTypeEnum.Expense,
+        'bg-green-600': transactionType === TransactionTypeEnum.Income
+        }"
+        class="p-4 text-white"
+      >
         <div class="flex justify-between items-center">
           <div class="w-1/5"></div>
           <div
@@ -15,7 +21,11 @@
               alt="Calendar"
             />
             <input
-              class="bg-red-600 text-2xl w-32 mr-3 focus:outline-none"
+              [ngClass]="{
+              'bg-red-600': transactionType === TransactionTypeEnum.Expense,
+              'bg-green-600': transactionType === TransactionTypeEnum.Income,
+              }"
+              class="text-2xl w-32 mr-3 focus:outline-none"
               matInput
               readonly
               [(ngModel)]="currentDate"
@@ -25,7 +35,14 @@
             <mat-datepicker touchUi #picker></mat-datepicker>
           </div>
           <div class="w-1/5 flex justify-end">
-            <button class="bg-red-800 p-2 rounded-full" (click)="onClickAdd()">
+            <button
+              [ngClass]="{
+              'bg-red-800': transactionType === TransactionTypeEnum.Expense,
+              'bg-green-800': transactionType === TransactionTypeEnum.Income,
+              }"
+              class="p-2 rounded-full"
+              (click)="onClickAdd()"
+            >
               <img
                 src="https://img.icons8.com/ios-filled/50/ffffff/plus-math.png"
                 class="h-6 w-6"
@@ -37,7 +54,13 @@
       </div>
 
       <!-- Balance -->
-      <div class="bg-red-500 p-4 text-white">
+      <div
+        [ngClass]="{
+        'bg-red-500': transactionType === TransactionTypeEnum.Expense,
+        'bg-green-500': transactionType === TransactionTypeEnum.Income,
+        }"
+        class="p-4 text-white"
+      >
         <div class="flex justify-between items-center">
           <span>TWD</span>
           <span class="text-4xl">{{ totalAmount() | number }}</span>
@@ -46,12 +69,19 @@
     </div>
     <!-- Expense categories -->
     <div
-      class="bg-red-500 p-4 space-y-2 min-h-dvh"
+      [ngClass]="{
+      'bg-red-500': transactionType === TransactionTypeEnum.Expense,
+      'bg-green-500': transactionType === TransactionTypeEnum.Income,
+      }"
+      class="p-4 space-y-2 min-h-dvh"
       (swipeLeft)="onSwipeLeft()"
       (swipeRight)="onSwipeRight()"
     >
       @for (item of ledgerItems; track item.id) {
-      <div class="bg-white p-2 flex justify-between items-center" (click)="goToEditTag(item)">
+      <div
+        class="bg-white p-2 flex justify-between items-center"
+        (click)="goToEditTag(item)"
+      >
         <span>
           <i [ngClass]="item.tagInfo.tagIconName" class="mr-2"></i>
           <span>{{ item.tagInfo.tagName }}</span>
@@ -64,6 +94,7 @@
 
   <div class="sticky bottom-0">
     <!-- Budget progress -->
+    @if(transactionType === TransactionTypeEnum.Expense) {
     <div routerLink="budget" class="bg-red-300 p-4 text-red-800">
       <div class="flex justify-between items-center">
         <div class="flex items-center">
@@ -84,6 +115,7 @@
         <span>預算總額</span>
       </div>
     </div>
+    }
 
     <!-- Navigation -->
     <div class="flex justify-around items-center bg-gray-200">
@@ -92,6 +124,7 @@
           'bg-gray-400': transactionType === TransactionTypeEnum.Expense
         }"
         class="w-1/4 p-4"
+        (click)="changeTransactionType(TransactionTypeEnum.Expense)"
       >
         <i class="fas fa-arrow-up"></i>
         <span class="block text-xs">支出</span>
@@ -101,6 +134,7 @@
           'bg-gray-400': transactionType === TransactionTypeEnum.Income
         }"
         class="w-1/4 p-4"
+        (click)="changeTransactionType(TransactionTypeEnum.Income)"
       >
         <i class="fas fa-arrow-down"></i>
         <span class="block text-xs">收入</span>

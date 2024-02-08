@@ -5,10 +5,10 @@ import { TagInfo } from '../../../core/models/tag.model';
 import { LedgerService } from '../../../core/services/ledger.service';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 
-export const TagListGroupResolver: ResolveFn<TagInfo[][]> =
+export const AddIncomeTagListGroupResolver: ResolveFn<TagInfo[][]> =
   () => {
     const ledgerService = inject(LedgerService)
-    return ledgerService.getTagList(TransactionTypeEnum.Expense)
+    return ledgerService.getTagList(TransactionTypeEnum.Income)
       .pipe(take(1), map(tagList => {
         const result = (tagList as TagInfo[]).reduce((acc: TagInfo[][], cur, i) => {
           const num = Math.floor(i / 9)

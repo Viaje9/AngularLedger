@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { Observable, catchError, map, mergeMap, take, tap } from 'rxjs';
 import { TagInfo } from '../models/tag.model';
 import { TransactionType } from '../models/transaction-type.model';
-import { AddExpenseItem } from '../models/ledger-item.model';
+import { AddLedgerItem } from '../models/ledger-item.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +13,14 @@ export class LedgerService {
 
   tagsCollection!: CollectionReference<DocumentData, DocumentData>
   expenseListCollection!: CollectionReference<DocumentData, DocumentData>
+  incomeListCollection!: CollectionReference<DocumentData, DocumentData>
   constructor(
     private firestore: Firestore,
     private auth: AuthService
   ) {
     this.tagsCollection = collection(this.firestore, this.tagsPath);
     this.expenseListCollection = collection(this.firestore, this.expenseListPath);
+    this.incomeListCollection = collection(this.firestore, this.incomeListPath);
   }
 
 
@@ -28,6 +30,10 @@ export class LedgerService {
 
   get expenseListPath() {
     return `users/${this.auth.userUid}/expenseList`
+  }
+
+  get incomeListPath() {
+    return `users/${this.auth.userUid}/incomeList`
   }
 
   /** tags start */
@@ -113,11 +119,11 @@ export class LedgerService {
     return getDoc(docRef)
   }
 
-  addExpense(data: AddExpenseItem) {
+  addExpense(data: AddLedgerItem) {
     return addDoc(this.expenseListCollection, data)
   }
 
-  updateExpense(data: AddExpenseItem & { docId: string }) {
+  updateExpense(data: AddLedgerItem & { docId: string }) {
     const docRef = doc(this.firestore, this.expenseListPath, data.docId)
     return updateDoc(docRef, {
       date: data.date,
@@ -136,7 +142,7 @@ export class LedgerService {
     return collectionData(query(this.expenseListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe(mergeMap(async (expenseList) => {
       const list = [];
       for (const expenseItem of expenseList) {
-        const item = expenseItem as AddExpenseItem;
+        const item = expenseItem as AddLedgerItem;
         const tagInfo = await this.getTagInfo(item.tagId);
         expenseItem['tagInfo'] = tagInfo.data();
         list.push(expenseItem);
@@ -144,6 +150,50 @@ export class LedgerService {
       return list;
     })) as Observable<any[]>;
   }
+
+  /** expense end */
+
+  /** income start */
+
+  getTodayIncomeList(date: Date) {
+    return collectionData(query(this.incomeListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe(mergeMap(async (incomeList) => {
+      const list = [];
+      for (const incomeItem of incomeList) {
+        const item = incomeItem as AddLedgerItem;
+        const tagInfo = await this.getTagInfo(item.tagId);
+        incomeItem['tagInfo'] = tagInfo.data();
+        list.push(incomeItem);
+      }
+      return list;
+    })
+    ) as Observable<any[]>;
+  }
+
+  getIncomeInfo(docId: string) {
+    const docRef = doc(this.firestore, this.incomeListPath, docId)
+    return getDoc(docRef)
+  }
+
+  addIncome(data: AddLedgerItem) {
+    return addDoc(this.incomeListCollection, data)
+  }
+
+  updateIncome(data: AddLedgerItem & { docId: string }) {
+    const docRef = doc(this.firestore, this.incomeListPath, data.docId)
+    return updateDoc(docRef, {
+      date: data.date,
+      price: data.price,
+      tagId: data.tagId,
+      description: data.description
+    })
+  }
+
+  deleteIncome(docId: string) {
+    const docRef = doc(this.firestore, this.incomeListPath, docId)
+    return deleteDoc(docRef)
+  }
+
+  /** income end */
 
   queryDate(date: Date, fieldName: string) {
     // 定義您想要搜索的日期
