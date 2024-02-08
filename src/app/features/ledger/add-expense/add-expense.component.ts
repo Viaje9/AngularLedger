@@ -36,7 +36,7 @@ export class AddExpenseComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
-  date = ''
+  date!: Date
   expenseStatus!: StatusType;
 
   constructor(

@@ -120,7 +120,7 @@ export class LedgerOverviewComponent implements OnInit {
       this.router.navigate(['/addExpense'], {
         state: {
           expenseStatus: StatusEnum.Add,
-          date: this.formateDate(this.currentDate)
+          date: this.currentDate
         }
       })
     }
@@ -128,7 +128,7 @@ export class LedgerOverviewComponent implements OnInit {
 
   getExpenseList() {
     this.loaderService.start()
-    this.ledgerService.getTodayExpenseList(this.formateDate(this.currentDate)).pipe(untilDestroyed(this))
+    this.ledgerService.getTodayExpenseList(this.currentDate).pipe(untilDestroyed(this))
       .subscribe((expenseList) => {
         this.ledgerItems = expenseList
         this.loaderService.stop()

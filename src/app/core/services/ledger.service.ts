@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CollectionReference, DocumentData, Firestore, collection, collectionData, doc, docData, getDocs, limit, orderBy, query, where, addDoc, getDoc, updateDoc, deleteDoc, writeBatch } from '@angular/fire/firestore';
+import { CollectionReference, DocumentData, Firestore, collection, collectionData, doc, docData, getDocs, limit, orderBy, query, where, addDoc, getDoc, updateDoc, deleteDoc, writeBatch, Timestamp } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
 import { Observable, catchError, map, mergeMap, take, tap } from 'rxjs';
 import { TagInfo } from '../models/tag.model';
@@ -132,8 +132,8 @@ export class LedgerService {
     return deleteDoc(docRef)
   }
 
-  getTodayExpenseList(date: string) {
-    return collectionData(query(this.expenseListCollection, where('date', '==', date)), { idField: 'id' }).pipe(mergeMap(async (expenseList) => {
+  getTodayExpenseList(date: Date) {
+    return collectionData(query(this.expenseListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe(mergeMap(async (expenseList) => {
       const list = [];
       for (const expenseItem of expenseList) {
         const item = expenseItem as AddExpenseItem;
@@ -143,5 +143,21 @@ export class LedgerService {
       }
       return list;
     })) as Observable<any[]>;
+  }
+
+  queryDate(date: Date, fieldName: string) {
+    // 定義您想要搜索的日期
+    const specificDate = structuredClone(date)
+    specificDate.setHours(0, 0, 0, 0); // 將時間設定為該日的開始
+
+    // 創建開始時間戳（該日的00:00:00）
+    const startOfDay = Timestamp.fromDate(specificDate);
+
+    // 計算結束時間戳（該日的23:59:59）
+    const endOfDay = structuredClone(date)
+    endOfDay.setHours(23, 59, 59, 999); // 將時間設定為該日的結束
+    const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
+
+    return [where(fieldName, '>=', startOfDay), where(fieldName, '<=', endOfDayTimestamp)]
   }
 }

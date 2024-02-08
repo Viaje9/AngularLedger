@@ -1,12 +1,12 @@
 export interface AddExpenseInitData {
   expenseStatus: StatusType;
-  date: string;
+  date: Date;
 }
 
 export interface EditExpenseInitData {
   expenseStatus: StatusType;
   docId: string;
-  date: string;
+  date: Date;
   price: string;
   tagId: string;
   description: string;

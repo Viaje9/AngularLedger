@@ -2,7 +2,7 @@ import { TagInfo } from '@src/app/core/models/tag.model';
 
 export interface LedgerItem {
   id: string;
-  date: string;
+  date: Date;
   price: string;
   tagId: string;
   description: string;
@@ -11,7 +11,7 @@ export interface LedgerItem {
 
 
 export interface AddExpenseItem {
-  date: string;
+  date: Date;
   price: string;
   tagId: string;
   description: string;
