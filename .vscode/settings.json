@@ -7,5 +7,6 @@
       "skipChangeDetectionOnPush": true,
       "ngOnInit": true
     }
-  }
+  },
+  "github.copilot.chat.localeOverride": "zh-TW",
 }

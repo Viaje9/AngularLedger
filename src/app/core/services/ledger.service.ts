@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { CollectionReference, DocumentData, Firestore, collection, collectionData, doc, docData, getDocs, limit, orderBy, query, where, addDoc, getDoc, updateDoc, deleteDoc, writeBatch } from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { Observable, catchError, map, take, tap } from 'rxjs';
+import { Observable, catchError, map, mergeMap, take, tap } from 'rxjs';
 import { TagInfo } from '../models/tag.model';
 import { TransactionType } from '../models/transaction-type.model';
+import { AddExpenseItem } from '../models/ledger-item.model';
 
 @Injectable({
   providedIn: 'root'
@@ -112,16 +113,20 @@ export class LedgerService {
     return getDoc(docRef)
   }
 
-  addExpense(data: {
-    date: string;
-    price: string;
-    tagId: string;
-    description: string;
-  }) {
+  addExpense(data: AddExpenseItem) {
     return addDoc(this.expenseListCollection, data)
   }
 
   getTodayExpenseList(date: string) {
-    return collectionData(query(this.expenseListCollection, where('date', '==', date)), { idField: 'id' }) as Observable<any[]>;
+    return collectionData(query(this.expenseListCollection, where('date', '==', date)), { idField: 'id' }).pipe(mergeMap(async (expenseList) => {
+      const list = [];
+      for (const expenseItem of expenseList) {
+        const item = expenseItem as AddExpenseItem;
+        const tagInfo = await this.getTagInfo(item.tagId);
+        expenseItem['tagInfo'] = tagInfo.data();
+        list.push(expenseItem);
+      }
+      return list;
+    })) as Observable<any[]>;
   }
 }

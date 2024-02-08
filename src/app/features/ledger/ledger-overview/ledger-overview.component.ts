@@ -11,6 +11,7 @@ import { StatusEnum } from '../add-expense/add-expense.model';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
+import { untilDestroyed } from '@ngneat/until-destroy';
 
 
 const MY_DATE_FORMATS = {
@@ -126,10 +127,9 @@ export class LedgerOverviewComponent implements OnInit {
 
   getExpenseList() {
     this.loaderService.start()
-    this.ledgerService.getTodayExpenseList(this.formateDate(this.currentDate))
-      .subscribe((e) => {
-        console.log(e);
-        this.ledgerItems = e
+    this.ledgerService.getTodayExpenseList(this.formateDate(this.currentDate)).pipe(untilDestroyed(this))
+      .subscribe((expenseList) => {
+        this.ledgerItems = expenseList
         this.loaderService.stop()
       })
   }
