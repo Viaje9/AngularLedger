@@ -4,21 +4,35 @@
       <!-- Top bar -->
       <div class="bg-red-600 p-4 text-white">
         <div class="flex justify-between items-center">
-          <div class="flex items-center">
+          <div class="w-1/5"></div>
+          <div
+            class="flex items-center justify-center w-3/5"
+            (click)="picker.open()"
+          >
             <img
               src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"
-              class="h-6 w-6"
+              class="h-6 w-6 me-2"
               alt="Calendar"
             />
-            <span class="ml-2">2024/01/05</span>
-          </div>
-          <button class="bg-red-800 p-2 rounded-full" routerLink="addExpense">
-            <img
-              src="https://img.icons8.com/ios-filled/50/ffffff/plus-math.png"
-              class="h-6 w-6"
-              alt="Add"
+            <input
+              class="bg-red-600 text-2xl w-32 mr-3 focus:outline-none"
+              matInput
+              readonly
+              [(ngModel)]="currentDate"
+              [matDatepicker]="picker"
+              (dateChange)="onDateChange()"
             />
-          </button>
+            <mat-datepicker touchUi #picker></mat-datepicker>
+          </div>
+          <div class="w-1/5 flex justify-end">
+            <button class="bg-red-800 p-2 rounded-full" (click)="onClickAdd()" >
+              <img
+                src="https://img.icons8.com/ios-filled/50/ffffff/plus-math.png"
+                class="h-6 w-6"
+                alt="Add"
+              />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -31,11 +45,15 @@
       </div>
     </div>
     <!-- Expense categories -->
-    <div class="bg-red-500 p-4 space-y-2">
+    <div
+      class="bg-red-500 p-4 space-y-2 min-h-dvh"
+      (swipeLeft)="onSwipeLeft()"
+      (swipeRight)="onSwipeRight()"
+    >
       @for (item of ledgerItems; track item.id) {
       <div class="bg-white p-2 flex justify-between items-center">
-        <span>🥐 {{ item.category }}</span>
-        <span>${{ item.amount }}</span>
+        <!-- <i [ngClass]="item.tagIconName"></i> -->
+        <span>${{ item.price }}</span>
       </div>
       }
     </div>
@@ -65,29 +83,31 @@
     </div>
 
     <!-- Navigation -->
-    <div class="flex justify-around items-center bg-gray-200 p-4">
-      <button>
+    <div class="flex justify-around items-center bg-gray-200">
+      <button
+        [ngClass]="{
+          'bg-gray-400': transactionType === TransactionTypeEnum.Expense
+        }"
+        class="w-1/4 p-4"
+      >
         <i class="fas fa-arrow-up"></i>
         <span class="block text-xs">支出</span>
       </button>
-      <button>
+      <button
+        [ngClass]="{
+          'bg-gray-400': transactionType === TransactionTypeEnum.Income
+        }"
+        class="w-1/4 p-4"
+      >
         <i class="fas fa-arrow-down"></i>
         <span class="block text-xs">收入</span>
       </button>
-      <button>
-        <img
-          src="https://img.icons8.com/ios-filled/50/000000/bar-chart.png"
-          class="h-6 w-6"
-          alt="Statistics"
-        />
+      <button class="w-1/4 p-4">
+        <i class="fas fa-chart-line"></i>
         <span class="block text-xs">統計</span>
       </button>
-      <button routerLink="setting">
-        <img
-          src="https://img.icons8.com/ios-filled/50/000000/settings.png"
-          class="h-6 w-6"
-          alt="Settings"
-        />
+      <button class="w-1/4 p-4" routerLink="setting">
+        <i class="fas fa-cog"></i>
         <span class="block text-xs">設定</span>
       </button>
     </div>

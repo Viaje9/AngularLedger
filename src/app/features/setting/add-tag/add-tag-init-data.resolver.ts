@@ -14,7 +14,6 @@ export const AddTagInitDataResolver: ResolveFn<AddTagInitDataType> =
     const transactionType = router?.getCurrentNavigation()?.extras.state?.['transactionType']
     const tagStatus = router?.getCurrentNavigation()?.extras.state?.['tagStatus'] as AddTagStatus
     if (tagStatus === AddTagStatusEnum.Edit) {
-      const ledgerService = inject(LedgerService)
       return ledgerService.getTagInfo(docId).then(docSnap => {
         if (docSnap.exists()) {
           const result = docSnap.data() as TagInfo

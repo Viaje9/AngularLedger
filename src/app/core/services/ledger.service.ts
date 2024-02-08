@@ -105,9 +105,23 @@ export class LedgerService {
 
   /** tags end */
 
-  addExpense() {
-    // addDoc(this.expenseListCollection, {
-    //
-    // })
+  /** expense start */
+
+  getExpenseInfo(docId: string) {
+    const docRef = doc(this.firestore, this.expenseListPath, docId)
+    return getDoc(docRef)
+  }
+
+  addExpense(data: {
+    date: string;
+    price: string;
+    tagId: string;
+    description: string;
+  }) {
+    return addDoc(this.expenseListCollection, data)
+  }
+
+  getTodayExpenseList(date: string) {
+    return collectionData(query(this.expenseListCollection, where('date', '==', date)), { idField: 'id' }) as Observable<any[]>;
   }
 }

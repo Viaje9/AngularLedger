@@ -1,14 +1,18 @@
 import { Component, type OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TagInfo } from '@src/app/core/models/tag.model';
+import { LedgerService } from '@src/app/core/services/ledger.service';
+import { LoaderService } from '@src/app/core/services/loader.service';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
+import { EditExpenseInitData, StatusEnum, StatusType } from './add-expense.model';
+import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 
 @Component({
   selector: 'app-add-expense',
   standalone: true,
   imports: [
-    SharedModule
+    SharedModule,
   ],
   templateUrl: './add-expense.component.html',
   styleUrl: './add-expense.component.css',
@@ -28,11 +32,24 @@ export class AddExpenseComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
+  date = ''
+  expenseStatus!: StatusType;
+  expenseData!: EditExpenseInitData
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private modalService: ModalService,
+    private loaderService: LoaderService,
+    private ledgerService: LedgerService
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
+    this.expenseStatus = this.route.snapshot.data['data'].expenseStatus;
+    if (this.expenseStatus === StatusEnum.Edit) {
+      this.expenseData = this.route.snapshot.data['data'] as EditExpenseInitData
+    } else if (this.expenseStatus === StatusEnum.Add) {
+      this.date = this.route.snapshot.data['data'].date
+    }
   }
   ngOnInit(): void {
 
@@ -66,6 +83,7 @@ export class AddExpenseComponent implements OnInit {
       this.selectedTagId = ''
     } else {
       this.selectedTagId = tagId
+
     }
   }
 
@@ -77,8 +95,26 @@ export class AddExpenseComponent implements OnInit {
         showCancelBtn: false,
         outsideClose: true,
       });
-
+      return
     }
+
+    this.loaderService.start()
+
+    await this.ledgerService.addExpense({
+      date: this.date,
+      price: this.price.toString(),
+      tagId: this.selectedTagId,
+      description: this.description
+    }).catch((error) => {
+      console.error("Error adding document: ", error);
+    }).then(() => {
+      this.router.navigateByUrl('/', {
+        state: {
+          transactionType: TransactionTypeEnum.Expense,
+          date: this.date
+        }
+      });
+    }).finally(() => this.loaderService.stop())
   }
 
   onClickDescription() {
