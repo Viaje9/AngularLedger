@@ -7,11 +7,11 @@ import { MatInputModule } from '@angular/material/input'; // Import the missing 
 import { TransactionType } from '@src/app/core/models/transaction-type.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { Router } from '@angular/router';
-import { StatusEnum } from '../add-expense/add-expense.model';
+import { EditExpenseInitData, StatusEnum } from '../add-expense/add-expense.model';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
-import { untilDestroyed } from '@ngneat/until-destroy';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
 
 const MY_DATE_FORMATS = {
@@ -43,6 +43,7 @@ class CustomDateAdapter extends NativeDateAdapter {
   }
 }
 
+@UntilDestroy()
 @Component({
   selector: 'app-ledger-overview',
   standalone: true,
@@ -132,6 +133,25 @@ export class LedgerOverviewComponent implements OnInit {
         this.ledgerItems = expenseList
         this.loaderService.stop()
       })
+  }
+
+  totalAmount() {
+    return this.ledgerItems.reduce((acc, item) => acc + parseInt(item.price), 0)
+  }
+
+  goToEditTag(item: LedgerItem) {
+    const stateData :EditExpenseInitData = {
+      expenseStatus: StatusEnum.Edit,
+      docId: item.id,
+      date: item.date,
+      price: item.price,
+      tagId: item.tagId,
+      description: item.description
+
+    }
+    this.router.navigate(['/addExpense'], {
+      state: stateData
+    })
   }
 }
 

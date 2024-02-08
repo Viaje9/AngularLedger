@@ -40,7 +40,7 @@
       <div class="bg-red-500 p-4 text-white">
         <div class="flex justify-between items-center">
           <span>TWD</span>
-          <span class="text-4xl">1,525</span>
+          <span class="text-4xl">{{ totalAmount() | number }}</span>
         </div>
       </div>
     </div>
@@ -51,12 +51,12 @@
       (swipeRight)="onSwipeRight()"
     >
       @for (item of ledgerItems; track item.id) {
-      <div class="bg-white p-2 flex justify-between items-center">
+      <div class="bg-white p-2 flex justify-between items-center" (click)="goToEditTag(item)">
         <span>
           <i [ngClass]="item.tagInfo.tagIconName" class="mr-2"></i>
           <span>{{ item.tagInfo.tagName }}</span>
         </span>
-        <span>${{ item.price }}</span>
+        <span>$ {{ item.price | number }}</span>
       </div>
       }
     </div>

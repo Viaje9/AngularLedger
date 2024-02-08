@@ -117,6 +117,21 @@ export class LedgerService {
     return addDoc(this.expenseListCollection, data)
   }
 
+  updateExpense(data: AddExpenseItem & { docId: string }) {
+    const docRef = doc(this.firestore, this.expenseListPath, data.docId)
+    return updateDoc(docRef, {
+      date: data.date,
+      price: data.price,
+      tagId: data.tagId,
+      description: data.description
+    })
+  }
+
+  deleteExpense(docId: string) {
+    const docRef = doc(this.firestore, this.expenseListPath, docId)
+    return deleteDoc(docRef)
+  }
+
   getTodayExpenseList(date: string) {
     return collectionData(query(this.expenseListCollection, where('date', '==', date)), { idField: 'id' }).pipe(mergeMap(async (expenseList) => {
       const list = [];

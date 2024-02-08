@@ -23,6 +23,10 @@ export class AddExpenseComponent implements OnInit {
   @ViewChild('tagGroup') tagGroupRef!: ElementRef;
   @ViewChild('templateRef') templateRef!: TemplateRef<any> | undefined;
 
+  get StatusEnum() {
+    return StatusEnum
+  }
+
   maxTagGroupPage = 0
   currentTagGroupPage = 0
   translateFactor = 'translate(0, 0)'
@@ -34,7 +38,6 @@ export class AddExpenseComponent implements OnInit {
   description = '';
   date = ''
   expenseStatus!: StatusType;
-  expenseData!: EditExpenseInitData
 
   constructor(
     private route: ActivatedRoute,
@@ -46,7 +49,11 @@ export class AddExpenseComponent implements OnInit {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
     this.expenseStatus = this.route.snapshot.data['data'].expenseStatus;
     if (this.expenseStatus === StatusEnum.Edit) {
-      this.expenseData = this.route.snapshot.data['data'] as EditExpenseInitData
+      const expenseData = this.route.snapshot.data['data'] as EditExpenseInitData
+      this.price = parseInt(expenseData.price)
+      this.selectedTagId = expenseData.tagId
+      this.description = expenseData.description
+      this.date = expenseData.date
     } else if (this.expenseStatus === StatusEnum.Add) {
       this.date = this.route.snapshot.data['data'].date
     }
@@ -88,13 +95,8 @@ export class AddExpenseComponent implements OnInit {
   }
 
   async onClickSave() {
-    if (!this.selectedTagId || !this.price) {
-      this.modalService.openConfirm({
-        content: '請輸入金額與選擇標籤',
-        okText: '確認',
-        showCancelBtn: false,
-        outsideClose: true,
-      });
+
+    if (!this.saveCheck()) {
       return
     }
 
@@ -117,6 +119,43 @@ export class AddExpenseComponent implements OnInit {
     }).finally(() => this.loaderService.stop())
   }
 
+  async onClickEdit() {
+    if (!this.saveCheck()) {
+      return
+    }
+
+    this.loaderService.start()
+    await this.ledgerService.updateExpense({
+      docId: this.route.snapshot.data['data'].docId,
+      date: this.date,
+      price: this.price.toString(),
+      tagId: this.selectedTagId,
+      description: this.description
+    }).catch((error) => {
+      console.error("Error updating document: ", error);
+    }).then(() => {
+      this.router.navigateByUrl('/', {
+        state: {
+          transactionType: TransactionTypeEnum.Expense,
+          date: this.date
+        }
+      });
+    }).finally(() => this.loaderService.stop())
+  }
+
+  saveCheck() {
+    if (!this.selectedTagId || !this.price) {
+      this.modalService.openConfirm({
+        content: '請輸入金額與選擇標籤',
+        okText: '確認',
+        showCancelBtn: false,
+        outsideClose: true,
+      });
+      return false
+    }
+    return true
+  }
+
   onClickDescription() {
     this.modalService.openConfirm({
       title: "備註",
@@ -125,5 +164,27 @@ export class AddExpenseComponent implements OnInit {
       outsideClose: true,
       contentTemplateRef: this.templateRef
     });
+  }
+
+  onClickDelete() {
+    this.modalService.openConfirm({
+      content: '確認刪除？',
+      outsideClose: true,
+      onOk: () => {
+        this.doDelete()
+      },
+    });
+  }
+
+  doDelete() {
+    this.loaderService.start()
+    this.ledgerService.deleteExpense(this.route.snapshot.data['data'].docId).then(() => {
+      this.router.navigateByUrl('/', {
+        state: {
+          transactionType: TransactionTypeEnum.Expense,
+          date: this.date
+        }
+      });
+    }).finally(() => this.loaderService.stop())
   }
 }
