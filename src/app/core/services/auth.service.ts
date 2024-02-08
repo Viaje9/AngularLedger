@@ -22,7 +22,9 @@ export class AuthService {
   }
 
   get userUid() {
-    return this.UserData.uid || ''
+    const auth = getAuth();
+    const user = auth.currentUser;
+    return user?.uid || ''
   }
 
 
