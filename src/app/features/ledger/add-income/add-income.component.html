@@ -1,5 +1,7 @@
 <div class="bg-gray-800 text-white p-4 flex justify-between items-center">
-  <i class="fas fa-arrow-left" routerLink="/"></i>
+  <div class="w-10" (click)="onClickBack()">
+    <i class="fas fa-arrow-left"></i>
+  </div>
   <h1 class="text-lg">新增收入</h1>
   @if (incomeStatus === StatusEnum.Add) {
   <button class="bg-gray-600 px-4 py-2 rounded" (click)="onClickSave()">

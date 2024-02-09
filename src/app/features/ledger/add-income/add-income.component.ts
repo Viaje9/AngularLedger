@@ -8,6 +8,7 @@ import { LoaderService } from '@src/app/core/services/loader.service';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { EditIncomeInitData } from './add-income.model';
+import { Timestamp } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-add-income',
@@ -36,7 +37,7 @@ export class AddIncomeComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
-  date!: Date
+  date!: Timestamp
   incomeStatus!: StatusType;
 
   constructor(
@@ -95,6 +96,15 @@ export class AddIncomeComponent implements OnInit {
     }
   }
 
+  onClickBack() {
+    this.router.navigateByUrl('/', {
+      state: {
+        transactionType: TransactionTypeEnum.Income,
+        date: this.date.toDate()
+      }
+    });
+  }
+
   async onClickSave() {
 
     if (!this.saveCheck()) {
@@ -102,7 +112,6 @@ export class AddIncomeComponent implements OnInit {
     }
 
     this.loaderService.start()
-
     await this.ledgerService.addIncome({
       date: this.date,
       price: this.price.toString(),
@@ -114,7 +123,7 @@ export class AddIncomeComponent implements OnInit {
       this.router.navigateByUrl('/', {
         state: {
           transactionType: TransactionTypeEnum.Income,
-          date: this.date
+          date: this.date.toDate()
         }
       });
     }).finally(() => this.loaderService.stop())
@@ -138,7 +147,7 @@ export class AddIncomeComponent implements OnInit {
       this.router.navigateByUrl('/', {
         state: {
           transactionType: TransactionTypeEnum.Income,
-          date: this.date
+          date: this.date.toDate()
         }
       });
     }).finally(() => this.loaderService.stop())
@@ -183,7 +192,7 @@ export class AddIncomeComponent implements OnInit {
       this.router.navigateByUrl('/', {
         state: {
           transactionType: TransactionTypeEnum.Income,
-          date: this.date
+          date: this.date.toDate()
         }
       });
     }).finally(() => this.loaderService.stop())

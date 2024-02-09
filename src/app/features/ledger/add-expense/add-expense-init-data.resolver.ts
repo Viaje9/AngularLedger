@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, ResolveFn, Router, RouterStateSnapshot } from '
 import { AddExpenseInitDataType, StatusEnum, StatusType } from './add-expense.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
+import { Timestamp } from '@angular/fire/firestore';
 
 export const AddExpenseInitDataResolver: ResolveFn<AddExpenseInitDataType> =
   () => {
@@ -33,7 +34,7 @@ export const AddExpenseInitDataResolver: ResolveFn<AddExpenseInitDataType> =
       if (date) {
         return {
           expenseStatus: expenseStatus,
-          date: date,
+          date: Timestamp.fromDate(date),
         }
       }
     }

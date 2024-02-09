@@ -1,8 +1,9 @@
+import { Timestamp } from '@angular/fire/firestore';
 import { TagInfo } from '@src/app/core/models/tag.model';
 
 export interface LedgerItem {
   id: string;
-  date: Date;
+  date: Timestamp;
   price: string;
   tagId: string;
   description: string;
@@ -11,7 +12,7 @@ export interface LedgerItem {
 
 
 export interface AddLedgerItem {
-  date: Date;
+  date: Timestamp;
   price: string;
   tagId: string;
   description: string;

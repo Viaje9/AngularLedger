@@ -7,6 +7,7 @@ import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
 import { EditExpenseInitData, StatusEnum, StatusType } from './add-expense.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
+import { Timestamp } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-add-expense',
@@ -36,7 +37,7 @@ export class AddExpenseComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
-  date!: Date
+  date!: Timestamp;
   expenseStatus!: StatusType;
 
   constructor(
@@ -94,6 +95,15 @@ export class AddExpenseComponent implements OnInit {
     }
   }
 
+  onClickBack() {
+    this.router.navigateByUrl('/', {
+      state: {
+        transactionType: TransactionTypeEnum.Expense,
+        date: this.date.toDate()
+      }
+    });
+  }
+
   async onClickSave() {
 
     if (!this.saveCheck()) {
@@ -101,7 +111,6 @@ export class AddExpenseComponent implements OnInit {
     }
 
     this.loaderService.start()
-
     await this.ledgerService.addExpense({
       date: this.date,
       price: this.price.toString(),
@@ -113,7 +122,7 @@ export class AddExpenseComponent implements OnInit {
       this.router.navigateByUrl('/', {
         state: {
           transactionType: TransactionTypeEnum.Expense,
-          date: this.date
+          date: this.date.toDate()
         }
       });
     }).finally(() => this.loaderService.stop())
@@ -137,7 +146,7 @@ export class AddExpenseComponent implements OnInit {
       this.router.navigateByUrl('/', {
         state: {
           transactionType: TransactionTypeEnum.Expense,
-          date: this.date
+          date: this.date.toDate()
         }
       });
     }).finally(() => this.loaderService.stop())
@@ -182,7 +191,7 @@ export class AddExpenseComponent implements OnInit {
       this.router.navigateByUrl('/', {
         state: {
           transactionType: TransactionTypeEnum.Expense,
-          date: this.date
+          date: this.date.toDate()
         }
       });
     }).finally(() => this.loaderService.stop())
