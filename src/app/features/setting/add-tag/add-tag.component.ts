@@ -44,7 +44,15 @@ export class AddTagComponent implements OnInit {
     'fas fa-tag',
     'fas fa-phone',
     'fas fa-user',
-    'fas fa-home'
+    'fas fa-home',
+    'fas fa-hamburger',
+    'far fa-credit-card',
+    'fas fa-gift',
+    'fas fa-hand-holding-heart',
+    'fas fa-landmark',
+    'fas fa-comment-dollar',
+    'fas fa-wine-glass-alt',
+    'fas fa-store',
   ]
 
   tagListCollection!: CollectionReference<DocumentData, DocumentData>

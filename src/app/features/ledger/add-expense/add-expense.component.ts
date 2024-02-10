@@ -153,7 +153,9 @@ export class AddExpenseComponent implements OnInit {
   }
 
   saveCheck() {
-    if (!this.selectedTagId || !this.price) {
+    const checkTag = this.tagsGroup.some(tags => tags.some(tagInfo => tagInfo.id === this.selectedTagId))
+
+    if (!this.selectedTagId || !this.price || !checkTag) {
       this.modalService.openConfirm({
         content: '請輸入金額與選擇標籤',
         okText: '確認',
