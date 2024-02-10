@@ -9,6 +9,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import 'hammerjs';
+import { APP_BASE_HREF } from '@angular/common';
 
 /**
  * https://github.com/angular/angular/issues/50447#issuecomment-1561531221
@@ -20,6 +21,7 @@ export function initData(auth: Auth) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: APP_BASE_HREF, useValue: environment.baseUrl },
     importProvidersFrom(provideFirebaseApp(() => initializeApp(environment.firebaseConfig))),
     importProvidersFrom(provideFirestore(() => getFirestore())),
     importProvidersFrom(provideAuth(() => getAuth())),
