@@ -13,11 +13,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check if Firebase Config is set
+        run: |
+          if [ -z "${{ secrets.FIREBASE_CONFIG }}" ]; then
+            echo "FIREBASE_CONFIG is not set."
+          else
+            echo "FIREBASE_CONFIG is set."
+          fi
+
       - name: Create src/environments/environment.ts file
         run: |
           mkdir -p src/environments
           touch src/environments/environment.ts
-          echo "${{ secrets.firebaseConfig }}" >> src/environments/environment.ts
+          echo "${{ secrets.FIREBASE_CONFIG }}" >> src/environments/environment.ts
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
