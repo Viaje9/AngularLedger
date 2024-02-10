@@ -15,6 +15,8 @@ jobs:
 
       - name: Create src/environments/environment.ts file
         run: |
+          mkdir -p src/environments
+          touch src/environments/environment.ts
           echo "${{ secrets.firebaseConfig }}" >> src/environments/environment.ts
 
       - name: Set up Node.js
