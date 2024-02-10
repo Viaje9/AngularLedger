@@ -25,7 +25,7 @@
               'bg-red-600': transactionType === TransactionTypeEnum.Expense,
               'bg-green-600': transactionType === TransactionTypeEnum.Income,
               }"
-              class="text-2xl w-32 mr-3 focus:outline-none"
+              class="text-2xl w-36 mr-3 focus:outline-none"
               matInput
               readonly
               [(ngModel)]="currentDate"
@@ -61,9 +61,9 @@
         }"
         class="p-4 text-white"
       >
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center text-4xl">
           <span>TWD</span>
-          <span class="text-4xl">{{ totalAmount() | number }}</span>
+          <span>{{ totalAmount() | number }}</span>
         </div>
       </div>
     </div>

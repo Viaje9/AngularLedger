@@ -36,15 +36,13 @@
     <div class="space-y-2" cdkDropList (cdkDropListDropped)="dropTag($event)">
       @for (item of tagList ; track item.id) {
       <div
-        cdkDrag
-        [cdkDragDisabled]="!isDrop"
         class="flex items-center justify-between px-4 py-3 bg-gray-700"
         (click)="goToEditTag(item.id)"
       >
         <div class="flex items-center">
           <i [ngClass]="item.tagIconName"></i>
         </div>
-        <span>
+        <span cdkDrag [cdkDragDisabled]="!isDrop">
           {{ item.tagName }}
           @if (!isDrop) { &gt; } @else {
           <i class="fas fa-bars me-1"></i>
