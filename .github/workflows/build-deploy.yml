@@ -41,7 +41,7 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build ./dist/angular-ledger/browser
+          folder: dist/angular-ledger/browser
 
 
 
