@@ -13,6 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create src/environments/environment.ts file
+        run: |
+          echo "${{ secrets.firebaseConfig }}" >> src/environments/environment.ts
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
