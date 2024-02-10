@@ -143,8 +143,9 @@ export class LedgerService {
       const list = [];
       for (const expenseItem of expenseList) {
         const item = expenseItem as AddLedgerItem;
+
         const tagInfo = await this.getTagInfo(item.tagId);
-        expenseItem['tagInfo'] = tagInfo.data();
+        expenseItem['tagInfo'] = tagInfo?.data() || {};
         list.push(expenseItem);
       }
       return list;
@@ -161,7 +162,7 @@ export class LedgerService {
       for (const incomeItem of incomeList) {
         const item = incomeItem as AddLedgerItem;
         const tagInfo = await this.getTagInfo(item.tagId);
-        incomeItem['tagInfo'] = tagInfo.data();
+        incomeItem['tagInfo'] = tagInfo?.data() || {};
         list.push(incomeItem);
       }
       return list;
