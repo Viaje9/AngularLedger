@@ -1,8 +1,8 @@
 {
   "name": "angular-ledger",
   "short_name": "angular-ledger",
-  "theme_color": "#DC2626",
-  "background_color": "#DC2626",
+  "theme_color": "#FFECB3",
+  "background_color": "#FFECB3",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

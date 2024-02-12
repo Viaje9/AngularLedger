@@ -123,29 +123,29 @@
         [ngClass]="{
           'bg-gray-400': transactionType === TransactionTypeEnum.Expense
         }"
-        class="w-1/4 p-4"
+        class="w-1/4 p-4 pb-8"
         (click)="changeTransactionType(TransactionTypeEnum.Expense)"
       >
         <i class="fas fa-arrow-up"></i>
-        <span class="block text-xs">支出</span>
+        <span class="block text-lg">支出</span>
       </button>
       <button
         [ngClass]="{
           'bg-gray-400': transactionType === TransactionTypeEnum.Income
         }"
-        class="w-1/4 p-4"
+        class="w-1/4 p-4 pb-8"
         (click)="changeTransactionType(TransactionTypeEnum.Income)"
       >
         <i class="fas fa-arrow-down"></i>
-        <span class="block text-xs">收入</span>
+        <span class="block text-lg">收入</span>
       </button>
-      <button class="w-1/4 p-4">
+      <button class="w-1/4 p-4 pb-8">
         <i class="fas fa-chart-line"></i>
-        <span class="block text-xs">統計</span>
+        <span class="block text-lg">統計</span>
       </button>
-      <button class="w-1/4 p-4" routerLink="setting">
+      <button class="w-1/4 p-4 pb-8" routerLink="setting">
         <i class="fas fa-cog"></i>
-        <span class="block text-xs">設定</span>
+        <span class="block text-lg">設定</span>
       </button>
     </div>
   </div>
