@@ -98,21 +98,29 @@
     <div routerLink="/setting/budget" class="bg-red-300 p-4 text-red-800">
       <div class="flex justify-between items-center">
         <div class="flex items-center">
-          <img
-            src="https://img.icons8.com/ios-filled/50/fa314a/sheep.png"
-            class="h-6 w-6"
-            alt="Sheep"
-          />
-          <span class="ml-2 text-lg">{{ budgetPercent() }}%</span>
+          <span class="ml-2 text-2xl">{{ budgetPercent() }}%</span>
         </div>
-        <div>
-          <span class="text-xl">${{ currentRangeBudget | number }}</span> /
-          <span class="text-xl">${{ budgetAmount | number }}</span>
+        <div class="flex">
+          <div class="mr-1 flex flex-col items-end">
+            <span class="text-xl block"
+              >$ {{ calculateTodayBudget() | number }}</span
+            >
+            <span class="text-sm">今日預算</span>
+          </div>
         </div>
-      </div>
-      <div class="text-xs">
-        <span>剩餘預算</span>
-        <span>預算總額</span>
+        <div class="flex">
+          <div class="mr-1 flex flex-col items-end">
+            <span class="text-xl block"
+              >$ {{ currentRangeBudget | number }}</span
+            >
+            <span class="text-sm">剩餘預算</span>
+          </div>
+          /
+          <div class="ml-1 flex flex-col items-end">
+            <span class="text-xl block">$ {{ budgetAmount | number }}</span>
+            <span class="text-sm">預算總額</span>
+          </div>
+        </div>
       </div>
     </div>
     }

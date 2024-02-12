@@ -35,6 +35,13 @@ export class BudgetComponent implements OnInit {
 
   onChangeBudgetAmount() {
     localStorage.setItem('budgetAmount', `${this.budgetAmount}`)
+    if (!this.budgetAmount || this.budgetAmount === 0) {
+      this.showBudget = false
+      this.showBudgetDisabled = true
+      this.onChangeShowBudget()
+    } else {
+      this.showBudgetDisabled = false
+    }
   }
 
   onChangeShowBudget() {

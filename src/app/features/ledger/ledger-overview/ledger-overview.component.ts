@@ -144,6 +144,13 @@ export class LedgerOverviewComponent implements OnInit {
     return ((1 - parseFloat(((this.currentRangeBudget / this.budgetAmount)).toFixed(2))) * 100).toFixed(2)
   }
 
+  calculateTodayBudget() {
+    const startDateOfDayJs = dayjs(this.startDate, 'YYYY/MM/DD')
+    const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
+    const diff = endDateOfDayJs.diff(startDateOfDayJs, 'day');
+    return parseInt((this.budgetAmount / diff).toFixed()) - this.totalAmount()
+  }
+
   onSwipeLeft() {
     const copyData = structuredClone(this.currentDate)
     copyData.setDate(this.currentDate.getDate() + 1)
