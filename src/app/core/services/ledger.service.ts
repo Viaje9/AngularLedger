@@ -196,6 +196,25 @@ export class LedgerService {
 
   /** income end */
 
+  getBudgetAmount(startDate: Date, endDate: Date) {
+    console.log(startDate);
+
+    const startOfDate = structuredClone(startDate)
+    startOfDate.setHours(0, 0, 0, 0);
+
+    const startOfTimestamp = Timestamp.fromDate(startOfDate);
+
+    const endOfDay = structuredClone(endDate)
+    endOfDay.setHours(23, 59, 59, 999);
+    const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
+
+    return collectionData(query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp)), { idField: 'id' }).pipe(
+      map((expenseList) => {
+        return expenseList.reduce((acc, item) => acc + parseInt(item['price']), 0)
+      })
+    )
+  }
+
   queryDate(date: Date, fieldName: string) {
     // 定義您想要搜索的日期
     const specificDate = structuredClone(date)

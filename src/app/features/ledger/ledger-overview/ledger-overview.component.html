@@ -103,11 +103,11 @@
             class="h-6 w-6"
             alt="Sheep"
           />
-          <span class="ml-2 text-lg">87%</span>
+          <span class="ml-2 text-lg">{{ budgetPercent() }}%</span>
         </div>
         <div>
-          <span class="text-2xl">$10,475</span> /
-          <span class="text-xl">$12,000</span>
+          <span class="text-xl">${{ currentRangeBudget | number }}</span> /
+          <span class="text-xl">${{ budgetAmount | number }}</span>
         </div>
       </div>
       <div class="text-xs">

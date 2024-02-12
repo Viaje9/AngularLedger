@@ -12,6 +12,7 @@ import { LoaderService } from '@src/app/core/services/loader.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import dayjs from 'dayjs';
 
 
 const MY_DATE_FORMATS = {
@@ -79,6 +80,10 @@ export class LedgerOverviewComponent implements OnInit {
   ledgerItems: LedgerItem[] = []
 
   showBudget = localStorage.getItem('showBudget') === '1'
+  budgetAmount = parseInt(localStorage.getItem('budgetAmount') || '0')
+  currentRangeBudget = 0
+  startDate = ''
+  endDate = ''
 
   constructor(
     private router: Router,
@@ -99,12 +104,44 @@ export class LedgerOverviewComponent implements OnInit {
       this.getExpenseList()
     }
 
-    if(this.transactionType === this.TransactionTypeEnum.Income) {
+    if (this.transactionType === this.TransactionTypeEnum.Income) {
       this.getIncomeList()
     }
   }
 
   ngOnInit() {
+    this.countBudget()
+  }
+
+  countBudget() {
+    const selectedDate = parseInt(localStorage.getItem('selectedDate') || '0')
+    if (selectedDate) {
+      const inputDate = dayjs(this.currentDate);
+      let startDateOfDay, endDateOfDay
+      if (inputDate.date() >= selectedDate) {
+        startDateOfDay = inputDate.date(selectedDate)
+        endDateOfDay = inputDate.add(1, 'month').date(selectedDate).subtract(1, 'day')
+      } else {
+        startDateOfDay = inputDate.subtract(1, 'month').date(selectedDate)
+        endDateOfDay = inputDate.date(selectedDate).subtract(1, 'day')
+      }
+
+      const startDate = startDateOfDay.format('YYYY/MM/DD')
+      const endDate = endDateOfDay.format('YYYY/MM/DD')
+
+      if (this.transactionType === this.TransactionTypeEnum.Expense && startDate !== this.startDate && endDate !== this.endDate) {
+        this.startDate = startDate
+        this.endDate = endDate
+        this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate()).pipe(untilDestroyed(this))
+          .subscribe((amount) => {
+            this.currentRangeBudget = amount
+          })
+      }
+    }
+  }
+
+  budgetPercent() {
+    return ((1 - parseFloat(((this.currentRangeBudget / this.budgetAmount)).toFixed(2))) * 100).toFixed(2)
   }
 
   onSwipeLeft() {
@@ -129,6 +166,8 @@ export class LedgerOverviewComponent implements OnInit {
     if (this.transactionType === this.TransactionTypeEnum.Income) {
       this.getIncomeList()
     }
+
+    this.countBudget()
   }
 
   formateDate(date: Date) {
