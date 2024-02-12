@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1707627206609,
+  "timestamp": 1707714835747,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -14,13 +14,13 @@
         "/AngularLedger/chunk-IGXZ44CT.js",
         "/AngularLedger/chunk-MO62WHCN.js",
         "/AngularLedger/chunk-VTBT3ENK.js",
-        "/AngularLedger/chunk-VTWRCRXX.js",
+        "/AngularLedger/chunk-YTPYP3GF.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-U4VPBCVT.js",
+        "/AngularLedger/main-2WMREZO6.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
-        "/AngularLedger/styles-PXTRJPKX.css"
+        "/AngularLedger/styles-P5QRBDAB.css"
       ],
       "patterns": []
     },
@@ -57,13 +57,13 @@
     "/AngularLedger/chunk-IGXZ44CT.js": "7d32e050ca0721cfbbcac19ac0cb54242fd9c549",
     "/AngularLedger/chunk-MO62WHCN.js": "da9f8b6c107e82febfad41bf76d4018dc9885adc",
     "/AngularLedger/chunk-VTBT3ENK.js": "c86b018c17e9ac68785a0f7fadeae2f84b12a0e0",
-    "/AngularLedger/chunk-VTWRCRXX.js": "da60e748690f02c038703794e44b6123e4f6209b",
+    "/AngularLedger/chunk-YTPYP3GF.js": "3a94403712d1902e71c54eb559553b0e7f0786c4",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "491a47d0f799b49fb115bbb60ff5e734d62b6bd2",
-    "/AngularLedger/main-U4VPBCVT.js": "a62a0b5e06d4dac0bc4e786114a73e3380c9f302",
-    "/AngularLedger/manifest.webmanifest": "7f503270788cfdd2ad9be3675009ecd28a52f5d9",
+    "/AngularLedger/index.html": "7c75f2fcb827634311de1b0c98e0c1b364ba2875",
+    "/AngularLedger/main-2WMREZO6.js": "23625c65fde4a01ad0e2b5ab169f775dd93012dc",
+    "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
-    "/AngularLedger/styles-PXTRJPKX.css": "a31cb5a921b3035d0eab3b813dbacd6b0c23865d"
+    "/AngularLedger/styles-P5QRBDAB.css": "4a041790dd6e4621dea53b7e1fb15f19d651513d"
   },
   "navigationUrls": [
     {
