@@ -78,6 +78,8 @@ export class LedgerOverviewComponent implements OnInit {
 
   ledgerItems: LedgerItem[] = []
 
+  showBudget = localStorage.getItem('showBudget') === '1'
+
   constructor(
     private router: Router,
     private loaderService: LoaderService,

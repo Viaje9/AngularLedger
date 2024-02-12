@@ -4,8 +4,8 @@
       <!-- Top bar -->
       <div
         [ngClass]="{
-        'bg-red-600': transactionType === TransactionTypeEnum.Expense,
-        'bg-green-600': transactionType === TransactionTypeEnum.Income
+          'bg-red-600': transactionType === TransactionTypeEnum.Expense,
+          'bg-green-600': transactionType === TransactionTypeEnum.Income
         }"
         class="p-4 text-white"
       >
@@ -94,8 +94,8 @@
 
   <div class="sticky bottom-0">
     <!-- Budget progress -->
-    @if(false) {
-    <div routerLink="budget" class="bg-red-300 p-4 text-red-800">
+    @if((transactionType === TransactionTypeEnum.Expense) && showBudget ) {
+    <div routerLink="/setting/budget" class="bg-red-300 p-4 text-red-800">
       <div class="flex justify-between items-center">
         <div class="flex items-center">
           <img
