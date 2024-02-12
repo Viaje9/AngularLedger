@@ -23,6 +23,7 @@ export class AddIncomeComponent implements OnInit {
   @ViewChild('scrollTags') scrollTagsRef!: ElementRef;
   @ViewChild('tagGroup') tagGroupRef!: ElementRef;
   @ViewChild('templateRef') templateRef!: TemplateRef<any> | undefined;
+  @ViewChild('priceInput') priceInput!: ElementRef;
 
   get StatusEnum() {
     return StatusEnum
@@ -91,6 +92,7 @@ export class AddIncomeComponent implements OnInit {
     if (this.selectedTagId === tagId) {
       this.selectedTagId = ''
     } else {
+      this.priceInput.nativeElement.focus()
       this.selectedTagId = tagId
 
     }
