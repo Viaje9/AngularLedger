@@ -134,14 +134,17 @@ export class LedgerOverviewComponent implements OnInit {
         this.endDate = endDate
         this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate()).pipe(untilDestroyed(this))
           .subscribe((amount) => {
-            this.currentRangeBudget = amount
+            this.currentRangeBudget = this.budgetAmount - amount
           })
       }
     }
   }
 
-  budgetPercent() {
-    return ((1 - parseFloat(((this.currentRangeBudget / this.budgetAmount)).toFixed(2))) * 100).toFixed(2)
+  calculateRangeDayBudget() {
+    const startDateOfDayJs = dayjs(this.startDate, 'YYYY/MM/DD')
+    const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
+    const diff = endDateOfDayJs.diff(startDateOfDayJs, 'day');
+    return parseInt((this.currentRangeBudget / diff).toFixed()) - this.totalAmount()
   }
 
   calculateTodayBudget() {

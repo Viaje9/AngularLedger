@@ -49,3 +49,9 @@ $angular-ledger-theme: mat.define-light-theme((
     scrollbar-width: none; /* Firefox */
   }
 }
+
+* {
+  user-select: none;
+  -webkit-user-select: none; /* Chrome Safari */
+  -moz-user-select: none;    /* Firefox */
+}
