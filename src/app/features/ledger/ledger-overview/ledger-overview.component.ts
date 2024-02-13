@@ -62,7 +62,6 @@ class CustomDateAdapter extends NativeDateAdapter {
     {
       provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
     },
-    { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }
   ],
   templateUrl: './ledger-overview.component.html',
   styleUrl: './ledger-overview.component.css',
