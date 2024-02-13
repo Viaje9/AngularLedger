@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1707749065855,
+  "timestamp": 1707823399110,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -13,14 +13,14 @@
       "urls": [
         "/AngularLedger/chunk-34RB6FOU.js",
         "/AngularLedger/chunk-3EAJ2RMU.js",
+        "/AngularLedger/chunk-4WN7J7BV.js",
         "/AngularLedger/chunk-6AZRZ7XJ.js",
-        "/AngularLedger/chunk-NP3IOIO4.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-EJYJ2U7U.js",
+        "/AngularLedger/main-E5ZJGDXX.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
-        "/AngularLedger/styles-SUPZ5GBL.css"
+        "/AngularLedger/styles-E6H3HVUD.css"
       ],
       "patterns": []
     },
@@ -56,14 +56,14 @@
     "/AngularLedger/assets/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
     "/AngularLedger/chunk-34RB6FOU.js": "5c234067377715779d2c7a2eab6bfa2e775e2077",
     "/AngularLedger/chunk-3EAJ2RMU.js": "22f125d261a33210cd2bd98a4d60582d115d0451",
+    "/AngularLedger/chunk-4WN7J7BV.js": "b96818adec2728bdf5fbc4b7ccf998b1f3070ef7",
     "/AngularLedger/chunk-6AZRZ7XJ.js": "f578232fe39e1050127bb70fe0f95680fdd97ff2",
-    "/AngularLedger/chunk-NP3IOIO4.js": "9044af198fbef3beb43246845c26275f8f2f770b",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "837fd1f4e5addb5aff02395540328a97de1e060f",
-    "/AngularLedger/main-EJYJ2U7U.js": "52de25d30dc6b9d0b2198f7bdbaf5dc9afd351a9",
+    "/AngularLedger/index.html": "5948d13f7f5a999ea91e4076721554cb30e90bf1",
+    "/AngularLedger/main-E5ZJGDXX.js": "90df042f55efc8e2afccd6d4c618a3eb773296c5",
     "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
-    "/AngularLedger/styles-SUPZ5GBL.css": "2f71097fdb3466d8f88b97d6d91df91d2866a9c9"
+    "/AngularLedger/styles-E6H3HVUD.css": "d49a6d3bd71175821d99de398559d4a9f7ee7273"
   },
   "navigationUrls": [
     {
