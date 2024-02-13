@@ -140,8 +140,14 @@ export class LedgerOverviewComponent implements OnInit {
     }
   }
 
+  calculateDiffRangeDay() {
+    const startDateOfDayJs = dayjs(this.currentDate)
+    const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
+    return endDateOfDayJs.diff(startDateOfDayJs, 'day');
+  }
+
   calculateRangeDayBudget() {
-    const startDateOfDayJs = dayjs(this.startDate, 'YYYY/MM/DD')
+    const startDateOfDayJs = dayjs(this.currentDate)
     const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
     const diff = endDateOfDayJs.diff(startDateOfDayJs, 'day');
     return parseInt((this.currentRangeBudget / diff).toFixed()) - this.totalAmount()
