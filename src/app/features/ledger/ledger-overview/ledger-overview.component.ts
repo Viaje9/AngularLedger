@@ -13,6 +13,7 @@ import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import dayjs from 'dayjs';
+import { take } from 'rxjs';
 
 
 const MY_DATE_FORMATS = {
@@ -211,7 +212,7 @@ export class LedgerOverviewComponent implements OnInit {
 
   getExpenseList() {
     this.loaderService.start()
-    this.ledgerService.getTodayExpenseList(this.currentDate).pipe(untilDestroyed(this))
+    this.ledgerService.getTodayExpenseList(this.currentDate).pipe(take(1), untilDestroyed(this))
       .subscribe((expenseList) => {
         this.ledgerItems = expenseList
         this.loaderService.stop()
@@ -220,7 +221,7 @@ export class LedgerOverviewComponent implements OnInit {
 
   getIncomeList() {
     this.loaderService.start()
-    this.ledgerService.getTodayIncomeList(this.currentDate).pipe(untilDestroyed(this))
+    this.ledgerService.getTodayIncomeList(this.currentDate).pipe(take(1), untilDestroyed(this))
       .subscribe((incomeList) => {
         this.ledgerItems = incomeList
         this.loaderService.stop()
