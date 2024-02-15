@@ -1,5 +1,5 @@
-<div class="bg-gray-100 h-dvh">
-  <div class="min-h-max">
+<div class="bg-gray-100 h-dvh flex flex-col">
+  <div class="flex flex-col flex-1">
     <div class="sticky top-0">
       <!-- Top bar -->
       <div
@@ -12,7 +12,7 @@
         <div class="flex justify-between items-center">
           <div class="w-1/5 text-2xl">
             @if (transactionType === TransactionTypeEnum.Expense) {
-              {{ calculateDiffRangeDay() }}
+            {{ calculateDiffRangeDay() }}
             }
           </div>
           <div
@@ -71,13 +71,12 @@
         </div>
       </div>
     </div>
-    <!-- Expense categories -->
     <div
       [ngClass]="{
       'bg-red-500': transactionType === TransactionTypeEnum.Expense,
       'bg-green-500': transactionType === TransactionTypeEnum.Income,
       }"
-      class="p-4 space-y-2 min-h-dvh"
+      class="wrapper flex-1 p-4 space-y-2"
       (swipeLeft)="onSwipeLeft()"
       (swipeRight)="onSwipeRight()"
     >
