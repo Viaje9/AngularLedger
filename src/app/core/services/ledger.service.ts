@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { Observable, catchError, map, mergeMap, take, tap } from 'rxjs';
 import { TagInfo } from '../models/tag.model';
 import { TransactionType } from '../models/transaction-type.model';
-import { AddLedgerItem } from '../models/ledger-item.model';
+import { AddLedgerItem, LedgerItem } from '../models/ledger-item.model';
 
 @Injectable({
   providedIn: 'root'
@@ -197,8 +197,6 @@ export class LedgerService {
   /** income end */
 
   getBudgetAmount(startDate: Date, endDate: Date) {
-    console.log(startDate);
-
     const startOfDate = structuredClone(startDate)
     startOfDate.setHours(0, 0, 0, 0);
 
@@ -213,6 +211,30 @@ export class LedgerService {
         return expenseList.reduce((acc, item) => acc + parseInt(item['price']), 0)
       })
     )
+  }
+
+  getRangeItems(startDate: Date, endDate: Date) {
+    const startOfDate = structuredClone(startDate)
+    startOfDate.setHours(0, 0, 0, 0);
+
+    const startOfTimestamp = Timestamp.fromDate(startOfDate);
+
+    const endOfDay = structuredClone(endDate)
+    endOfDay.setHours(23, 59, 59, 999);
+    const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
+
+    return collectionData(query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp)), { idField: 'id' }).pipe(
+      mergeMap(async (expenseList) => {
+        const list = [];
+        for (const expenseItem of expenseList) {
+          const item = expenseItem as AddLedgerItem;
+          const tagInfo = await this.getTagInfo(item.tagId);
+          expenseItem['tagInfo'] = tagInfo?.data() || {};
+          list.push(expenseItem);
+        }
+        return list
+      })
+    ) as Observable<LedgerItem[]>;
   }
 
   queryDate(date: Date, fieldName: string) {
