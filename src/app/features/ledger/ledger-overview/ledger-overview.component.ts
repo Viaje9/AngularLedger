@@ -14,36 +14,8 @@ import { LedgerItem } from '@src/app/core/models/ledger-item.model';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import dayjs from 'dayjs';
 import { take } from 'rxjs';
+import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
 
-
-const MY_DATE_FORMATS = {
-  parse: {
-    dateInput: 'YYYY/MM/DD',
-  },
-  display: {
-    dateInput: 'YYYY/MM/DD',
-    monthYearLabel: 'YYYY MM',
-    dateA11yLabel: 'YYYY/MM/DD',
-    monthYearA11yLabel: 'YYYY MM',
-  },
-};
-
-@Injectable()
-class CustomDateAdapter extends NativeDateAdapter {
-  override format(date: Date, displayFormat: Object): string {
-    if (displayFormat === 'YYYY/MM/DD') {
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      return `${year}/${month}/${day}`;
-    } else if (displayFormat === 'YYYY MM') {
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      return `${month}月 ${date.getFullYear()}`;
-    } else {
-      return date.toDateString();
-    }
-  }
-}
 
 @UntilDestroy()
 @Component({
@@ -51,18 +23,7 @@ class CustomDateAdapter extends NativeDateAdapter {
   standalone: true,
   imports: [
     SharedModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule
-  ],
-  providers: [
-    provideNativeDateAdapter(),
-    {
-      provide: DateAdapter, useClass: CustomDateAdapter
-    },
-    {
-      provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
-    },
+    AngularMaterialDatepickerModule,
   ],
   templateUrl: './ledger-overview.component.html',
   styleUrl: './ledger-overview.component.css',
@@ -254,6 +215,14 @@ export class LedgerOverviewComponent implements OnInit {
     } else if (this.transactionType === this.TransactionTypeEnum.Income) {
       this.getIncomeList()
     }
+  }
+
+  onClickStatistics() {
+    this.router.navigate(['/setting/statisticsCharts'], {
+      state: {
+        date: this.currentDate
+      }
+    })
   }
 }
 
