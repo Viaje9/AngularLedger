@@ -15,6 +15,7 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import dayjs from 'dayjs';
 import { take } from 'rxjs';
 import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
+import { ModalService } from '@src/app/core/services/modal.service';
 
 
 @UntilDestroy()
@@ -49,7 +50,8 @@ export class LedgerOverviewComponent implements OnInit {
   constructor(
     private router: Router,
     private loaderService: LoaderService,
-    private ledgerService: LedgerService
+    private ledgerService: LedgerService,
+    private modalService: ModalService,
   ) {
     const transactionType = router?.getCurrentNavigation()?.extras.state?.['transactionType'] as TransactionType
     const date = router?.getCurrentNavigation()?.extras.state?.['date'] as Date
@@ -218,11 +220,28 @@ export class LedgerOverviewComponent implements OnInit {
   }
 
   onClickStatistics() {
-    this.router.navigate(['/setting/statisticsCharts'], {
-      state: {
-        date: this.currentDate
-      }
-    })
+    if (localStorage.getItem('showBudget') === '1') {
+      this.router.navigate(['/setting/statisticsCharts'], {
+        state: {
+          date: this.currentDate
+        }
+      })
+    } else {
+      this.modalService.openConfirm({
+        title: "通知",
+        content: "請先設定預算週期，再查看統計圖表",
+        okText: '確認',
+        outsideClose: false,
+        onOk: () => {
+          this.router.navigate(['/setting/budget'], {
+            state: {
+              date: this.currentDate
+            }
+          })
+        }
+      });
+    }
+
   }
 }
 

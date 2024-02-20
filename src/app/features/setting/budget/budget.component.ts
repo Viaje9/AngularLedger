@@ -66,8 +66,12 @@ export class BudgetComponent implements OnInit {
       title: "選擇日期",
       okText: '確認',
       showCancelBtn: false,
-      outsideClose: true,
-      contentTemplateRef: this.templateRef
+      outsideClose: false,
+      contentTemplateRef: this.templateRef,
+      onOk: () => {
+        this.showBudget = this.selectedDate !== 0
+        this.onChangeShowBudget()
+      }
     });
   }
 
