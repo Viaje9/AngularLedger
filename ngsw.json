@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1708440387157,
+  "timestamp": 1708440665400,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -12,12 +12,12 @@
       },
       "urls": [
         "/AngularLedger/chunk-77POFY4X.js",
-        "/AngularLedger/chunk-BFZJO5RC.js",
         "/AngularLedger/chunk-JW3D34R3.js",
         "/AngularLedger/chunk-OHBUJJEM.js",
+        "/AngularLedger/chunk-TVNUP6P4.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-E3BXGFVU.js",
+        "/AngularLedger/main-2ZBDHEOC.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
         "/AngularLedger/styles-64EABU36.css"
@@ -55,12 +55,12 @@
     "/AngularLedger/assets/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
     "/AngularLedger/assets/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
     "/AngularLedger/chunk-77POFY4X.js": "dae55fa8dc26c2ac08b550fa012848518d2fbfad",
-    "/AngularLedger/chunk-BFZJO5RC.js": "713154a5cf8b61a67ff49156b4dacb8093df1726",
     "/AngularLedger/chunk-JW3D34R3.js": "30fc739c7ff9987eda0c2037dd7267e94eaabae3",
     "/AngularLedger/chunk-OHBUJJEM.js": "7cc745f7cf4c1b2f0952f46e3d660246d1a31785",
+    "/AngularLedger/chunk-TVNUP6P4.js": "5601280027e44ee78bce3a64ebc7665a5b87df06",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "45b4ec6903b38a01368203be426bbe650f54aa28",
-    "/AngularLedger/main-E3BXGFVU.js": "9afddf180031c6345a92af9f81c1ca16e5475885",
+    "/AngularLedger/index.html": "11bfe6461fcb5803d7bee29ec164efc55077da80",
+    "/AngularLedger/main-2ZBDHEOC.js": "5da7521636c1f2c0434c610f4e8388559aa84a82",
     "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
     "/AngularLedger/styles-64EABU36.css": "187dc8b54e2d4e06ccfb5dbfe17e58e438f5dc21"
