@@ -225,11 +225,18 @@ export class LedgerService {
 
     return collectionData(query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp)), { idField: 'id' }).pipe(
       mergeMap(async (expenseList) => {
+        const q = query(this.tagsCollection);
+        const querySnapshot = await getDocs(q);
+        const tagList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
         const list = [];
         for (const expenseItem of expenseList) {
           const item = expenseItem as AddLedgerItem;
-          const tagInfo = await this.getTagInfo(item.tagId);
-          expenseItem['tagInfo'] = tagInfo?.data() || {};
+          const tagInfo = tagList.find((tag) => tag.id === item.tagId);
+          expenseItem['tagInfo'] = tagInfo || {};
           list.push(expenseItem);
         }
         return list

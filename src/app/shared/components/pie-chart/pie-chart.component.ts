@@ -1,6 +1,8 @@
 // pie-chart.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { PieChartItem } from '@src/app/core/models/pie-chart-item.model';
 import * as d3 from 'd3';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-pie-chart',
@@ -10,87 +12,201 @@ import * as d3 from 'd3';
 })
 export class PieChartComponent implements OnInit {
 
-  constructor() { }
-
-  ngOnInit(): void {
-    this.drawChart();
+  @Input() set pieChartItems(value: PieChartItem[]) {
+    this.pieChartItemsSubject.next(value);
   }
 
-  drawChart(): void {
-    const width = window.innerWidth * 0.8,
-      height = window.innerWidth * 0.8,
-      radius = Math.min(width, height) / 2;
-
-    const labels = ["Lorem ipsum", "dolor sit", "amet", "consectetur", "adipisicing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt"]
-    const enhancedLabels = this.enhanceArrayWithBackgroundColor(labels)
+  @Output() onEmitPieChartWithColorItems = new EventEmitter();
 
 
-    const color = d3.scaleOrdinal()
-      .domain(enhancedLabels.map((label: any) => label.label))
-      .range(enhancedLabels.map((label: any) => label.backgroundColor)) as any
+  pieChartItemsSubject: Subject<PieChartItem[]> = new Subject<PieChartItem[]>();
 
-    const randomData = () => {
-      var labels = color.domain();
-      return labels.map((label: any) => {
-        return { label: label, value: Math.random() };
-      });
-    }
+  svg!: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
 
+  constructor() {
 
-    const arc = d3.arc()
-      .outerRadius(radius - 10)
-      .innerRadius(0) as any
+  }
 
-    const labelArc = d3.arc()
-      .outerRadius(radius - 40)
-      .innerRadius(radius - 40);
+  ngOnInit(): void {
+    this.pieChartItemsSubject.subscribe((list: PieChartItem[]) => {
+      this.init()
+      this.drawChart(list);
+    })
+  }
 
-    const pie = d3.pie()
-      .sort(null)
-      .value((d: any) => d.value);
-
-
-    const svg = d3.select("#pieChart")
+  init() {
+    d3.select("#pieChart > svg").remove()
+    const width = window.innerWidth,
+    height = window.innerWidth;
+    this.svg = d3.select("#pieChart")
       .append("svg")
       .attr("width", width)
       .attr("height", height)
       .append("g")
-      .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
+    this.svg.append("g").attr("class", "slices");
+    this.svg.append("g").attr("class", "labels");
+    this.svg.append("g").attr("class", "lines");
+    this.svg.append("g").attr("class", "centerText");
+    this.svg.attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+  }
+
+
+
+
+  drawChart(list: PieChartItem[]): void {
+    console.log('list', list);
+
+    const width = window.innerWidth,
+      height = window.innerWidth,
+      radius = Math.min(width, height) / 2;
+
+    const enhancedList = this.enhanceArrayWithBackgroundColor(list)
+    this.onEmitPieChartWithColorItems.emit(enhancedList)
+
+    const color = d3.scaleOrdinal()
+      .domain(enhancedList.map((label: any) => label.label))
+      .range(enhancedList.map((label: any) => label.backgroundColor)) as any
+
+    const randomData = () => {
+      return list as any
+    }
+
+
+    const pie = d3.pie<PieChartItem>()
+      .sort(null)
+      .value((d) => d.value);
+
+
+    const arc = d3.arc()
+      .outerRadius(radius * 0.9)
+      .innerRadius(radius * 0.4) as any
+
+    const outerArc = d3.arc()
+      .outerRadius(radius * 0.8)
+      .innerRadius(radius * 0.8)
 
     const data = randomData()
 
-    const g = svg.selectAll(".arc")
-      .data(pie(data))
-      .enter().append("g")
-      .attr("class", "arc");
+    const key = (d: any) => {
+      return d.data.label;
+    };
 
-    g.append("path")
-      .attr("d", arc)
-      .style("fill", (d: any) => color(d.data.label));
+    /** SLICES */
 
-    g.append("text")
-      .attr("transform", (d: any) => `translate(${labelArc.centroid(d)})`)
-      .attr("dy", ".35em")
-      .text((d: any) => d.data.label);
+    const slice = this.svg.select(".slices").selectAll("path.slice").data(pie(data), key);
+
+    slice
+      .enter()
+      .insert("path")
+      .style("fill", function (d: any) {
+        return color(d.data.label);
+      })
+      .attr("class", "slice").transition()
+      .duration(1000)
+      .attrTween("d", function (d) {
+        let _current = d
+        const interpolate = d3.interpolate(_current, d);
+        _current = interpolate(0);
+        return function (t) {
+          return arc(interpolate(t));
+        };
+      })
+
+    slice
+      .enter()
+      .insert('text')
+      .text((d) => `${d.index}`)
+      .attr("transform", (d) => "translate(" + arc.centroid(d) + ")")
+      .style("text-anchor", "middle")
+      .style("font-size", 17)
+
+    /** CENTER TEXT */
+
+    const centerContent = this.svg.select(".centerText")
+
+    const centerText = list.reduce((acc, item) => acc + item.value, 0)
+
+    centerContent.insert("text")
+      .attr("text-anchor", "middle")
+      .attr('dominant-baseline', 'middle')
+      .attr("transform", `translate(0,0)`)
+      .style("fill", "white")
+      .style("font-size", "2em")
+      .text(`$ ${centerText}`);
+
+    /** TEXT LABELS */
+
+    //     const text = this.svg.select(".labels").selectAll("text")
+    //       .data(pie(data), key)
+    //
+    //     text
+    //       .enter()
+    //       .append("text")
+    //       .attr("dy", ".35em")
+    //       .attr("fill", "white")
+    //       .text((d: any) => `${d.data.label}-${d.data.value}`)
+    //       .transition()
+    //       .duration(1000)
+    //       .attrTween("transform", function (d) {
+    //
+    //         let _current = d
+    //         const interpolate = d3.interpolate(_current, d);
+    //         _current = interpolate(0);
+    //         return function (t) {
+    //           const d2 = interpolate(t) as any;
+    //           const pos = outerArc.centroid(d2);
+    //           pos[0] = radius * (midAngle(d2) < Math.PI ? 0.5 : -0.8);
+    //           return `translate(${pos})`
+    //         };
+    //       })
+    //
+    //     const midAngle = (d: any) => {
+    //       return d.startAngle + (d.endAngle - d.startAngle) / 2;
+    //     }
+
+    /* ------- SLICE TO TEXT POLYLINES -------*/
+
+    //     const polyline = this.svg.select(".lines").selectAll("polyline").data(pie(data), key);
+    //
+    //     polyline
+    //       .enter()
+    //       .append("polyline")
+    //       .style("opacity", 0.5)
+    //       .style("stroke", "black")
+    //       .style("stroke-width", "2px")
+    //       .style("fill", "none")
+    //       .transition()
+    //       .duration(1000)
+    //       .attrTween("points", function (d) {
+    //         let _current = d
+    //         const interpolate = d3.interpolate(_current, d);
+    //         _current = interpolate(0);
+    //         return function (t) {
+    //           const d2 = interpolate(t) as any;
+    //           const pos = outerArc.centroid(d2);
+    //           pos[0] = radius * (midAngle(d2) < Math.PI ? 0.5 : -0.8);
+    //           return `${arc.centroid(d2)}, ${outerArc.centroid(d2)}, ${pos}`;
+    //         };
+    //       })
+
   }
 
   enhanceArrayWithBackgroundColor<T>(array: T[]) {
-    // 計算每一步增加的亮度值
-    const lightnessStep = array.length > 1 ? (50 / (array.length - 1)) : 0;
-    const baseHue = Math.floor(Math.random() * 360); // 為整個陣列生成一個基本色相
-    const baseSaturation = 50
+    let baseHue = 190
+    const baseSaturation = 60;
+    const baseLightness = 55;
 
-    return array.map((item, index) => {
-      const lightness = 50 + index * lightnessStep; // 計算亮度，從50%開始增加
-      const backgroundColor = `hsl(${baseHue}, ${baseSaturation}%, ${lightness}%)`;
+    return array.map((item) => {
+      baseHue = (baseHue + 35) % 360;
+      const backgroundColor = `hsl(${baseHue}, ${baseSaturation}%, ${baseLightness}%)`;
 
       if (typeof item === 'object') {
-
-        return { ...item, backgroundColor }; // 返回新的項目，包含背景顏色
+        return { ...item, backgroundColor };
       }
 
-      return { label: item, backgroundColor }; // 返回新的項目，包含背景顏色
+      return { label: item, backgroundColor };
     });
   }
 }

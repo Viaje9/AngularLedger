@@ -1,66 +1,90 @@
-<div class="bg-gray-800 text-white h-dvh">
-  <div class="bg-gray-800 py-4">
-    <div class="sticky top-0 bg-gray-800">
-      <div class="flex justify-between items-center px-4 mb-4">
-        <button (click)="onClickBack()" class="text-white">
-          <i class="fas fa-arrow-left"></i>
-        </button>
+<div class="bg-gray-800 text-white min-h-dvh">
+  <div class="sticky top-0 bg-gray-800">
+    <div class="py-4">
+      <div class="sticky top-0 bg-gray-800">
+        <div class="flex justify-between items-center px-4 mb-4">
+          <button (click)="onClickBack()" class="text-white">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="w-full text-center">
+      <mat-form-field>
+        <mat-date-range-input
+          #rangeInput
+          [disabled]="dateTab === DateTabsEnum.Range_TAB"
+          [formGroup]="range"
+          [rangePicker]="picker"
+        >
+          <input
+            matStartDate
+            formControlName="start"
+            placeholder="起日"
+          />
+          <input
+            matEndDate
+            formControlName="end"
+            placeholder="訖日"
+          />
+        </mat-date-range-input>
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="picker"
+        ></mat-datepicker-toggle>
+        <mat-date-range-picker touchUi #picker>
+          <mat-datepicker-actions>
+            <button class="btn" mat-button matDatepickerCancel>取消</button>
+            <button class="btn" mat-button matDatepickerApply (click)="onDateChange()">確定</button>
+          </mat-datepicker-actions>
+        </mat-date-range-picker>
+        @if(range.controls.start.hasError('required') ||
+        range.controls.end.hasError('required')) {
+        <mat-error>請選擇日期</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- <p>Selected range: {{ range.value | json }}</p> -->
+    </div>
+    <div class="flex mb-4">
+      <div
+        [ngClass]="{
+          'selectedTab': dateTab === DateTabsEnum.Range_TAB,
+        }"
+        class="flex-grow text-center border-b-2 border-gray-300 py-2 text-lg px-1"
+        (click)="onClickTab(DateTabsEnum.Range_TAB)"
+      >
+        週期統計
+      </div>
+      <div
+        [ngClass]="{
+          selectedTab: dateTab === DateTabsEnum.CUSTOM_TAB
+        }"
+        class="flex-grow text-center border-b-2 border-gray-300 py-2 text-lg px-1"
+        (click)="onClickTab(DateTabsEnum.CUSTOM_TAB)"
+      >
+        自訂區間
       </div>
     </div>
   </div>
-  <div class="w-full text-center">
-    <mat-form-field>
-      <mat-date-range-input
-        [disabled]="dateTab === DateTabsEnum.Range_TAB"
-        [formGroup]="range"
-        [rangePicker]="picker"
-      >
-        <input matStartDate formControlName="start" placeholder="起日" />
-        <input matEndDate formControlName="end" placeholder="訖日" />
-      </mat-date-range-input>
-      <mat-datepicker-toggle
-        matIconSuffix
-        [for]="picker"
-      ></mat-datepicker-toggle>
-      <mat-date-range-picker #picker>
-        <mat-datepicker-actions>
-          <button class="btn" mat-button matDatepickerCancel>取消</button>
-          <button mat-raised-button class="btn" matDatepickerApply>
-            確定
-          </button>
-        </mat-datepicker-actions>
-      </mat-date-range-picker>
 
-      @if (range.controls.start.hasError('matStartDateInvalid')) {
-      <mat-error>請選擇起日</mat-error>
-      } @if (range.controls.end.hasError('matEndDateInvalid')) {
-      <mat-error>請選擇訖日</mat-error>
-      }
-    </mat-form-field>
-
-    <!-- <p>Selected range: {{ range.value | json }}</p> -->
-  </div>
-  <div class="flex mb-4">
-    <div
-      [ngClass]="{
-        'selectedTab': dateTab === DateTabsEnum.Range_TAB,
-      }"
-      class="flex-grow text-center border-b-2 border-gray-300 py-2 text-lg px-1"
-      (click)="onClickTab(DateTabsEnum.Range_TAB)"
-    >
-      週期統計
-    </div>
-    <div
-      [ngClass]="{
-        selectedTab: dateTab === DateTabsEnum.CUSTOM_TAB
-      }"
-      class="flex-grow text-center border-b-2 border-gray-300 py-2 text-lg px-1"
-      (click)="onClickTab(DateTabsEnum.CUSTOM_TAB)"
-    >
-      自訂區間
-    </div>
-  </div>
   <div (swipeLeft)="onSwipeLeft()" (swipeRight)="onSwipeRight()">
-    <app-pie-chart></app-pie-chart>
+    <app-pie-chart
+      [pieChartItems]="pieChartItems"
+      (onEmitPieChartWithColorItems)="setLedgerList($event)"
+    ></app-pie-chart>
+  </div>
+  <div class="bg-gray-700 p-2">
+    @for (item of rangeList; track $index + item.label + item.percent +
+    item.value) {
+    <div
+      [ngStyle]="{ color: item.backgroundColor }"
+      class="text-2xl px-2 py-2 flex justify-between"
+    >
+      <span class="flex-1 pl-2">{{ $index }} {{ item.label }} </span>
+      <span class="flex-1"> {{ item.percent }}</span>
+      <span class="flex-1 pr-2 flex justify-end">$ {{ item.value }}</span>
+    </div>
+    }
   </div>
 </div>

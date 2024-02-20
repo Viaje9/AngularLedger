@@ -1,16 +1,21 @@
-import { Component, ViewChild, type OnInit, ElementRef } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Component, ViewChild, type OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
 import { SharedModule } from '@src/app/shared/shared.module';
 import dayjs from 'dayjs';
 import { DateTabsEnum, DateTabsType } from './statistics-charts.component.enum';
 import { LedgerService } from '@src/app/core/services/ledger.service';
-import { AddLedgerItem, LedgerItem } from '@src/app/core/models/ledger-item.model';
+import { LedgerItem } from '@src/app/core/models/ledger-item.model';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { RangeGroupItem } from './statistics-charts.component.model';
 import { PieChartComponent } from '@src/app/shared/components/pie-chart/pie-chart.component';
+import { PieChartItem } from '@src/app/core/models/pie-chart-item.model';
+import { MatDateRangeInput } from '@angular/material/datepicker';
+import { take } from 'rxjs';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-statistics-charts',
   standalone: true,
@@ -23,10 +28,11 @@ import { PieChartComponent } from '@src/app/shared/components/pie-chart/pie-char
   styleUrl: './statistics-charts.component.css',
 })
 export class StatisticsChartsComponent implements OnInit {
+  @ViewChild('rangeInput') rangeInput!: MatDateRangeInput<any>;
 
   range = new FormGroup({
-    start: new FormControl<Date | null>(null),
-    end: new FormControl<Date | null>(null),
+    start: new FormControl<Date | null>(null, [Validators.required]),
+    end: new FormControl<Date | null>(null, [Validators.required]),
   });
 
   previousDate!: Date;
@@ -34,6 +40,12 @@ export class StatisticsChartsComponent implements OnInit {
   dateTab: DateTabsType = DateTabsEnum.Range_TAB
 
   groupList: RangeGroupItem[] = []
+
+  pieChartItems: PieChartItem[] = []
+
+  rangeList: Array<PieChartItem & { backgroundColor: string, percent: string }> = []
+
+  totalPriceText = ''
 
   get DateTabsEnum() {
     return DateTabsEnum
@@ -44,7 +56,7 @@ export class StatisticsChartsComponent implements OnInit {
     private ledgerService: LedgerService,
     private loaderService: LoaderService,
   ) {
-    const perviousDate = this.router?.getCurrentNavigation()?.extras.state?.['date'] as Date
+    const perviousDate = this.router?.getCurrentNavigation()?.extras.state?.['date'] as Date || new Date()
     if (perviousDate) {
       this.previousDate = perviousDate
       this.setRange()
@@ -59,8 +71,10 @@ export class StatisticsChartsComponent implements OnInit {
 
   }
 
-  ngAfterViewInit(): void {
-
+  onDateChange() {
+    if (this.range.valid) {
+      this.getRangeItems()
+    }
   }
 
   setRange() {
@@ -86,11 +100,13 @@ export class StatisticsChartsComponent implements OnInit {
   onSwipeLeft() {
     this.previousDate = dayjs(this.previousDate).add(1, 'month').toDate()
     this.setRange()
+    this.onDateChange()
   }
 
   onSwipeRight() {
     this.previousDate = dayjs(this.previousDate).subtract(1, 'month').toDate()
     this.setRange()
+    this.onDateChange()
   }
 
   onClickBack() {
@@ -109,7 +125,7 @@ export class StatisticsChartsComponent implements OnInit {
     const endDate = this.range.getRawValue().end
     if (startDate && endDate) {
       this.loaderService.start()
-      this.ledgerService.getRangeItems(startDate, endDate).subscribe((list) => {
+      this.ledgerService.getRangeItems(startDate, endDate).pipe(take(1), untilDestroyed(this)).subscribe((list) => {
         this.loaderService.stop()
         const groupList = list.reduce((acc, item: LedgerItem) => {
           const group = acc.find((groupInfo: RangeGroupItem) => groupInfo.tagId === item.tagId)
@@ -124,12 +140,29 @@ export class StatisticsChartsComponent implements OnInit {
             const index = acc.findIndex((groupInfo: any) => groupInfo.tagId === item.tagId)
             acc[index].price += parseInt(item.price)
           }
-
           return acc
-        }, [] as RangeGroupItem[])
+        }, [] as RangeGroupItem[]).sort((a, b) => b.price - a.price)
+
         this.groupList = groupList
+        this.totalPriceText = `$ ${groupList.reduce((acc, item) => acc + item.price, 0)}`
+        this.pieChartItems = groupList.map(e => {
+          return {
+            label: e.tagName,
+            value: e.price
+          }
+        })
       })
     }
+  }
+
+  setLedgerList(list: Array<PieChartItem & { backgroundColor: string }>) {
+    const total = list.reduce((acc, item) => acc + item.value, 0)
+    this.rangeList = list.map(item => {
+      return {
+        ...item,
+        percent: `${((item.value / total) * 100).toFixed(2)}%`
+      }
+    })
   }
 
 }
