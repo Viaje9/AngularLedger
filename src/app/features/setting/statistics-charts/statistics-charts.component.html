@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <div (swipeLeft)="onSwipeLeft()" (swipeRight)="onSwipeRight()">
+  <div class="wrapper" (swipeLeft)="onSwipeLeft()" (swipeRight)="onSwipeRight()">
     <app-pie-chart
       [pieChartItems]="pieChartItems"
       (onEmitPieChartWithColorItems)="setLedgerList($event)"

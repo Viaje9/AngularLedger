@@ -10,3 +10,9 @@
 .btn {
   @apply flex-shrink-0 text-white bg-indigo-500 border-0 py-2 px-4 mr-1 focus:outline-none hover:bg-indigo-600 rounded text-lg mt-10 sm:mt-0
 }
+
+
+.wrapper {
+  overflow-y: auto;
+  touch-action: pan-y !important;
+}
