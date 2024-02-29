@@ -17,16 +17,8 @@
           [formGroup]="range"
           [rangePicker]="picker"
         >
-          <input
-            matStartDate
-            formControlName="start"
-            placeholder="起日"
-          />
-          <input
-            matEndDate
-            formControlName="end"
-            placeholder="訖日"
-          />
+          <input matStartDate formControlName="start" placeholder="起日" />
+          <input matEndDate formControlName="end" placeholder="訖日" />
         </mat-date-range-input>
         <mat-datepicker-toggle
           matIconSuffix
@@ -35,7 +27,14 @@
         <mat-date-range-picker touchUi #picker>
           <mat-datepicker-actions>
             <button class="btn" mat-button matDatepickerCancel>取消</button>
-            <button class="btn" mat-button matDatepickerApply (click)="onDateChange()">確定</button>
+            <button
+              class="btn"
+              mat-button
+              matDatepickerApply
+              (click)="onDateChange()"
+            >
+              確定
+            </button>
           </mat-datepicker-actions>
         </mat-date-range-picker>
         @if(range.controls.start.hasError('required') ||
@@ -68,23 +67,41 @@
     </div>
   </div>
 
-  <div class="wrapper" (swipeLeft)="onSwipeLeft()" (swipeRight)="onSwipeRight()">
+  <div
+    class="wrapper"
+    (swipeLeft)="onSwipeLeft()"
+    (swipeRight)="onSwipeRight()"
+  >
     <app-pie-chart
       [pieChartItems]="pieChartItems"
       (onEmitPieChartWithColorItems)="setLedgerList($event)"
     ></app-pie-chart>
   </div>
   <div class="bg-gray-700 p-2">
-    @for (item of rangeList; track $index + item.label + item.percent +
-    item.value) {
+    @for (item of rangeList; track $index) {
     <div
       [ngStyle]="{ color: item.backgroundColor }"
       class="text-2xl px-2 py-2 flex justify-between"
+      (click)="onClickTagGroup(item.tagName, item.items)"
     >
-      <span class="flex-1 pl-2">{{ $index }} {{ item.label }} </span>
+      <span class="flex-1 pl-2">{{ $index }} {{ item.tagName }} </span>
       <span class="flex-1"> {{ item.percent }}</span>
-      <span class="flex-1 pr-2 flex justify-end">$ {{ item.value }}</span>
+      <span class="flex-1 pr-2 flex justify-end">$ {{ item.price }}</span>
     </div>
     }
   </div>
 </div>
+
+<ng-template #groupItemsRef>
+  <div class="max-h-max overflow-scroll">
+    @for (item of groupItems; track $index) {
+    <div class="text-xl flex justify-between mb-1 pb-1 border-b border-white">
+      <span class="flex-1">
+        {{ dayjs(item.date.toDate()).format("MM/DD") }}
+      </span>
+      <span class="flex-1">$ {{ item.price }}</span>
+      <span class="flex-1 flex justify-end"> {{ item.description }}</span>
+    </div>
+    }
+  </div>
+</ng-template>

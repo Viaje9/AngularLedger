@@ -25,13 +25,14 @@ export class ModalComponent implements OnInit {
   showCancelBtn = true
   btnCenter = true
   templateRef?: TemplateRef<any>;
+  fullScreen = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: ModalData,
   ) {
     if (this.data) {
-      const { title, content, okText, cancelText, showCrossBtn, outsideClose, showCancelBtn, contentTemplateRef, btnCenter } =
+      const { title, content, okText, cancelText, showCrossBtn, outsideClose, showCancelBtn, contentTemplateRef, btnCenter, fullScreen } =
         data;
       this.title = title;
       this.content = content;
@@ -42,6 +43,7 @@ export class ModalComponent implements OnInit {
       this.showCancelBtn = showCancelBtn
       this.btnCenter = btnCenter
       this.templateRef = contentTemplateRef
+      this.fullScreen = fullScreen
     }
   }
 

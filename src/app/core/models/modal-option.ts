@@ -44,4 +44,9 @@ export interface ModalOption {
    * @description 自定義content
    * **/
   contentTemplateRef?: TemplateRef<any>
+  /**
+   * @description 是否全螢幕
+   * @default false
+   * **/
+  fullScreen?: boolean;
 }

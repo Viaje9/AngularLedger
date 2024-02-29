@@ -49,20 +49,26 @@ export class ModalService {
       showCrossBtn = true,
       showCancelBtn = true,
       btnCenter = true,
+      fullScreen = false,
       contentTemplateRef,
-    }: ModalOption) => ({
-      data: {
-        content,
-        title,
-        okText,
-        cancelText,
-        outsideClose,
-        showCrossBtn,
-        showCancelBtn,
-        btnCenter,
-        contentTemplateRef
+    }: ModalOption) => {
+      const config = {
+        data: {
+          content,
+          title,
+          okText,
+          cancelText,
+          outsideClose,
+          showCrossBtn,
+          showCancelBtn,
+          btnCenter,
+          fullScreen,
+          contentTemplateRef
+        }
       }
-    })
+
+      return fullScreen ? { maxWidth: '100vw', width: '100%', ...config } : config
+    }
 
     if (this.modalQueue.length === 1) {
       this.executeStatus$.next(true)

@@ -37,7 +37,7 @@ export class PieChartComponent implements OnInit {
   init() {
     d3.select("#pieChart > svg").remove()
     const width = window.innerWidth,
-    height = window.innerWidth;
+      height = window.innerWidth;
     this.svg = d3.select("#pieChart")
       .append("svg")
       .attr("width", width)
@@ -56,13 +56,11 @@ export class PieChartComponent implements OnInit {
 
 
   drawChart(list: PieChartItem[]): void {
-    console.log('list', list);
-
     const width = window.innerWidth,
       height = window.innerWidth,
       radius = Math.min(width, height) / 2;
 
-    const enhancedList = this.enhanceArrayWithBackgroundColor(list)
+    const enhancedList = this.enhanceArrayWithBackgroundColor<PieChartItem>(list)
     this.onEmitPieChartWithColorItems.emit(enhancedList)
 
     const color = d3.scaleOrdinal()
@@ -202,11 +200,7 @@ export class PieChartComponent implements OnInit {
       baseHue = (baseHue + 35) % 360;
       const backgroundColor = `hsl(${baseHue}, ${baseSaturation}%, ${baseLightness}%)`;
 
-      if (typeof item === 'object') {
-        return { ...item, backgroundColor };
-      }
-
-      return { label: item, backgroundColor };
+      return { ...item, backgroundColor };
     });
   }
 }
