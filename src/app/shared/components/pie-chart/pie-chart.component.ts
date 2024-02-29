@@ -44,6 +44,7 @@ export class PieChartComponent implements OnInit {
       .attr("height", height)
       .append("g")
 
+    this.svg.append("g").attr("class", "pies");
     this.svg.append("g").attr("class", "slices");
     this.svg.append("g").attr("class", "labels");
     this.svg.append("g").attr("class", "lines");
@@ -73,6 +74,11 @@ export class PieChartComponent implements OnInit {
 
 
     const pie = d3.pie<PieChartItem>()
+      .padAngle(0.07)
+      .sort(null)
+      .value((d) => d.value);
+
+    const pie2 = d3.pie<PieChartItem>()
       .sort(null)
       .value((d) => d.value);
 
@@ -92,8 +98,25 @@ export class PieChartComponent implements OnInit {
     };
 
     /** SLICES */
-
+    const pies = this.svg.select(".pies").selectAll("path.pie").data(pie2(data), key);
     const slice = this.svg.select(".slices").selectAll("path.slice").data(pie(data), key);
+
+    pies.enter()
+      .insert("path")
+      .style("fill", "rgb(209 213 219 / var(--tw-bg-opacity))")
+      .attr("class", "slice")
+      .style("stroke", "rgb(209 213 219 / var(--tw-bg-opacity))") // Add border
+      .style("stroke-width", 2) // Set border width
+      .transition()
+      .duration(1000)
+      .attrTween("d", function (d) {
+        let _current = d
+        const interpolate = d3.interpolate(_current, d);
+        _current = interpolate(0);
+        return function (t) {
+          return arc(interpolate(t))
+        };
+      })
 
     slice
       .enter()
@@ -101,6 +124,8 @@ export class PieChartComponent implements OnInit {
       .style("fill", function (d: any) {
         return color(d.data.label);
       })
+      .style("stroke", "white") // Add border
+      .style("stroke-width", 2) // Set border width
       .attr("class", "slice").transition()
       .duration(1000)
       .attrTween("d", function (d) {
@@ -108,7 +133,7 @@ export class PieChartComponent implements OnInit {
         const interpolate = d3.interpolate(_current, d);
         _current = interpolate(0);
         return function (t) {
-          return arc(interpolate(t));
+          return arc(interpolate(t))
         };
       })
 
@@ -116,7 +141,9 @@ export class PieChartComponent implements OnInit {
       .enter()
       .insert('text')
       .text((d) => `${d.index}`)
-      .attr("transform", (d) => "translate(" + arc.centroid(d) + ")")
+      .attr("transform", (d) => {
+        return "translate(" + arc.centroid(d) + ")"
+      })
       .style("text-anchor", "middle")
       .style("font-size", 17)
 

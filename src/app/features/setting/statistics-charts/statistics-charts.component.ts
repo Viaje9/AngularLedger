@@ -65,7 +65,7 @@ export class StatisticsChartsComponent implements OnInit {
     private loaderService: LoaderService,
     private modalService: ModalService,
   ) {
-    const perviousDate = this.router?.getCurrentNavigation()?.extras.state?.['date'] as Date
+    const perviousDate = this.router?.getCurrentNavigation()?.extras.state?.['date'] as Date || new Date()
     if (perviousDate) {
       this.previousDate = perviousDate
       this.setRange()
