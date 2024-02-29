@@ -77,16 +77,19 @@
       (onEmitPieChartWithColorItems)="setLedgerList($event)"
     ></app-pie-chart>
   </div>
-  <div class="bg-gray-700 p-2">
+  <div class="bg-gray-700 p-2 pb-10">
     @for (item of rangeList; track $index) {
     <div
       [ngStyle]="{ color: item.backgroundColor }"
-      class="text-2xl px-2 py-2 flex justify-between"
+      class="text-xl px-1 py-1 flex justify-between"
       (click)="onClickTagGroup(item.tagName, item.items)"
     >
-      <span class="flex-1 pl-2">{{ $index }} {{ item.tagName }} </span>
-      <span class="flex-1"> {{ item.percent }}</span>
-      <span class="flex-1 pr-2 flex justify-end">$ {{ item.price }}</span>
+      <span class="w-5/12 flex">
+        <div class="w-7 text-center">{{ $index }}</div>
+        <div>{{ item.tagName }}</div>
+      </span>
+      <span class="w-2/12"> {{ item.percent }}</span>
+      <span class="w-5/12 pr-1 flex justify-end 400">$ {{ item.price }}</span>
     </div>
     }
   </div>
