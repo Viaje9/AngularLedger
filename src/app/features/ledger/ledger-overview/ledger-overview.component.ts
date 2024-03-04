@@ -70,6 +70,8 @@ export class LedgerOverviewComponent implements OnInit {
     if (this.transactionType === this.TransactionTypeEnum.Income) {
       this.getIncomeList()
     }
+
+    this.currentDate.setHours(0, 0, 0, 0);
   }
 
   ngOnInit() {
