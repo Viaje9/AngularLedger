@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1709213112770,
+  "timestamp": 1709515117516,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -11,13 +11,13 @@
         "ignoreVary": true
       },
       "urls": [
+        "/AngularLedger/chunk-5B7QQHN3.js",
         "/AngularLedger/chunk-R5WM43LX.js",
         "/AngularLedger/chunk-U6J3SRQJ.js",
-        "/AngularLedger/chunk-Y6IXEVUQ.js",
         "/AngularLedger/chunk-ZJK5TM62.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-ZZCQJRZY.js",
+        "/AngularLedger/main-P3QVZR4G.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
         "/AngularLedger/styles-SZY7LS2D.css"
@@ -54,13 +54,13 @@
     "/AngularLedger/assets/icons/icon-512x512.png": "1de182f76f7329dfa8f9fcdd1fdcdd695bea6a99",
     "/AngularLedger/assets/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
     "/AngularLedger/assets/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
+    "/AngularLedger/chunk-5B7QQHN3.js": "decc6c2c91a5296885ae4701d4ca6ccee2538621",
     "/AngularLedger/chunk-R5WM43LX.js": "217c3df6d25957945c4e3ae05a7e94793f9d13ca",
     "/AngularLedger/chunk-U6J3SRQJ.js": "d1cb2e5fd5fd842af00de79af6d3ca925b2f9fa4",
-    "/AngularLedger/chunk-Y6IXEVUQ.js": "7006a539fb4a05ecd431074745653bcc18cac208",
     "/AngularLedger/chunk-ZJK5TM62.js": "9c9b81b1de78e526d9a92dea1e28f604b59bc058",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "8627c75787499a1bbe81c3063813178997f93cbe",
-    "/AngularLedger/main-ZZCQJRZY.js": "254de7db796362642a82c958e47f65332e4b44ec",
+    "/AngularLedger/index.html": "39498160d638593f6f80ebd9800e339f39c9336a",
+    "/AngularLedger/main-P3QVZR4G.js": "5cdb3a26f564fafd1bc80336f91cc5d69019c9a1",
     "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
     "/AngularLedger/styles-SZY7LS2D.css": "21cd5e81f3a3d996de0f342089369898adde02fd"
