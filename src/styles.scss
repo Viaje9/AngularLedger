@@ -54,4 +54,5 @@ $angular-ledger-theme: mat.define-light-theme((
   user-select: none;
   -webkit-user-select: none; /* Chrome Safari */
   -moz-user-select: none;    /* Firefox */
+  overscroll-behavior-y: none;
 }
