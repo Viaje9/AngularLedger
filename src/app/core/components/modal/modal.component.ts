@@ -26,14 +26,26 @@ export class ModalComponent implements OnInit {
   btnCenter = true
   templateRef?: TemplateRef<any>;
   fullScreen = false;
+  afterViewInitEvent!: () => void
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: ModalData,
   ) {
     if (this.data) {
-      const { title, content, okText, cancelText, showCrossBtn, outsideClose, showCancelBtn, contentTemplateRef, btnCenter, fullScreen } =
-        data;
+      const {
+        title,
+        content,
+        okText,
+        cancelText,
+        showCrossBtn,
+        outsideClose,
+        showCancelBtn,
+        contentTemplateRef,
+        btnCenter,
+        fullScreen,
+        afterViewInit
+      } = data;
       this.title = title;
       this.content = content;
       this.okText = okText;
@@ -44,10 +56,16 @@ export class ModalComponent implements OnInit {
       this.btnCenter = btnCenter
       this.templateRef = contentTemplateRef
       this.fullScreen = fullScreen
+      this.afterViewInitEvent = afterViewInit || (() => { })
     }
   }
 
   ngOnInit(): void { }
+
+
+  ngAfterViewInit(): void {
+    this.afterViewInitEvent()
+  }
 
   clickOutsideClose(): void {
     if (this.outsideClose) {

@@ -1,4 +1,4 @@
-import { Component, type OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
+import { Component, type OnInit, ViewChild, ElementRef, TemplateRef, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
@@ -7,7 +7,7 @@ import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
 import { EditExpenseInitData, StatusEnum, StatusType } from './add-expense.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp, query } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-add-expense',
@@ -24,6 +24,7 @@ export class AddExpenseComponent implements OnInit {
   @ViewChild('tagGroup') tagGroupRef!: ElementRef;
   @ViewChild('templateRef') templateRef!: TemplateRef<any> | undefined;
   @ViewChild('priceInput') priceInput!: ElementRef;
+  @ViewChild('descriptionInput') descriptionInput!: ElementRef;
 
   get StatusEnum() {
     return StatusEnum
@@ -46,7 +47,8 @@ export class AddExpenseComponent implements OnInit {
     private router: Router,
     private modalService: ModalService,
     private loaderService: LoaderService,
-    private ledgerService: LedgerService
+    private ledgerService: LedgerService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
     this.expenseStatus = this.route.snapshot.data['data'].expenseStatus;
@@ -175,8 +177,12 @@ export class AddExpenseComponent implements OnInit {
       okText: '確認',
       showCancelBtn: false,
       outsideClose: true,
-      contentTemplateRef: this.templateRef
-    });
+      contentTemplateRef: this.templateRef,
+      afterViewInit: () => {
+        this.changeDetectorRef.detectChanges()
+        this.descriptionInput?.nativeElement.focus()
+      }
+    })
   }
 
   onClickDelete() {

@@ -51,6 +51,7 @@ export class ModalService {
       btnCenter = true,
       fullScreen = false,
       contentTemplateRef,
+      afterViewInit
     }: ModalOption) => {
       const config = {
         data: {
@@ -63,7 +64,8 @@ export class ModalService {
           showCancelBtn,
           btnCenter,
           fullScreen,
-          contentTemplateRef
+          contentTemplateRef,
+          afterViewInit
         }
       }
 

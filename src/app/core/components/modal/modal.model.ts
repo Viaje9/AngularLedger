@@ -42,4 +42,8 @@ export interface ModalData {
    * @default false
    * **/
   fullScreen: boolean;
+   /**
+   * @description contentTemplateRef 初始化後的 callback
+   * **/
+   afterViewInit?: () => void;
 }
