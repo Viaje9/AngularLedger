@@ -8,5 +8,5 @@
       "ngOnInit": true
     }
   },
-  "github.copilot.chat.localeOverride": "zh-TW",
+  "github.copilot.chat.localeOverride": "en",
 }

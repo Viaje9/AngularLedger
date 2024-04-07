@@ -103,9 +103,9 @@ export class PieChartComponent implements OnInit {
 
     pies.enter()
       .insert("path")
-      .style("fill", "rgb(209 213 219 / var(--tw-bg-opacity))")
+      .style("fill", "rgb(209 213 219 / var(--tw-bg-opacity))") // 背景色
       .attr("class", "slice")
-      .style("stroke", "rgb(209 213 219 / var(--tw-bg-opacity))") // Add border
+      .style("stroke", "rgb(209 213 219 / var(--tw-bg-opacity))") // 邊框
       .style("stroke-width", 2) // Set border width
       .transition()
       .duration(1000)
