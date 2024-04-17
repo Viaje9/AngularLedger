@@ -11,12 +11,6 @@ export class AuthService {
     onAuthStateChanged(this.auth, (user: any) => {
       if (user) {
         this.UserData = user;
-
-        localStorage.setItem('user', JSON.stringify(this.UserData));
-        JSON.parse(localStorage.getItem('user')!);
-      } else {
-        localStorage.setItem('user', 'null');
-        JSON.parse(localStorage.getItem('user')!);
       }
     })
   }
@@ -32,21 +26,6 @@ export class AuthService {
   //get Authenticated user from firebase
   getAuthFire() {
     return this.auth.currentUser;
-  }
-
-  //Check wither User Is looged in or not
-  get isLoggedIn(): boolean {
-    const token = localStorage.getItem('user')
-    const user = JSON.parse(token as string);
-    return user !== null ? true : false;
-  }
-
-
-  //get Authenticated user from Local Storage
-  getAuthLocal() {
-    const token = localStorage.getItem('user')
-    const user = JSON.parse(token as string);
-    return user;
   }
 
   //Register Method
