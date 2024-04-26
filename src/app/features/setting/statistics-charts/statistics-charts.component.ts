@@ -15,6 +15,9 @@ import { MatDateRangeInput } from '@angular/material/datepicker';
 import { take } from 'rxjs';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { ModalService } from '@src/app/core/services/modal.service';
+import { Timestamp } from '@angular/fire/firestore';
+import { ModalComponent } from '@src/app/core/components/modal/modal.component';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @UntilDestroy()
 @Component({
@@ -50,6 +53,8 @@ export class StatisticsChartsComponent implements OnInit {
   totalPriceText = ''
 
   groupItems: LedgerItem[] = []
+
+  dialogRef!: MatDialogRef<ModalComponent, any> | null
 
   get DateTabsEnum() {
     return DateTabsEnum
@@ -179,9 +184,9 @@ export class StatisticsChartsComponent implements OnInit {
     })
   }
 
-  onClickTagGroup(tagName: string, ledgerItems: LedgerItem[]) {
+  async onClickTagGroup(tagName: string, ledgerItems: LedgerItem[]) {
     this.groupItems = ledgerItems.sort((a, b) => a.date.seconds - b.date.seconds)
-    this.modalService.openConfirm({
+    this.dialogRef = await this.modalService.openConfirm({
       title: tagName,
       okText: '確認',
       outsideClose: false,
@@ -189,5 +194,16 @@ export class StatisticsChartsComponent implements OnInit {
       fullScreen: true,
       contentTemplateRef: this.groupItemsRef
     });
+  }
+
+  goToExpenseDate(date: Timestamp) {
+    if (this.dialogRef) {
+      this.dialogRef.componentInstance.ok()
+      this.router.navigate(['/expenseOverview'], {
+        queryParams: {
+          date: dayjs(date.toDate()).format('YYYY-MM-DD')
+        }
+      });
+    }
   }
 }

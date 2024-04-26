@@ -99,7 +99,7 @@
   <div class="max-h-max overflow-scroll">
     @for (item of groupItems; track $index) {
     <div class="text-xl flex justify-between mb-1 pb-1 border-b border-white">
-      <span class="flex-1">
+      <span class="flex-1" (click)="goToExpenseDate(item.date)">
         {{ dayjs(item.date.toDate()).format("MM/DD") }}
       </span>
       <span class="flex-1">$ {{ item.price }}</span>
