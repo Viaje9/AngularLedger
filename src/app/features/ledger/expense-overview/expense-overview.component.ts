@@ -157,18 +157,11 @@ export class ExpenseOverviewComponent implements OnInit {
     return this.ledgerItems.reduce((acc, item) => acc + parseInt(item.price), 0)
   }
 
-  goToEditTag(item: LedgerItem) {
-    const stateData: EditExpenseInitData = {
-      expenseStatus: StatusEnum.Edit,
-      docId: item.id,
-      date: item.date,
-      price: item.price,
-      tagId: item.tagId,
-      description: item.description
-
-    }
-    this.router.navigate(['/addExpense'], {
-      state: stateData
+  goToEditExpense(item: LedgerItem) {
+    this.router.navigate(['/editExpense'], {
+      state: {
+        docId: item.id,
+      }
     })
   }
 

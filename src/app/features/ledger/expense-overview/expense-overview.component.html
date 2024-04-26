@@ -54,7 +54,7 @@
       @for (item of ledgerItems; track item.id) {
       <div
         class="bg-white p-2 flex justify-between items-center"
-        (click)="goToEditTag(item)"
+        (click)="goToEditExpense(item)"
       >
         <span>
           <i [ngClass]="item.tagInfo.tagIconName" class="w-5 mr-1"></i>

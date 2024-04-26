@@ -1,0 +1,86 @@
+<div class="bg-gray-800 text-white p-4 flex justify-between items-center">
+  <div class="w-10" (click)="onClickBack()">
+    <i class="fas fa-arrow-left"></i>
+  </div>
+  <h1 class="text-lg">新增支出</h1>
+  <button class="bg-gray-600 px-4 py-2 rounded" (click)="onClickEdit()">
+    儲存
+  </button>
+</div>
+<div class="bg-red-600 text-center p-10 flex">
+  <span class="text-white text-3xl me-3 pt-2">$</span>
+  <input
+    #priceInput
+    [(ngModel)]="price"
+    autocomplete="off"
+    id="tagName"
+    type="number"
+    inputmode="numeric"
+    class="w-full text-right bg-red-600 rounded border border-red-700 focus:border-red-500 focus:ring-2 focus:ring-red-900 text-3xl outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+  />
+</div>
+<div class="w-full overflow-hidden">
+  <div
+    #scrollTags
+    (swipeLeft)="onSwipeLeft()"
+    (swipeRight)="onSwipeRight()"
+    [style.transform]="translateFactor"
+    class="flex w-full transition"
+  >
+    @for (tags of tagsGroup; track tags) {
+    <div #tagGroup class="w-screen text-center">
+      <div class="flex w-screen flex-wrap">
+        @for (tagInfo of tags; track tagInfo.id) {
+        <div
+          class="w-1/3 py-8"
+          [ngClass]="{ 'bg-neutral-300': tagInfo.id === selectedTagId }"
+          (click)="onTagClick(tagInfo.id)"
+        >
+          <i [ngClass]="tagInfo.tagIconName"></i>
+          <p>{{ tagInfo.tagName }}</p>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+</div>
+
+<div class="flex justify-center my-4">
+  @for (item of tagsGroup; track item;let i=$index) {
+  <div
+    [ngClass]="{ 'bg-gray-900': currentTagGroupPage === i }"
+    class="mx-2 w-2 h-2 bg-gray-500 rounded-full"
+  ></div>
+  }
+</div>
+<div class="bg-white py-4 border-t border-gray-300">
+  <div
+    class="flex p-4 border-b items-center justify-between"
+    (click)="onClickDescription()"
+  >
+    <div class="flex items-center">
+      <i class="mr-4 fas fa-pencil-alt"></i>
+      <p>備註</p>
+    </div>
+    <span class="w-3/5 text-ellipsis overflow-hidden text-right text-nowrap">
+      {{ description }}
+    </span>
+  </div>
+  <div
+    class="flex p-4 border-b justify-center items-center bg-red-600 text-white text-2xl"
+    (click)="onClickDelete()"
+  >
+    <i class="fas fa-trash mr-2"></i>
+    <p class="">刪除</p>
+  </div>
+</div>
+
+<ng-template #templateRef>
+  <textarea
+    #descriptionInput
+    [(ngModel)]="description"
+    class="text-black w-full py-1 px-2 focus:border-none focus:outline-none"
+    rows="10"
+  ></textarea>
+</ng-template>
