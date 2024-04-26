@@ -3,9 +3,9 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 import { HammerModule } from '@angular/platform-browser';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { Auth, getAuth, onAuthStateChanged, provideAuth } from '@angular/fire/auth';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, provideFirestore } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import 'hammerjs';
@@ -23,7 +23,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     { provide: APP_BASE_HREF, useValue: environment.baseUrl },
     importProvidersFrom(provideFirebaseApp(() => initializeApp(environment.firebaseConfig))),
-    importProvidersFrom(provideFirestore(() => getFirestore())),
+    importProvidersFrom(provideFirestore(() => initializeFirestore(getApp(), {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    }))),
     importProvidersFrom(provideAuth(() => getAuth())),
     // importProvidersFrom(provideDatabase(() => getDatabase()))
     {
