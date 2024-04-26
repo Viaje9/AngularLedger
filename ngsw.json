@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1714120845229,
+  "timestamp": 1714121792380,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -12,12 +12,12 @@
       },
       "urls": [
         "/AngularLedger/chunk-6YHLYNGG.js",
-        "/AngularLedger/chunk-KIVGIST7.js",
+        "/AngularLedger/chunk-CVXKUACD.js",
         "/AngularLedger/chunk-ND2NYX3H.js",
         "/AngularLedger/chunk-Q25J75AG.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-EQPBCCO3.js",
+        "/AngularLedger/main-7XLT7PAT.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
         "/AngularLedger/styles-M3LRU4NT.css"
@@ -55,12 +55,12 @@
     "/AngularLedger/assets/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
     "/AngularLedger/assets/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
     "/AngularLedger/chunk-6YHLYNGG.js": "bc4b0129891ac5adb4f14ad2ed77625b56aad202",
-    "/AngularLedger/chunk-KIVGIST7.js": "a51360eba14eae17109aa1d4eb77495ccd85b386",
+    "/AngularLedger/chunk-CVXKUACD.js": "a0d3f5a58df5565df7f57f8f6477c207d538af94",
     "/AngularLedger/chunk-ND2NYX3H.js": "818bc008840725fb6a9f1c34d0dacc65282e5d7b",
     "/AngularLedger/chunk-Q25J75AG.js": "74c8317cb5d5b73515c122591d84969d2b5b572a",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "8c2f109f86e537b4fc6ed7e2391b59407877079b",
-    "/AngularLedger/main-EQPBCCO3.js": "ac87bdb685c0c9dc6e4bae96d55e4bb340576023",
+    "/AngularLedger/index.html": "b28b9f0b0cba035c32abc210932e76bfd8b4c018",
+    "/AngularLedger/main-7XLT7PAT.js": "2cdc8408280921c33128401f6a25dc1043ec6f02",
     "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
     "/AngularLedger/styles-M3LRU4NT.css": "8d3d39e4d1e014c7c1d8030cf8cdd8c61bd957bc"
