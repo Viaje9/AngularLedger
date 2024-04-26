@@ -1,13 +1,9 @@
-import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
-import { ChangeDetectorRef, Component, Injectable, type OnInit } from '@angular/core';
+import { Component, type OnInit } from '@angular/core';
 import { SharedModule } from '@src/app/shared/shared.module';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter, provideNativeDateAdapter } from '@angular/material/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input'; // Import the missing MatInputModule
 import { TransactionType } from '@src/app/core/models/transaction-type.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EditExpenseInitData, StatusEnum } from '../add-expense/add-expense.model';
+import { EditIncomeInitData, StatusEnum } from '../add-income/add-income.model';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
@@ -111,8 +107,8 @@ export class IncomeOverviewComponent implements OnInit {
   }
 
   goToEditTag(item: LedgerItem) {
-    const stateData: EditExpenseInitData = {
-      expenseStatus: StatusEnum.Edit,
+    const stateData: EditIncomeInitData = {
+      incomeStatus: StatusEnum.Edit,
       docId: item.id,
       date: item.date,
       price: item.price,
@@ -120,7 +116,7 @@ export class IncomeOverviewComponent implements OnInit {
       description: item.description
 
     }
-    this.router.navigate(['/addExpense'], {
+    this.router.navigate(['/addIncome'], {
       state: stateData
     })
   }

@@ -5,9 +5,9 @@ import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
-import { EditExpenseInitData, StatusEnum, StatusType } from './add-expense.model';
-import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
-import { Timestamp, query } from '@angular/fire/firestore';
+import { Timestamp } from '@angular/fire/firestore';
+import dayjs from 'dayjs';
+import { isValidDate } from '@src/app/utils/validator';
 
 @Component({
   selector: 'app-add-expense',
@@ -26,10 +26,6 @@ export class AddExpenseComponent implements OnInit {
   @ViewChild('priceInput') priceInput!: ElementRef;
   @ViewChild('descriptionInput') descriptionInput!: ElementRef;
 
-  get StatusEnum() {
-    return StatusEnum
-  }
-
   maxTagGroupPage = 0
   currentTagGroupPage = 0
   translateFactor = 'translate(0, 0)'
@@ -40,7 +36,6 @@ export class AddExpenseComponent implements OnInit {
   selectedTagId = '';
   description = '';
   date!: Timestamp;
-  expenseStatus!: StatusType;
 
   constructor(
     private route: ActivatedRoute,
@@ -51,22 +46,26 @@ export class AddExpenseComponent implements OnInit {
     private changeDetectorRef: ChangeDetectorRef
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
-    this.expenseStatus = this.route.snapshot.data['data'].expenseStatus;
-    if (this.expenseStatus === StatusEnum.Edit) {
-      const expenseData = this.route.snapshot.data['data'] as EditExpenseInitData
-      this.price = parseInt(expenseData.price)
-      this.selectedTagId = expenseData.tagId
-      this.description = expenseData.description
-      this.date = expenseData.date
-    } else if (this.expenseStatus === StatusEnum.Add) {
-      this.date = this.route.snapshot.data['data'].date
+    const dateString = this.route.snapshot.queryParamMap.get('date') || ''
+
+    if (isValidDate(dateString)) {
+      this.date = Timestamp.fromDate(dayjs(dateString, 'YYYY-MM-DD').toDate())
+    } else {
+      this.router.navigate(['/'])
     }
   }
   ngOnInit(): void {
+    const { price, description } = this.route.snapshot.queryParams;
+    const priceNum = parseInt(price)
+    if(priceNum > 0) {
+      this.price = priceNum
+    }
 
+    if(description) {
+      this.description = description
+    }
   }
   ngAfterViewInit(): void {
-
     const scrollWidth = this.scrollTagsRef.nativeElement.scrollWidth;
     const tagGroupWidth = this.tagGroupRef.nativeElement.scrollWidth;
     this.maxTagGroupPage = Math.ceil(scrollWidth / tagGroupWidth)
@@ -100,16 +99,14 @@ export class AddExpenseComponent implements OnInit {
   }
 
   onClickBack() {
-    this.router.navigateByUrl('/', {
-      state: {
-        transactionType: TransactionTypeEnum.Expense,
-        date: this.date.toDate()
+    this.router.navigate(['/'], {
+      queryParams: {
+        date: dayjs(this.date.toDate()).format('YYYY-MM-DD')
       }
     });
   }
 
   async onClickSave() {
-
     if (!this.saveCheck()) {
       return
     }
@@ -121,14 +118,9 @@ export class AddExpenseComponent implements OnInit {
       tagId: this.selectedTagId,
       description: this.description
     }).catch((error) => {
-      console.error("Error adding document: ", error);
+      this.showError()
     }).then(() => {
-      this.router.navigateByUrl('/', {
-        state: {
-          transactionType: TransactionTypeEnum.Expense,
-          date: this.date.toDate()
-        }
-      });
+      this.onClickBack()
     }).finally(() => this.loaderService.stop())
   }
 
@@ -145,14 +137,9 @@ export class AddExpenseComponent implements OnInit {
       tagId: this.selectedTagId,
       description: this.description
     }).catch((error) => {
-      console.error("Error updating document: ", error);
+      this.showError()
     }).then(() => {
-      this.router.navigateByUrl('/', {
-        state: {
-          transactionType: TransactionTypeEnum.Expense,
-          date: this.date.toDate()
-        }
-      });
+      this.onClickBack()
     }).finally(() => this.loaderService.stop())
   }
 
@@ -185,25 +172,12 @@ export class AddExpenseComponent implements OnInit {
     })
   }
 
-  onClickDelete() {
+  showError() {
     this.modalService.openConfirm({
-      content: '確認刪除？',
+      content: '操作失敗',
+      okText: '確認',
+      showCancelBtn: false,
       outsideClose: true,
-      onOk: () => {
-        this.doDelete()
-      },
     });
-  }
-
-  doDelete() {
-    this.loaderService.start()
-    this.ledgerService.deleteExpense(this.route.snapshot.data['data'].docId).then(() => {
-      this.router.navigateByUrl('/', {
-        state: {
-          transactionType: TransactionTypeEnum.Expense,
-          date: this.date.toDate()
-        }
-      });
-    }).finally(() => this.loaderService.stop())
   }
 }

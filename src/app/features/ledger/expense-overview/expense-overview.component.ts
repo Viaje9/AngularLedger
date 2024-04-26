@@ -1,9 +1,6 @@
 import { Component, type OnInit } from '@angular/core';
 import { SharedModule } from '@src/app/shared/shared.module';
-import { TransactionType } from '@src/app/core/models/transaction-type.model';
-import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EditExpenseInitData, StatusEnum } from '../add-expense/add-expense.model';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
@@ -27,12 +24,6 @@ import { isValidDate } from '@src/app/utils/validator';
   styleUrl: './expense-overview.component.css',
 })
 export class ExpenseOverviewComponent implements OnInit {
-
-  get TransactionTypeEnum() {
-    return TransactionTypeEnum
-  }
-
-  transactionType: TransactionType = this.TransactionTypeEnum.Expense
 
   currentDate = new Date()
 
@@ -135,15 +126,6 @@ export class ExpenseOverviewComponent implements OnInit {
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
   }
 
-  onClickAdd() {
-    this.router.navigate(['/addExpense'], {
-      state: {
-        expenseStatus: StatusEnum.Add,
-        date: this.currentDate
-      }
-    })
-  }
-
   getExpenseList() {
     this.loaderService.start()
     this.ledgerService.getTodayExpenseList(this.currentDate).pipe(take(1), untilDestroyed(this))
@@ -161,6 +143,14 @@ export class ExpenseOverviewComponent implements OnInit {
     this.router.navigate(['/editExpense'], {
       state: {
         docId: item.id,
+      }
+    })
+  }
+
+  goToAdd() {
+    this.router.navigate(['/addExpense'], {
+      queryParams: {
+        date: dayjs(this.currentDate).format('YYYY-MM-DD'),
       }
     })
   }

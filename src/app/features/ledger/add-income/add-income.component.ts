@@ -1,7 +1,7 @@
 import { Component, ElementRef, TemplateRef, ViewChild, type OnInit } from '@angular/core';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { SharedModule } from '@src/app/shared/shared.module';
-import { StatusEnum, StatusType } from '../add-expense/add-expense.model';
+import { StatusEnum, StatusType } from '../add-income/add-income.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LoaderService } from '@src/app/core/services/loader.service';
