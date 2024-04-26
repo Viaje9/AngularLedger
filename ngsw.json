@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1714118449719,
+  "timestamp": 1714120845229,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -11,13 +11,13 @@
         "ignoreVary": true
       },
       "urls": [
-        "/AngularLedger/chunk-73HW63VR.js",
-        "/AngularLedger/chunk-PEITIEII.js",
+        "/AngularLedger/chunk-6YHLYNGG.js",
+        "/AngularLedger/chunk-KIVGIST7.js",
+        "/AngularLedger/chunk-ND2NYX3H.js",
         "/AngularLedger/chunk-Q25J75AG.js",
-        "/AngularLedger/chunk-TPZIU4XM.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-W7DB7YDJ.js",
+        "/AngularLedger/main-EQPBCCO3.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
         "/AngularLedger/styles-M3LRU4NT.css"
@@ -54,13 +54,13 @@
     "/AngularLedger/assets/icons/icon-512x512.png": "1de182f76f7329dfa8f9fcdd1fdcdd695bea6a99",
     "/AngularLedger/assets/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
     "/AngularLedger/assets/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
-    "/AngularLedger/chunk-73HW63VR.js": "bf4d7cb3991de9536f7f0f391cad1f79d73adc58",
-    "/AngularLedger/chunk-PEITIEII.js": "a9dc2d3f5a2e9af01e79c033abc0966885c4cf57",
+    "/AngularLedger/chunk-6YHLYNGG.js": "bc4b0129891ac5adb4f14ad2ed77625b56aad202",
+    "/AngularLedger/chunk-KIVGIST7.js": "a51360eba14eae17109aa1d4eb77495ccd85b386",
+    "/AngularLedger/chunk-ND2NYX3H.js": "818bc008840725fb6a9f1c34d0dacc65282e5d7b",
     "/AngularLedger/chunk-Q25J75AG.js": "74c8317cb5d5b73515c122591d84969d2b5b572a",
-    "/AngularLedger/chunk-TPZIU4XM.js": "4a588b69e0ea336bd5a9beede944f5440c0b6570",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "1fbdc253df4150ad84d7b38ee6bb9db84bc3f885",
-    "/AngularLedger/main-W7DB7YDJ.js": "ed3f13c1915a69b2f63a2436586df226c4e5bde8",
+    "/AngularLedger/index.html": "8c2f109f86e537b4fc6ed7e2391b59407877079b",
+    "/AngularLedger/main-EQPBCCO3.js": "ac87bdb685c0c9dc6e4bae96d55e4bb340576023",
     "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
     "/AngularLedger/styles-M3LRU4NT.css": "8d3d39e4d1e014c7c1d8030cf8cdd8c61bd957bc"
