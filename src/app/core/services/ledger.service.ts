@@ -58,7 +58,7 @@ export class LedgerService {
   /**
    * 取得所有tag並過濾出指定的tagIdList
    */
-  async getTagListWithId(tagIdList: string[]) {
+  private async getTagListWithId(tagIdList: string[]) {
     if (!tagIdList.length) return []
     const userId = this.auth.userUid;
     const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
@@ -173,15 +173,17 @@ export class LedgerService {
   getTodayIncomeList(date: Date) {
     return collectionData(query(this.incomeListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe(mergeMap(async (incomeList) => {
       const list = [];
+      const tagIdList = incomeList.map((e) => e['tagId']);
+      const tagInfoList = await this.getTagListWithId(tagIdList)
       for (const incomeItem of incomeList) {
         const item = incomeItem as AddLedgerItem;
-        const tagInfo = await this.getTagInfo(item.tagId);
-        incomeItem['tagInfo'] = tagInfo?.data() || {};
+        const tagInfo = tagInfoList.find((tag) => tag.id === item.tagId);
+        incomeItem['tagInfo'] = tagInfo || {};
         list.push(incomeItem);
       }
       return list;
     })
-    ) as Observable<any[]>;
+    ) as Observable<LedgerItem[]>;
   }
 
   getIncomeInfo(docId: string) {
