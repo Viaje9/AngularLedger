@@ -1,8 +1,0 @@
-:host {
-  display: block;
-}
-
-.wrapper {
-  overflow-y: auto;
-  touch-action: pan-y !important;
-}
