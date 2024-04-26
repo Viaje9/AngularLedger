@@ -1,0 +1,91 @@
+<div class="bg-gray-100 h-dvh flex flex-col">
+  <div class="flex flex-col flex-1">
+    <div class="sticky top-0">
+      <!-- Top bar -->
+      <div class="p-4 text-white bg-green-600">
+        <div class="flex justify-between items-center">
+          <div class="w-1/5 text-2xl"></div>
+          <div
+            class="flex items-center justify-center w-3/5"
+            (click)="picker.open()"
+          >
+            <img
+              src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"
+              class="h-6 w-6 me-2"
+              alt="Calendar"
+            />
+            <input
+              class="bg-green-600 text-2xl w-36 mr-3 focus:outline-none"
+              matInput
+              readonly
+              [(ngModel)]="currentDate"
+              [matDatepicker]="picker"
+              (dateChange)="onDateChange()"
+            />
+            <mat-datepicker touchUi #picker></mat-datepicker>
+          </div>
+          <div class="w-1/5 flex justify-end">
+            <button
+              class="bg-green-800 p-2 rounded-full"
+              (click)="onClickAdd()"
+            >
+              <img
+                src="https://img.icons8.com/ios-filled/50/ffffff/plus-math.png"
+                class="h-6 w-6"
+                alt="Add"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance -->
+      <div class="bg-green-500 p-4 text-white">
+        <div class="flex justify-between items-center text-4xl">
+          <span>TWD</span>
+          <span>{{ totalAmount() | number }}</span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="bg-green-500 wrapper flex-1 p-4 space-y-2"
+      (swipeLeft)="onSwipeLeft()"
+      (swipeRight)="onSwipeRight()"
+    >
+      @for (item of ledgerItems; track item.id) {
+      <div
+        class="bg-white p-2 flex justify-between items-center"
+        (click)="goToEditTag(item)"
+      >
+        <span>
+          <i [ngClass]="item.tagInfo.tagIconName" class="w-5 mr-1"></i>
+          <span>{{ item.tagInfo.tagName }}</span>
+        </span>
+        <span>$ {{ item.price | number }}</span>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="sticky bottom-0">
+    <!-- Navigation -->
+    <div class="flex justify-around items-center bg-gray-200">
+      <button class="w-1/4 p-4 pb-8" (click)="goToExpense()">
+        <i class="fas fa-arrow-up"></i>
+        <span class="block text-lg">支出</span>
+      </button>
+      <button class="w-1/4 p-4 pb-8 bg-gray-400">
+        <i class="fas fa-arrow-down"></i>
+        <span class="block text-lg">收入</span>
+      </button>
+      <button class="w-1/4 p-4 pb-8" (click)="onClickStatistics()">
+        <i class="fas fa-chart-line"></i>
+        <span class="block text-lg">統計</span>
+      </button>
+      <button class="w-1/4 p-4 pb-8" routerLink="setting">
+        <i class="fas fa-cog"></i>
+        <span class="block text-lg">設定</span>
+      </button>
+    </div>
+  </div>
+</div>

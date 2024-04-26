@@ -1,5 +1,9 @@
-import { Component, type OnInit } from '@angular/core';
+import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
+import { ChangeDetectorRef, Component, Injectable, type OnInit } from '@angular/core';
 import { SharedModule } from '@src/app/shared/shared.module';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter, provideNativeDateAdapter } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input'; // Import the missing MatInputModule
 import { TransactionType } from '@src/app/core/models/transaction-type.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,25 +18,24 @@ import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-materia
 import { ModalService } from '@src/app/core/services/modal.service';
 import { isValidDate } from '@src/app/utils/validator';
 
-
 @UntilDestroy()
 @Component({
-  selector: 'app-expense-overview',
+  selector: 'app-income-overview',
   standalone: true,
   imports: [
     SharedModule,
     AngularMaterialDatepickerModule,
   ],
-  templateUrl: './expense-overview.component.html',
-  styleUrl: './expense-overview.component.css',
+  templateUrl: './income-overview.component.html',
+  styleUrl: './income-overview.component.css',
 })
-export class ExpenseOverviewComponent implements OnInit {
+export class IncomeOverviewComponent implements OnInit {
 
   get TransactionTypeEnum() {
     return TransactionTypeEnum
   }
 
-  transactionType: TransactionType = this.TransactionTypeEnum.Expense
+  transactionType: TransactionType = this.TransactionTypeEnum.Income
 
   currentDate = new Date()
 
@@ -52,64 +55,15 @@ export class ExpenseOverviewComponent implements OnInit {
     private activatedRoute: ActivatedRoute
   ) {
     const dateString = this.activatedRoute.snapshot.queryParams['date']
-
     if (isValidDate(dateString)) {
       this.currentDate = dayjs(dateString, 'YYYY-MM-DD').toDate()
     }
 
     this.currentDate.setHours(0, 0, 0, 0);
-    this.getExpenseList()
+    this.getIncomeList()
   }
 
   ngOnInit() {
-    this.countBudget()
-  }
-
-  countBudget() {
-    const selectedDate = parseInt(localStorage.getItem('selectedDate') || '0')
-    if (selectedDate) {
-      const inputDate = dayjs(this.currentDate);
-      let startDateOfDay, endDateOfDay
-      if (inputDate.date() >= selectedDate) {
-        startDateOfDay = inputDate.date(selectedDate)
-        endDateOfDay = inputDate.add(1, 'month').date(selectedDate).subtract(1, 'day')
-      } else {
-        startDateOfDay = inputDate.subtract(1, 'month').date(selectedDate)
-        endDateOfDay = inputDate.date(selectedDate).subtract(1, 'day')
-      }
-
-      const startDate = startDateOfDay.format('YYYY/MM/DD')
-      const endDate = endDateOfDay.format('YYYY/MM/DD')
-
-      if (startDate !== this.startDate && endDate !== this.endDate) {
-        this.startDate = startDate
-        this.endDate = endDate
-        this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate()).pipe(untilDestroyed(this))
-          .subscribe((amount) => {
-            this.currentRangeBudget = this.budgetAmount - amount
-          })
-      }
-    }
-  }
-
-  calculateDiffRangeDay() {
-    const startDateOfDayJs = dayjs(this.currentDate)
-    const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
-    return endDateOfDayJs.diff(startDateOfDayJs, 'day') + 1;
-  }
-
-  calculateRangeDayBudget() {
-    const startDateOfDayJs = dayjs(this.currentDate)
-    const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
-    const diff = endDateOfDayJs.diff(startDateOfDayJs, 'day') + 1;
-    return parseInt((this.currentRangeBudget / diff).toFixed()) - this.totalAmount()
-  }
-
-  calculateTodayBudget() {
-    const startDateOfDayJs = dayjs(this.startDate, 'YYYY/MM/DD')
-    const endDateOfDayJs = dayjs(this.endDate, 'YYYY/MM/DD')
-    const diff = endDateOfDayJs.diff(startDateOfDayJs, 'day') + 1;
-    return parseInt((this.budgetAmount / diff).toFixed()) - this.totalAmount()
   }
 
   onSwipeLeft() {
@@ -127,8 +81,7 @@ export class ExpenseOverviewComponent implements OnInit {
   }
 
   onDateChange() {
-    this.getExpenseList()
-    this.countBudget()
+    this.getIncomeList()
   }
 
   formateDate(date: Date) {
@@ -136,19 +89,19 @@ export class ExpenseOverviewComponent implements OnInit {
   }
 
   onClickAdd() {
-    this.router.navigate(['/addExpense'], {
+    this.router.navigate(['/addIncome'], {
       state: {
-        expenseStatus: StatusEnum.Add,
+        incomeStatus: StatusEnum.Add,
         date: this.currentDate
       }
     })
   }
 
-  getExpenseList() {
+  getIncomeList() {
     this.loaderService.start()
-    this.ledgerService.getTodayExpenseList(this.currentDate).pipe(take(1), untilDestroyed(this))
-      .subscribe((expenseList) => {
-        this.ledgerItems = expenseList
+    this.ledgerService.getTodayIncomeList(this.currentDate).pipe(take(1), untilDestroyed(this))
+      .subscribe((incomeList) => {
+        this.ledgerItems = incomeList
         this.loaderService.stop()
       })
   }
@@ -172,8 +125,8 @@ export class ExpenseOverviewComponent implements OnInit {
     })
   }
 
-  goToIncome() {
-    this.router.navigate(['/incomeOverview'], {
+  goToExpense() {
+    this.router.navigate(['/expenseOverview'], {
       queryParams: {
         date: dayjs(this.currentDate).format('YYYY-MM-DD')
       }
@@ -205,5 +158,3 @@ export class ExpenseOverviewComponent implements OnInit {
 
   }
 }
-
-

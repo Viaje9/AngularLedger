@@ -8,6 +8,7 @@ import { AddIncomeComponent } from './add-income/add-income.component';
 import { AddIncomeTagListGroupResolver } from './add-income/add-income-tag-list-group.resolver';
 import { AddIncomeInitDataResolver } from './add-income/add-income-init-data.resolver';
 import { ExpenseOverviewComponent } from './expense-overview/expense-overview.component';
+import { IncomeOverviewComponent } from './income-overview/income-overview.component';
 
 export const LEDGER_ROUTES: Routes = [
   {
@@ -15,12 +16,15 @@ export const LEDGER_ROUTES: Routes = [
     component: LedgerComponent,
     children: [
       {
-        path: '',
-        component: LedgerOverviewComponent,
+        path: '', pathMatch: 'full', redirectTo: 'expenseOverview'
       },
       {
         path: 'expenseOverview',
         component: ExpenseOverviewComponent,
+      },
+      {
+        path: 'incomeOverview',
+        component: IncomeOverviewComponent,
       },
       {
         path: 'addExpense',
