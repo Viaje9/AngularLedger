@@ -7,6 +7,7 @@ import { AddExpenseInitDataResolver } from './add-expense/add-expense-init-data.
 import { AddIncomeComponent } from './add-income/add-income.component';
 import { AddIncomeTagListGroupResolver } from './add-income/add-income-tag-list-group.resolver';
 import { AddIncomeInitDataResolver } from './add-income/add-income-init-data.resolver';
+import { ExpenseOverviewComponent } from './expense-overview/expense-overview.component';
 
 export const LEDGER_ROUTES: Routes = [
   {
@@ -16,6 +17,10 @@ export const LEDGER_ROUTES: Routes = [
       {
         path: '',
         component: LedgerOverviewComponent,
+      },
+      {
+        path: 'expenseOverview',
+        component: ExpenseOverviewComponent,
       },
       {
         path: 'addExpense',
