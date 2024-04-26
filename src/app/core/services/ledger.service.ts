@@ -55,6 +55,19 @@ export class LedgerService {
     return getDoc(docRef)
   }
 
+  /**
+   * 取得所有tag並過濾出指定的tagIdList
+   */
+  async getTagListWithId(tagIdList: string[]) {
+    if (!tagIdList.length) return []
+    const userId = this.auth.userUid;
+    const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
+    const q = query(tagsCollection);
+    const querySnapshot = await getDocs(q);
+    const tagList = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })).filter((tag) => tagIdList.includes(tag.id));
+    return tagList
+  }
+
   getTagLastSort(type: TransactionType) {
     return collectionData(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'desc'), limit(1)))
       .pipe(map(e => {
@@ -139,13 +152,16 @@ export class LedgerService {
   }
 
   getTodayExpenseList(date: Date) {
-    return collectionData(query(this.expenseListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe(mergeMap(async (expenseList) => {
+    return collectionData(query(this.expenseListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe( mergeMap(async (expenseList) => {
       const list = [];
+      const tagIdList = expenseList.map((e) => e['tagId']);
+      const tagInfoList = await this.getTagListWithId(tagIdList)
       for (const expenseItem of expenseList) {
         const item = expenseItem as AddLedgerItem;
+        const tagInfo = tagInfoList.find((tag) => tag.id === item.tagId);
+        expenseItem['tagInfo'] = tagInfo || {};
+        expenseItem['tagInfo'] = {};
 
-        const tagInfo = await this.getTagInfo(item.tagId);
-        expenseItem['tagInfo'] = tagInfo?.data() || {};
         list.push(expenseItem);
       }
       return list;
