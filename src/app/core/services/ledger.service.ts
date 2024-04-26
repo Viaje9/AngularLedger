@@ -160,9 +160,7 @@ export class LedgerService {
         const item = expenseItem as AddLedgerItem;
         const tagInfo = tagInfoList.find((tag) => tag.id === item.tagId);
         expenseItem['tagInfo'] = tagInfo || {};
-        expenseItem['tagInfo'] = {};
-
-        list.push(expenseItem);
+        list.push(expenseItem)
       }
       return list;
     })) as Observable<any[]>;
