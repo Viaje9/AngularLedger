@@ -163,7 +163,7 @@ export class LedgerService {
         list.push(expenseItem)
       }
       return list;
-    })) as Observable<any[]>;
+    })) as Observable<LedgerItem[]>;
   }
 
   /** expense end */
