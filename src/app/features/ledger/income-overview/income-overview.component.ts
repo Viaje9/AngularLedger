@@ -56,10 +56,11 @@ export class IncomeOverviewComponent implements OnInit {
     }
 
     this.currentDate.setHours(0, 0, 0, 0);
-    this.getIncomeList()
+
   }
 
   ngOnInit() {
+    this.getIncomeList()
   }
 
   onSwipeLeft() {

@@ -49,11 +49,11 @@ export class ExpenseOverviewComponent implements OnInit {
     }
 
     this.currentDate.setHours(0, 0, 0, 0);
-    this.getExpenseList()
   }
 
   ngOnInit() {
     this.countBudget()
+    this.getExpenseList()
   }
 
   countBudget() {
