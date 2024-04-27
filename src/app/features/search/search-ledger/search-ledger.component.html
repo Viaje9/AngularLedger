@@ -1,0 +1,99 @@
+<div class="bg-gray-800 text-white min-h-dvh">
+  <div class="sticky top-0 bg-gray-800">
+    <div class="py-4">
+      <div class="sticky top-0 bg-gray-800">
+        <div class="flex justify-between items-center px-4">
+          <button (click)="onClickBack()" class="text-white">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="text-lg">搜索</h1>
+          <div></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-center">
+      <div
+        class="mat-custom inline-flex py-2 px-2 border border-spacing-1 rounded-xl mb-2 min-w-64 text-white"
+      >
+        <mat-date-range-input [rangePicker]="picker" [formGroup]="range">
+          <input
+            matStartDate
+            readonly
+            formControlName="start"
+            placeholder="起日"
+          />
+          <input readonly matEndDate formControlName="end" placeholder="訖日" />
+        </mat-date-range-input>
+        <mat-date-range-picker touchUi #picker>
+          <mat-datepicker-actions class="pb-10">
+            <button class="btn" mat-button matDatepickerCancel>取消</button>
+            <button
+              class="btn"
+              mat-button
+              matDatepickerApply
+              (click)="onDateChange()"
+            >
+              確定
+            </button>
+          </mat-datepicker-actions>
+        </mat-date-range-picker>
+        <i class="far fa-calendar-alt p-2" (click)="picker.open()"></i>
+      </div>
+    </div>
+    <div class="flex justify-center mb-2">
+      <div class="mr-2">
+        <select
+          [disabled]="tagList.length === 0"
+          [(ngModel)]="selectedTagId"
+          (change)="onTagChange()"
+          class="min-w-20 text-lg rounded-lg block w-full p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:outline-none min-h-11"
+        >
+          <option value="">All</option>
+          @for (item of tagList; track $index) {
+          <option [value]="item.id">{{ item.tagName }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <div class="relative">
+          <input
+            [disabled]="tagList.length === 0"
+            type="text"
+            class="block w-full p-2 text-lg border-gray-300 rounded-lg bg-gray-5 bg-gray-700 placeholder-gray-400 text-white focus:outline-none"
+            placeholder="請輸入..."
+            [(ngModel)]="searchText"
+            (ngModelChange)="onSearchChange($event)"
+          />
+
+          <button
+            [disabled]="tagList.length === 0"
+            type="submit"
+            class="absolute end-0 bottom-0 focus:outline-none font-medium rounded-lg px-4 h-full disabled:opacity-60"
+            (click)="clearSearch()"
+          >
+            <i class="far fa-times-circle"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="bg-gray-700 p-2 mb-10">
+    @for (item of rangeList; track $index) {
+    <div class="text-sm px-1 py-1 flex justify-between">
+      <span class="w-2/12">
+        {{ dayjs(item.date.toDate()).format("MM/DD") }}
+      </span>
+      <span class="w-2/12">
+        {{ item.tagInfo.tagName }}
+      </span>
+      <span class="w-6/12">
+        {{ item.description }}
+      </span>
+      <span class="w-2/12 pr-1 flex justify-end 400">$ {{ item.price }}</span>
+    </div>
+    @if (rangeList.length !== $index+1) {
+    <hr />
+    } }
+  </div>
+</div>
