@@ -133,6 +133,9 @@ export class ExpenseOverviewComponent implements OnInit {
         this.ledgerItems = expenseList
         this.loaderService.stop()
       })
+    setTimeout(() => {
+      this.loaderService.stop()
+    }, 5000)
   }
 
   totalAmount() {

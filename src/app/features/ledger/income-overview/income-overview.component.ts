@@ -101,6 +101,9 @@ export class IncomeOverviewComponent implements OnInit {
         this.ledgerItems = incomeList
         this.loaderService.stop()
       })
+    setTimeout(() => {
+      this.loaderService.stop()
+    }, 5000)
   }
 
   totalAmount() {
