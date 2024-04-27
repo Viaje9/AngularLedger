@@ -165,7 +165,7 @@ export class ExpenseOverviewComponent implements OnInit {
 
   onClickStatistics() {
     if (localStorage.getItem('showBudget') === '1') {
-      this.router.navigate(['/setting/statisticsCharts'], {
+      this.router.navigate(['/search/statisticsCharts'], {
         state: {
           date: this.currentDate
         }

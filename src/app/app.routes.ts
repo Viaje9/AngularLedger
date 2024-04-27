@@ -17,6 +17,10 @@ export const routes: Routes = [
         path: 'setting',
         loadChildren: () => import('./features/setting/setting.routes').then(m => m.SETTING_ROUTES)
       },
+      {
+        path: 'search',
+        loadChildren: () => import('./features/search/search.routes').then(m => m.SEARCH_ROUTES)
+      },
     ],
   },
   {
