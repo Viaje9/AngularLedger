@@ -74,7 +74,7 @@ export class PieChartComponent implements OnInit {
 
 
     const pie = d3.pie<PieChartItem>()
-      .padAngle(0.07)
+      .padAngle(0.1)
       .sort(null)
       .value((d) => d.value);
 
@@ -84,8 +84,13 @@ export class PieChartComponent implements OnInit {
 
 
     const arc = d3.arc()
-      .outerRadius(radius * 0.9)
+      .outerRadius(radius * 0.8)
       .innerRadius(radius * 0.4) as any
+
+    const textArc = d3.arc()
+      .outerRadius(radius * 1.4)
+      .innerRadius(radius * 0.4) as any
+
 
     const outerArc = d3.arc()
       .outerRadius(radius * 0.8)
@@ -101,22 +106,22 @@ export class PieChartComponent implements OnInit {
     const pies = this.svg.select(".pies").selectAll("path.pie").data(pie2(data), key);
     const slice = this.svg.select(".slices").selectAll("path.slice").data(pie(data), key);
 
-    pies.enter()
-      .insert("path")
-      .style("fill", "rgb(209 213 219 / var(--tw-bg-opacity))") // 背景色
-      .attr("class", "slice")
-      .style("stroke", "rgb(209 213 219 / var(--tw-bg-opacity))") // 邊框
-      .style("stroke-width", 2) // Set border width
-      .transition()
-      .duration(1000)
-      .attrTween("d", function (d) {
-        let _current = d
-        const interpolate = d3.interpolate(_current, d);
-        _current = interpolate(0);
-        return function (t) {
-          return arc(interpolate(t))
-        };
-      })
+    // pies.enter()
+    //   .insert("path")
+    //   .style("fill", "rgb(209 213 219 / var(--tw-bg-opacity))") // 背景色
+    //   .attr("class", "slice")
+    //   .style("stroke", "rgb(209 213 219 / var(--tw-bg-opacity))") // 邊框
+    //   .style("stroke-width", 2) // Set border width
+    //   .transition()
+    //   .duration(1000)
+    //   .attrTween("d", function (d) {
+    //     let _current = d
+    //     const interpolate = d3.interpolate(_current, d);
+    //     _current = interpolate(0);
+    //     return function (t) {
+    //       return arc(interpolate(t))
+    //     };
+    //   })
 
     slice
       .enter()
@@ -125,7 +130,7 @@ export class PieChartComponent implements OnInit {
         return color(d.data.label);
       })
       .style("stroke", "white") // Add border
-      .style("stroke-width", 2) // Set border width
+      .style("stroke-width", 1) // Set border width
       .attr("class", "slice").transition()
       .duration(1000)
       .attrTween("d", function (d) {
@@ -142,10 +147,12 @@ export class PieChartComponent implements OnInit {
       .insert('text')
       .text((d) => `${d.index}`)
       .attr("transform", (d) => {
-        return "translate(" + arc.centroid(d) + ")"
+        const [x, y] = textArc.centroid(d)
+        return `translate(${x}, ${y + 5})`
       })
       .style("text-anchor", "middle")
       .style("font-size", 17)
+      .style("fill", "white")
 
     /** CENTER TEXT */
 
