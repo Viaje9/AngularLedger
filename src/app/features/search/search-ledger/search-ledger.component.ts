@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, type OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
@@ -11,6 +11,8 @@ import { SharedModule } from '@src/app/shared/shared.module';
 import { take } from 'rxjs';
 import dayjs from 'dayjs';
 import { TagInfo } from '@src/app/core/models/tag.model';
+import { Timestamp } from '@angular/fire/firestore';
+import { isValidDate } from '@src/app/utils/validator';
 
 @UntilDestroy()
 @Component({
@@ -47,11 +49,26 @@ export class SearchLedgerComponent implements OnInit {
     private router: Router,
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
+    private activatedRoute: ActivatedRoute
+
   ) {
+
+    const startDateString = this.activatedRoute.snapshot.queryParams['startDate']
+    const endDateString = this.activatedRoute.snapshot.queryParams['endDate']
+
+    if (isValidDate(startDateString)) {
+      this.range.controls.start.setValue(dayjs(startDateString, 'YYYY-MM-DD').toDate())
+    }
+
+    if (isValidDate(endDateString)) {
+      this.range.controls.end.setValue(dayjs(endDateString, 'YYYY-MM-DD').toDate())
+    }
 
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.getRangeItems()
+  }
 
 
   onClickBack() {
@@ -84,6 +101,7 @@ export class SearchLedgerComponent implements OnInit {
     } else {
       this.rangeList = this.rawRangeList
     }
+    this.clearSearch()
   }
 
   onSearchChange(rawSearchText: string) {
@@ -101,5 +119,13 @@ export class SearchLedgerComponent implements OnInit {
   clearSearch() {
     this.searchText = ''
     this.onSearchChange('')
+  }
+
+  goToExpenseDate(date: Timestamp) {
+    this.router.navigate(['/expenseOverview'], {
+      queryParams: {
+        date: dayjs(date.toDate()).format('YYYY-MM-DD')
+      }
+    });
   }
 }

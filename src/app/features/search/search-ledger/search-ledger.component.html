@@ -81,7 +81,7 @@
   <div class="bg-gray-700 p-2 mb-10">
     @for (item of rangeList; track $index) {
     <div class="text-sm px-1 py-1 flex justify-between">
-      <span class="w-2/12">
+      <span class="w-2/12" (click)="goToExpenseDate(item.date)">
         {{ dayjs(item.date.toDate()).format("MM/DD") }}
       </span>
       <span class="w-2/12">

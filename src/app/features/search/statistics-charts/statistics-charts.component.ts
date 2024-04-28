@@ -206,4 +206,17 @@ export class StatisticsChartsComponent implements OnInit {
       });
     }
   }
+
+  goToSearchLedger() {
+    const startDate = this.range.getRawValue().start
+    const endDate = this.range.getRawValue().end
+
+    this.router.navigate(['/search/searchLedger'], {
+      queryParams: {
+        startDate: startDate ? dayjs(startDate).format('YYYY-MM-DD') : '',
+        endDate: endDate ? dayjs(endDate).format('YYYY-MM-DD') : ''
+      }
+    });
+
+  }
 }
