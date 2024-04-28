@@ -9,7 +9,7 @@ export const EditExpenseTagListGroupResolver: ResolveFn<TagInfo[][]> =
   () => {
     const ledgerService = inject(LedgerService)
     return ledgerService.getTagList(TransactionTypeEnum.Expense)
-      .pipe(take(1), map(tagList => {
+      .then(tagList => {
         const result = (tagList as TagInfo[]).reduce((acc: TagInfo[][], cur, i) => {
           const num = Math.floor(i / 9)
           if (!acc[num]) {
@@ -20,5 +20,5 @@ export const EditExpenseTagListGroupResolver: ResolveFn<TagInfo[][]> =
           return acc
         }, [])
         return result
-      }))
+      })
   };

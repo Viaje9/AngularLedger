@@ -1,7 +1,23 @@
 import { Injectable } from '@angular/core';
-import { CollectionReference, DocumentData, Firestore, collection, collectionData, doc, docData, getDocs, limit, orderBy, query, where, addDoc, getDoc, updateDoc, deleteDoc, writeBatch, Timestamp } from '@angular/fire/firestore';
+import {
+  CollectionReference,
+  DocumentData,
+  Firestore,
+  collection,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+  addDoc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  writeBatch,
+  Timestamp
+} from '@angular/fire/firestore';
 import { AuthService } from './auth.service';
-import { Observable, catchError, map, mergeMap, take, tap } from 'rxjs';
 import { TagInfo } from '../models/tag.model';
 import { TransactionType } from '../models/transaction-type.model';
 import { AddLedgerItem, LedgerItem } from '../models/ledger-item.model';
@@ -47,7 +63,8 @@ export class LedgerService {
     // return querySnapshot.docs.map(doc => doc.data());
     // where('transactionType', '==', type)
     // 使用collectionData
-    return collectionData(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'asc')), { idField: 'id' }) as Observable<TagInfo[]>;
+    return getDocs(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'asc')))
+      .then((querySnapshot) => querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))) as Promise<TagInfo[]>;
   }
 
   getTagInfo(docId: string) {
@@ -69,13 +86,15 @@ export class LedgerService {
   }
 
   getTagLastSort(type: TransactionType) {
-    return collectionData(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'desc'), limit(1)))
-      .pipe(map(e => {
+    return getDocs(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'desc'), limit(1)))
+      .then(querySnapshot => querySnapshot.docs.map(doc => doc.data()))
+      .then(e => {
         if (e.length) {
-          return e[0]['sort'] + 1
+          return e[0]['sort']
         }
         return 0
-      })).pipe(take(1))
+
+      })
   }
 
   addTagDoc(data: {
@@ -152,8 +171,10 @@ export class LedgerService {
   }
 
   getTodayExpenseList(date: Date) {
-    return collectionData(query(this.expenseListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe( mergeMap(async (expenseList) => {
+    const q = query(this.expenseListCollection, ...this.queryDate(date, 'date'))
+    return getDocs(q).then(async (querySnapshot) => {
       const list = [];
+      const expenseList = querySnapshot.docs.map((doc) => doc.data())
       const tagIdList = expenseList.map((e) => e['tagId']);
       const tagInfoList = await this.getTagListWithId(tagIdList)
       for (const expenseItem of expenseList) {
@@ -163,7 +184,7 @@ export class LedgerService {
         list.push(expenseItem)
       }
       return list;
-    })) as Observable<LedgerItem[]>;
+    }) as Promise<LedgerItem[]>;
   }
 
   /** expense end */
@@ -171,7 +192,7 @@ export class LedgerService {
   /** income start */
 
   getTodayIncomeList(date: Date) {
-    return collectionData(query(this.incomeListCollection, ...this.queryDate(date, 'date')), { idField: 'id' }).pipe(mergeMap(async (incomeList) => {
+    return getDocs(query(this.incomeListCollection, ...this.queryDate(date, 'date'))).then(querySnapshot => querySnapshot.docs.map((doc) => doc.data())).then(async (incomeList) => {
       const list = [];
       const tagIdList = incomeList.map((e) => e['tagId']);
       const tagInfoList = await this.getTagListWithId(tagIdList)
@@ -182,8 +203,7 @@ export class LedgerService {
         list.push(incomeItem);
       }
       return list;
-    })
-    ) as Observable<LedgerItem[]>;
+    }) as Promise<LedgerItem[]>;
   }
 
   getIncomeInfo(docId: string) {
@@ -222,11 +242,11 @@ export class LedgerService {
     endOfDay.setHours(23, 59, 59, 999);
     const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
 
-    return collectionData(query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp)), { idField: 'id' }).pipe(
-      map((expenseList) => {
-        return expenseList.reduce((acc, item) => acc + parseInt(item['price']), 0)
-      })
-    )
+    const q = query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp))
+
+    return getDocs(q).then((querySnapshot) => {
+      return querySnapshot.docs.reduce((acc, item) => acc + parseInt(item.data()['price']), 0)
+    })
   }
 
   getRangeItems(startDate: Date, endDate: Date) {
@@ -238,26 +258,26 @@ export class LedgerService {
     const endOfDay = structuredClone(endDate)
     endOfDay.setHours(23, 59, 59, 999);
     const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
+    const q = query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp))
+    return getDocs(q).then(async (querySnapshot) => {
+      return querySnapshot.docs.map((doc) => ({ ...doc.data() }))
+    }).then(async (expenseList) => {
+      const q = query(this.tagsCollection);
+      const querySnapshot = await getDocs(q);
+      const tagList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
-    return collectionData(query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp)), { idField: 'id' }).pipe(
-      mergeMap(async (expenseList) => {
-        const q = query(this.tagsCollection);
-        const querySnapshot = await getDocs(q);
-        const tagList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        const list = [];
-        for (const expenseItem of expenseList) {
-          const item = expenseItem as AddLedgerItem;
-          const tagInfo = tagList.find((tag) => tag.id === item.tagId);
-          expenseItem['tagInfo'] = tagInfo || {};
-          list.push(expenseItem);
-        }
-        return list
-      })
-    ) as Observable<LedgerItem[]>;
+      const list = [];
+      for (const expenseItem of expenseList) {
+        const item = expenseItem as AddLedgerItem;
+        const tagInfo = tagList.find((tag) => tag.id === item.tagId);
+        expenseItem['tagInfo'] = tagInfo || {};
+        list.push(expenseItem);
+      }
+      return list
+    }) as Promise<LedgerItem[]>;
   }
 
   queryDate(date: Date, fieldName: string) {

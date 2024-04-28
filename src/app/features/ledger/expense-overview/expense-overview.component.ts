@@ -75,10 +75,9 @@ export class ExpenseOverviewComponent implements OnInit {
       if (startDate !== this.startDate && endDate !== this.endDate) {
         this.startDate = startDate
         this.endDate = endDate
-        this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate()).pipe(untilDestroyed(this))
-          .subscribe((amount) => {
-            this.currentRangeBudget = this.budgetAmount - amount
-          })
+        this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate()).then((amount) => {
+          this.currentRangeBudget = this.budgetAmount - amount
+        })
       }
     }
   }
@@ -126,16 +125,17 @@ export class ExpenseOverviewComponent implements OnInit {
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
   }
 
-  getExpenseList() {
-    this.loaderService.start()
-    this.ledgerService.getTodayExpenseList(this.currentDate).pipe(take(1), untilDestroyed(this))
-      .subscribe((expenseList) => {
+  getExpenseList(retry = 0) {
+    if (retry < 2) {
+      this.loaderService.start()
+      this.ledgerService.getTodayExpenseList(this.currentDate).then((expenseList) => {
         this.ledgerItems = expenseList
+      }).finally(() => {
         this.loaderService.stop()
+      }).catch(() => {
+        this.getExpenseList(retry + 1)
       })
-    setTimeout(() => {
-      this.loaderService.stop()
-    }, 5000)
+    }
   }
 
   totalAmount() {

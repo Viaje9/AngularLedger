@@ -54,10 +54,12 @@ export class TagsManageComponent implements OnInit {
     this.loaderService.start()
     this.destroy$.next(true);
     this.transactionType = type
-    this.tagList$ = this.ledgerService.getTagList(this.transactionType).pipe(untilDestroyed(this))
-    this.tagList$.pipe(takeUntil(this.destroy$)).subscribe((data) => {
+
+    this.ledgerService.getTagList(this.transactionType).then((data) => {
       this.loaderService.stop()
       this.tagList = data
+    }).finally(() => {
+      this.loaderService.stop()
     })
   }
 

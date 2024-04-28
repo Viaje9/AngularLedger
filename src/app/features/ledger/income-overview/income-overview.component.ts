@@ -96,14 +96,11 @@ export class IncomeOverviewComponent implements OnInit {
 
   getIncomeList() {
     this.loaderService.start()
-    this.ledgerService.getTodayIncomeList(this.currentDate).pipe(take(1), untilDestroyed(this))
-      .subscribe((incomeList) => {
-        this.ledgerItems = incomeList
-        this.loaderService.stop()
-      })
-    setTimeout(() => {
+    this.ledgerService.getTodayIncomeList(this.currentDate).then((incomeList) => {
+      this.ledgerItems = incomeList
+    }).finally(() => {
       this.loaderService.stop()
-    }, 5000)
+    })
   }
 
   totalAmount() {

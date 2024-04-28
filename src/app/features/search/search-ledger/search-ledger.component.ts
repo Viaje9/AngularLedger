@@ -86,7 +86,7 @@ export class SearchLedgerComponent implements OnInit {
     const endDate = this.range.getRawValue().end
     if (startDate && endDate) {
       this.loaderService.start()
-      this.ledgerService.getRangeItems(startDate, endDate).pipe(take(1), untilDestroyed(this)).subscribe((list) => {
+      this.ledgerService.getRangeItems(startDate, endDate).then((list) => {
         this.loaderService.stop()
         this.rawRangeList = list
         this.rangeList = list

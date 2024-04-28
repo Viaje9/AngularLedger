@@ -32,13 +32,13 @@ export const AddTagInitDataResolver: ResolveFn<AddTagInitDataType> =
       })
     } else if (tagStatus === AddTagStatusEnum.Add){
       if(transactionType) {
-        return ledgerService.getTagLastSort(TransactionTypeEnum.Expense).pipe(take(1)).pipe(map(e => {
+        return ledgerService.getTagLastSort(TransactionTypeEnum.Expense).then(e => {
           return {
             tagStatus,
             transactionType,
             lastSort: e
           } as AddTagInitDataType
-        }))
+        })
       }
     }
     router.navigate(['/setting/tags-manage'])
