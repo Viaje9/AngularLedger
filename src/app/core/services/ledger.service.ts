@@ -173,16 +173,16 @@ export class LedgerService {
   getTodayExpenseList(date: Date) {
     const q = query(this.expenseListCollection, ...this.queryDate(date, 'date'))
     return getDocs(q).then(async (querySnapshot) => {
-      const list = [];
-      const expenseList = querySnapshot.docs.map((doc) => doc.data())
+      const expenseList = querySnapshot.docs.map(doc => ({ ...doc.data() as AddLedgerItem, id: doc.id }));
       const tagIdList = expenseList.map((e) => e['tagId']);
       const tagInfoList = await this.getTagListWithId(tagIdList)
-      for (const expenseItem of expenseList) {
-        const item = expenseItem as AddLedgerItem;
-        const tagInfo = tagInfoList.find((tag) => tag.id === item.tagId);
-        expenseItem['tagInfo'] = tagInfo || {};
-        list.push(expenseItem)
-      }
+      const list = expenseList.map((expenseItem) => {
+        const tagInfo = tagInfoList.find((tag) => tag.id === expenseItem.tagId) as TagInfo;
+        return {
+          ...expenseItem,
+          tagInfo
+        }
+      })
       return list;
     }) as Promise<LedgerItem[]>;
   }
@@ -192,18 +192,20 @@ export class LedgerService {
   /** income start */
 
   getTodayIncomeList(date: Date) {
-    return getDocs(query(this.incomeListCollection, ...this.queryDate(date, 'date'))).then(querySnapshot => querySnapshot.docs.map((doc) => doc.data())).then(async (incomeList) => {
-      const list = [];
-      const tagIdList = incomeList.map((e) => e['tagId']);
-      const tagInfoList = await this.getTagListWithId(tagIdList)
-      for (const incomeItem of incomeList) {
-        const item = incomeItem as AddLedgerItem;
-        const tagInfo = tagInfoList.find((tag) => tag.id === item.tagId);
-        incomeItem['tagInfo'] = tagInfo || {};
-        list.push(incomeItem);
-      }
-      return list;
-    }) as Promise<LedgerItem[]>;
+    return getDocs(query(this.incomeListCollection, ...this.queryDate(date, 'date')))
+      .then(querySnapshot => querySnapshot.docs.map((doc) => ({ ...doc.data() as AddLedgerItem, id: doc.id })))
+      .then(async (incomeList) => {
+        const tagIdList = incomeList.map((e) => e['tagId'])
+        const tagInfoList = await this.getTagListWithId(tagIdList)
+        const list = incomeList.map((incomeItem) => {
+          const tagInfo = tagInfoList.find((tag) => tag.id === incomeItem.tagId) as TagInfo;
+          return {
+            ...incomeItem,
+            tagInfo
+          }
+        })
+        return list;
+      }) as Promise<LedgerItem[]>;
   }
 
   getIncomeInfo(docId: string) {
