@@ -1,5 +1,5 @@
 // pie-chart.component.ts
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, input, OnInit, effect, output } from '@angular/core';
 import { PieChartItem } from '@src/app/core/models/pie-chart-item.model';
 import * as d3 from 'd3';
 import { Subject } from 'rxjs';
@@ -12,19 +12,19 @@ import { Subject } from 'rxjs';
 })
 export class PieChartComponent implements OnInit {
 
-  @Input() set pieChartItems(value: PieChartItem[]) {
-    this.pieChartItemsSubject.next(value);
-  }
+  pieChartItems = input.required<PieChartItem[]>()
 
-  @Output() onEmitPieChartWithColorItems = new EventEmitter();
 
+  onEmitPieChartWithColorItems = output<(PieChartItem & { backgroundColor: string; })[]>();
 
   pieChartItemsSubject: Subject<PieChartItem[]> = new Subject<PieChartItem[]>();
 
   svg!: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
 
   constructor() {
-
+    effect(() => {
+      this.pieChartItemsSubject.next(this.pieChartItems());
+    });
   }
 
   ngOnInit(): void {

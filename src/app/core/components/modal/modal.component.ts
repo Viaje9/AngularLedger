@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnInit, Output, output, TemplateRef, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SafeHtml } from '@angular/platform-browser';
 import { ModalData } from './modal.model';
@@ -12,9 +12,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./modal.component.scss'],
 })
 export class ModalComponent implements OnInit {
-  @Output() doConfirm = new EventEmitter();
-  @Output() doCancel = new EventEmitter();
-
+  doConfirm = output<void>();
+  doCancel = output<void>();
 
   title = '通知'
   content: string | SafeHtml = '';
