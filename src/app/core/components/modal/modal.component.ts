@@ -19,12 +19,12 @@ export class ModalComponent implements OnInit {
   content: string | SafeHtml = '';
   okText = '確認'
   cancelText = '取消'
-  showCrossBtn = true;
   outsideClose = false;
+  showCrossBtn = true;
   showCancelBtn = true
   btnCenter = true
-  templateRef?: TemplateRef<any>;
   fullScreen = false;
+  contentTemplateRef?: TemplateRef<any>;
   afterViewInitEvent!: () => void
 
   constructor(
@@ -45,16 +45,16 @@ export class ModalComponent implements OnInit {
         fullScreen,
         afterViewInit
       } = data;
-      this.title = title;
-      this.content = content;
-      this.okText = okText;
-      this.cancelText = cancelText;
-      this.showCrossBtn = showCrossBtn;
-      this.outsideClose = outsideClose;
-      this.showCancelBtn = showCancelBtn
-      this.btnCenter = btnCenter
-      this.templateRef = contentTemplateRef
-      this.fullScreen = fullScreen
+      this.title = title || this.title;
+      this.content = content || this.content;
+      this.okText = okText || this.okText;
+      this.cancelText = cancelText || this.cancelText;
+      this.showCrossBtn = showCrossBtn || this.showCrossBtn;
+      this.outsideClose = outsideClose || this.outsideClose;
+      this.showCancelBtn = showCancelBtn || this.showCancelBtn;
+      this.btnCenter = btnCenter || this.btnCenter;
+      this.contentTemplateRef = contentTemplateRef
+      this.fullScreen = fullScreen || this.fullScreen;
       this.afterViewInitEvent = afterViewInit || (() => { })
     }
   }

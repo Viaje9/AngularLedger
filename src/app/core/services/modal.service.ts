@@ -40,36 +40,14 @@ export class ModalService {
     const executeId = Date.now()
     this.pushModalConfig(executeId)
 
-    const config = ({
-      title = '通知',
-      content,
-      okText = '確認',
-      cancelText = '取消',
-      outsideClose = false,
-      showCrossBtn = true,
-      showCancelBtn = true,
-      btnCenter = true,
-      fullScreen = false,
-      contentTemplateRef,
-      afterViewInit
-    }: ModalOption) => {
+    const config = (option: ModalOption) => {
       const config = {
         data: {
-          content,
-          title,
-          okText,
-          cancelText,
-          outsideClose,
-          showCrossBtn,
-          showCancelBtn,
-          btnCenter,
-          fullScreen,
-          contentTemplateRef,
-          afterViewInit
+          ...option
         }
       }
 
-      return fullScreen ? { maxWidth: '100vw', width: '100%', ...config } : config
+      return option.fullScreen ? { maxWidth: '100vw', width: '100%', ...config } : config
     }
 
     if (this.modalQueue.length === 1) {

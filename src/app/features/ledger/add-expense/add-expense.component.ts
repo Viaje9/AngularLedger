@@ -1,4 +1,4 @@
-import { Component, type OnInit, ViewChild, ElementRef, TemplateRef, ChangeDetectorRef } from '@angular/core';
+import { Component, type OnInit, ElementRef, TemplateRef, ChangeDetectorRef, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
@@ -20,11 +20,11 @@ import { isValidDate } from '@src/app/utils/validator';
 
 })
 export class AddExpenseComponent implements OnInit {
-  @ViewChild('scrollTags') scrollTagsRef!: ElementRef;
-  @ViewChild('tagGroup') tagGroupRef!: ElementRef;
-  @ViewChild('templateRef') templateRef!: TemplateRef<any> | undefined;
-  @ViewChild('priceInput') priceInput!: ElementRef;
-  @ViewChild('descriptionInput') descriptionInput!: ElementRef;
+  scrollTagsRef = viewChild.required<ElementRef>('scrollTags');
+  tagGroupRef = viewChild.required<ElementRef>('tagGroup');
+  templateRef = viewChild<TemplateRef<any>>('templateRef');
+  priceInput = viewChild.required<ElementRef>('priceInput');
+  descriptionInput = viewChild.required<ElementRef>('descriptionInput');
 
   maxTagGroupPage = 0
   currentTagGroupPage = 0
@@ -66,8 +66,8 @@ export class AddExpenseComponent implements OnInit {
     }
   }
   ngAfterViewInit(): void {
-    const scrollWidth = this.scrollTagsRef.nativeElement.scrollWidth;
-    const tagGroupWidth = this.tagGroupRef.nativeElement.scrollWidth;
+    const scrollWidth = this.scrollTagsRef().nativeElement.scrollWidth;
+    const tagGroupWidth = this.tagGroupRef().nativeElement.scrollWidth;
     this.maxTagGroupPage = Math.ceil(scrollWidth / tagGroupWidth)
 
   }
@@ -92,7 +92,7 @@ export class AddExpenseComponent implements OnInit {
     if (this.selectedTagId === tagId) {
       this.selectedTagId = ''
     } else {
-      this.priceInput.nativeElement.focus()
+      this.priceInput().nativeElement.focus()
       this.selectedTagId = tagId
 
     }
@@ -164,10 +164,10 @@ export class AddExpenseComponent implements OnInit {
       okText: '確認',
       showCancelBtn: false,
       outsideClose: true,
-      contentTemplateRef: this.templateRef,
+      contentTemplateRef: this.templateRef(),
       afterViewInit: () => {
         this.changeDetectorRef.detectChanges()
-        this.descriptionInput?.nativeElement.focus()
+        this.descriptionInput().nativeElement.focus()
       }
     })
   }
