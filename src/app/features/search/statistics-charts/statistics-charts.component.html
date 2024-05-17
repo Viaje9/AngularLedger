@@ -82,7 +82,6 @@
   <div class="bg-gray-700 p-2 pb-10">
     @for (item of rangeList; track $index) {
     <div
-      [ngStyle]="{ color: item.backgroundColor }"
       class="text-xl px-1 py-1 flex justify-between"
       (click)="onClickTagGroup(item.tagName, item.items)"
     >
