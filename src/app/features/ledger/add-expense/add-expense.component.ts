@@ -124,29 +124,10 @@ export class AddExpenseComponent implements OnInit {
     }).finally(() => this.loaderService.stop())
   }
 
-  async onClickEdit() {
-    if (!this.saveCheck()) {
-      return
-    }
-
-    this.loaderService.start()
-    await this.ledgerService.updateExpense({
-      docId: this.route.snapshot.data['data'].docId,
-      date: this.date,
-      price: this.price.toString(),
-      tagId: this.selectedTagId,
-      description: this.description
-    }).catch((error) => {
-      this.showError()
-    }).then(() => {
-      this.onClickBack()
-    }).finally(() => this.loaderService.stop())
-  }
-
   saveCheck() {
     const checkTag = this.tagsGroup.some(tags => tags.some(tagInfo => tagInfo.id === this.selectedTagId))
 
-    if (!this.selectedTagId || !this.price || !checkTag) {
+    if (!this.selectedTagId || !this.price?.toString() || !checkTag) {
       this.modalService.openConfirm({
         content: '請輸入金額與選擇標籤',
         okText: '確認',
