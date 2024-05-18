@@ -8,12 +8,18 @@ import { SharedModule } from '@src/app/shared/shared.module';
 import { Timestamp } from '@angular/fire/firestore';
 import dayjs from 'dayjs';
 import { isValidDate } from '@src/app/utils/validator';
+import {
+  MatBottomSheet,
+  MatBottomSheetModule,
+} from '@angular/material/bottom-sheet';
+import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bottom-sheet/remark-bottom-sheet.component';
 
 @Component({
   selector: 'app-add-expense',
   standalone: true,
   imports: [
     SharedModule,
+    MatBottomSheetModule,
   ],
   templateUrl: './add-expense.component.html',
   styleUrl: './add-expense.component.css',
@@ -22,9 +28,7 @@ import { isValidDate } from '@src/app/utils/validator';
 export class AddExpenseComponent implements OnInit {
   scrollTagsRef = viewChild.required<ElementRef>('scrollTags');
   tagGroupRef = viewChild.required<ElementRef>('tagGroup');
-  templateRef = viewChild<TemplateRef<any>>('templateRef');
   priceInput = viewChild.required<ElementRef>('priceInput');
-  descriptionInput = viewChild.required<ElementRef>('descriptionInput');
 
   maxTagGroupPage = 0
   currentTagGroupPage = 0
@@ -43,10 +47,12 @@ export class AddExpenseComponent implements OnInit {
     private modalService: ModalService,
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private bottomSheet: MatBottomSheet
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
     const dateString = this.route.snapshot.queryParamMap.get('date') || ''
+
 
     if (isValidDate(dateString)) {
       this.date = Timestamp.fromDate(dayjs(dateString, 'YYYY-MM-DD').toDate())
@@ -57,13 +63,17 @@ export class AddExpenseComponent implements OnInit {
   ngOnInit(): void {
     const { price, description } = this.route.snapshot.queryParams;
     const priceNum = parseInt(price)
-    if(priceNum > 0) {
+    if (priceNum > 0) {
       this.price = priceNum
     }
 
-    if(description) {
+    if (description) {
       this.description = description
     }
+
+    //     const bottomSheetRef = this.bottomSheet.open(this.descriptionRef(), {
+    //
+    //     });
   }
   ngAfterViewInit(): void {
     const scrollWidth = this.scrollTagsRef().nativeElement.scrollWidth;
@@ -92,7 +102,9 @@ export class AddExpenseComponent implements OnInit {
     if (this.selectedTagId === tagId) {
       this.selectedTagId = ''
     } else {
-      this.priceInput().nativeElement.focus()
+      if (!this.price?.toString()) {
+        this.priceInput().nativeElement.focus()
+      }
       this.selectedTagId = tagId
 
     }
@@ -140,16 +152,15 @@ export class AddExpenseComponent implements OnInit {
   }
 
   onClickDescription() {
-    this.modalService.openConfirm({
-      title: "備註",
-      okText: '確認',
-      showCancelBtn: false,
-      outsideClose: true,
-      contentTemplateRef: this.templateRef(),
-      afterViewInit: () => {
-        this.changeDetectorRef.detectChanges()
-        this.descriptionInput().nativeElement.focus()
+    const bottomSheetRef = this.bottomSheet.open(RemarkBottomSheetComponent, {
+      data: {
+        description: this.description
       }
+    });
+
+    bottomSheetRef.instance.onSubmit.subscribe((description: string) => {
+      this.description = description
+      bottomSheetRef.dismiss()
     })
   }
 

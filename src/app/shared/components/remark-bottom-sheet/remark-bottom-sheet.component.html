@@ -1,0 +1,12 @@
+<div class="w-full text-lg py-2 text-center font-medium text-white bg-gray-800">
+  備註
+</div>
+<div class="px-3 pb-5">
+  <textarea
+    #descriptionRef
+    [value]="description"
+    class="text-black w-full mb-2 px-2 focus:outline-none border-gray-800"
+    rows="10"
+    (blur)="onSubmit.emit(this.descriptionRef.value)"
+  ></textarea>
+</div>

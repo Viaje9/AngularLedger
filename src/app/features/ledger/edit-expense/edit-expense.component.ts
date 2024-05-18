@@ -9,12 +9,15 @@ import { EditExpenseInitData } from './edit-expense.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { Timestamp, query } from '@angular/fire/firestore';
 import dayjs from 'dayjs';
+import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-sheet';
+import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bottom-sheet/remark-bottom-sheet.component';
 
 @Component({
   selector: 'app-edit-expense',
   standalone: true,
   imports: [
     SharedModule,
+    MatBottomSheetModule,
   ],
   templateUrl: './edit-expense.component.html',
   styleUrl: './edit-expense.component.css',
@@ -44,7 +47,7 @@ export class EditExpenseComponent implements OnInit {
     private modalService: ModalService,
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
-    private changeDetectorRef: ChangeDetectorRef
+    private bottomSheet: MatBottomSheet
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
     const expenseData = this.route.snapshot.data['data'] as EditExpenseInitData
@@ -83,7 +86,9 @@ export class EditExpenseComponent implements OnInit {
     if (this.selectedTagId === tagId) {
       this.selectedTagId = ''
     } else {
-      this.priceInput.nativeElement.focus()
+      if (!this.price?.toString()) {
+        this.priceInput.nativeElement.focus()
+      }
       this.selectedTagId = tagId
 
     }
@@ -132,16 +137,15 @@ export class EditExpenseComponent implements OnInit {
   }
 
   onClickDescription() {
-    this.modalService.openConfirm({
-      title: "備註",
-      okText: '確認',
-      showCancelBtn: false,
-      outsideClose: true,
-      contentTemplateRef: this.templateRef,
-      afterViewInit: () => {
-        this.changeDetectorRef.detectChanges()
-        this.descriptionInput?.nativeElement.focus()
+    const bottomSheetRef = this.bottomSheet.open(RemarkBottomSheetComponent, {
+      data: {
+        description: this.description
       }
+    });
+
+    bottomSheetRef.instance.onSubmit.subscribe((description: string) => {
+      this.description = description
+      bottomSheetRef.dismiss()
     })
   }
 

@@ -1,0 +1,9 @@
+::ng-deep .cdk-overlay-container .mat-bottom-sheet-container {
+  border-radius: 10px 10px 0 0;
+  padding: 0;
+}
+
+
+::ng-deep .cdk-overlay-container .ng-star-inserted {
+  @apply bg-gray-800;
+}
