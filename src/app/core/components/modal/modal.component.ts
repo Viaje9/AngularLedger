@@ -45,16 +45,16 @@ export class ModalComponent implements OnInit {
         fullScreen,
         afterViewInit
       } = data;
-      this.title = title || this.title;
-      this.content = content || this.content;
-      this.okText = okText || this.okText;
-      this.cancelText = cancelText || this.cancelText;
-      this.showCrossBtn = showCrossBtn || this.showCrossBtn;
-      this.outsideClose = outsideClose || this.outsideClose;
-      this.showCancelBtn = showCancelBtn || this.showCancelBtn;
-      this.btnCenter = btnCenter || this.btnCenter;
+      this.title = title ?? this.title;
+      this.content = content ?? this.content;
+      this.okText = okText ?? this.okText;
+      this.cancelText = cancelText ?? this.cancelText;
+      this.showCrossBtn = showCrossBtn ?? this.showCrossBtn;
+      this.outsideClose = outsideClose ?? this.outsideClose;
+      this.showCancelBtn = showCancelBtn ?? this.showCancelBtn;
+      this.btnCenter = btnCenter ?? this.btnCenter;
       this.contentTemplateRef = contentTemplateRef
-      this.fullScreen = fullScreen || this.fullScreen;
+      this.fullScreen = fullScreen ?? this.fullScreen;
       this.afterViewInitEvent = afterViewInit || (() => { })
     }
   }
