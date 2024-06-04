@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { Timestamp } from '@angular/fire/firestore';
 import { isValidDate } from '@src/app/utils/validator';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @UntilDestroy()
 @Component({
@@ -49,8 +50,8 @@ export class SearchLedgerComponent implements OnInit {
     private router: Router,
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
-    private activatedRoute: ActivatedRoute
-
+    private activatedRoute: ActivatedRoute,
+    private _snackBar: MatSnackBar
   ) {
 
     const startDateString = this.activatedRoute.snapshot.queryParams['startDate']
@@ -126,6 +127,16 @@ export class SearchLedgerComponent implements OnInit {
       queryParams: {
         date: dayjs(date.toDate()).format('YYYY-MM-DD')
       }
+    });
+  }
+
+  copyDesc(desc: string) {
+    navigator.clipboard.writeText(desc).catch()
+    this._snackBar.open('已複製所選文字！', '', {
+      panelClass: 'text-center',
+      duration: 1 * 1000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
     });
   }
 }

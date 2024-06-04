@@ -223,7 +223,7 @@ export class StatisticsChartsComponent implements OnInit {
 
   copyDesc(desc: string) {
     navigator.clipboard.writeText(desc).catch()
-    this._snackBar.open('以複製所選文字！', '', {
+    this._snackBar.open('已複製所選文字！', '', {
       panelClass: 'text-center',
       duration: 1 * 1000,
       horizontalPosition: 'center',

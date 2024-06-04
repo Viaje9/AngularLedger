@@ -87,7 +87,7 @@
       <span class="w-2/12">
         {{ item.tagInfo.tagName }}
       </span>
-      <span class="w-6/12">
+      <span class="w-6/12" (click)="copyDesc(item.description)">
         {{ item.description }}
       </span>
       <span class="w-2/12 pr-1 flex justify-end 400">$ {{ item.price }}</span>
