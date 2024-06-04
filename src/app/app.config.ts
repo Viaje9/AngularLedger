@@ -22,14 +22,13 @@ export function initData(auth: Auth) {
 export const appConfig: ApplicationConfig = {
   providers: [
     { provide: APP_BASE_HREF, useValue: environment.baseUrl },
-    importProvidersFrom(provideFirebaseApp(() => initializeApp(environment.firebaseConfig))),
-    importProvidersFrom(provideFirestore(() => initializeFirestore(getApp(), {
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideFirestore(() => initializeFirestore(getApp(), {
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager(),
       }),
-    }))),
-    importProvidersFrom(provideAuth(() => getAuth())),
-    // importProvidersFrom(provideDatabase(() => getDatabase()))
+    })),
+    provideAuth(() => getAuth()),
     {
       provide: APP_INITIALIZER,
       useFactory: initData,
