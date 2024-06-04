@@ -104,7 +104,7 @@
         {{ dayjs(item.date.toDate()).format("MM/DD") }}
       </span>
       <span class="flex-1">$ {{ item.price }}</span>
-      <span class="flex-1 flex justify-end"> {{ item.description }}</span>
+      <span class="flex-1 flex justify-end" (click)="copyDesc(item.description)"> {{ item.description }}</span>
     </div>
     }
   </div>

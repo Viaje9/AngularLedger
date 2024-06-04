@@ -1,4 +1,4 @@
-import { Component, ViewChild, type OnInit, SimpleChanges, TemplateRef } from '@angular/core';
+import { Component, ViewChild, type OnInit, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
@@ -12,12 +12,12 @@ import { RangeGroupItem } from './statistics-charts.component.model';
 import { PieChartComponent } from '@src/app/shared/components/pie-chart/pie-chart.component';
 import { PieChartItem } from '@src/app/core/models/pie-chart-item.model';
 import { MatDateRangeInput } from '@angular/material/datepicker';
-import { take } from 'rxjs';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { ModalComponent } from '@src/app/core/components/modal/modal.component';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @UntilDestroy()
 @Component({
@@ -69,6 +69,7 @@ export class StatisticsChartsComponent implements OnInit {
     private ledgerService: LedgerService,
     private loaderService: LoaderService,
     private modalService: ModalService,
+    private _snackBar: MatSnackBar
   ) {
     const perviousDate = this.router?.getCurrentNavigation()?.extras.state?.['date'] as Date || new Date()
     if (perviousDate) {
@@ -218,5 +219,15 @@ export class StatisticsChartsComponent implements OnInit {
       }
     });
 
+  }
+
+  copyDesc(desc: string) {
+    navigator.clipboard.writeText(desc).catch()
+    this._snackBar.open('以複製所選文字！', '', {
+      panelClass: 'text-center',
+      duration: 1 * 1000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+    });
   }
 }
