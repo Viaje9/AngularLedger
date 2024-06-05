@@ -1,12 +1,49 @@
-<div class="w-full text-lg py-2 text-center font-medium text-white bg-gray-800">
-  備註
-</div>
-<div class="px-3 pb-5">
-  <textarea
-    #descriptionRef
-    [value]="description"
-    class="text-black w-full mb-2 px-2 focus:outline-none border-gray-800"
-    rows="10"
-    (blur)="onSubmit.emit(this.descriptionRef.value)"
-  ></textarea>
+<div class="h-96">
+  <div
+    class="w-full text-lg py-2 text-center font-medium text-white bg-gray-800"
+  >
+    備註
+  </div>
+  <div class="px-3 pb-3">
+    <div class="optionsHeight overflow-scroll border border-slate-200 mt-2">
+      <ul class="bg-white w-full border border-slate-300 rounded">
+        @for (info of filterOptions; track $index) {
+        <li class="px-3 flex justify-between bg-white border border-slate-300">
+          <span
+            class="flex-1 py-2"
+            (click)="onClickOption(info.name)"
+            >{{ info.name }}</span
+          >
+          <span class="w-6 py-2 flex items-center justify-center" (click)="onClickRemoveOption(info.id)">
+            <svg
+              width="24px"
+              height="24px"
+              viewBox="0 -960 960 960"
+              fill="#00000"
+            >
+              <path
+                d="m334-296 146-146 146 146 38-38-146-146 146-146-38-38-146 146-146-146-38 38 146 146-146 146 38 38Zm146.17 196q-78.81 0-148.21-29.91T211.23-211.1q-51.34-51.28-81.28-120.59Q100-401.01 100-479.83q0-79.07 29.97-148.69t81.35-121.13q51.38-51.5 120.59-80.92Q401.13-860 479.83-860q79.06 0 148.67 29.39 69.62 29.39 121.13 80.85 51.52 51.46 80.94 121.02Q860-559.18 860-480.09t-29.39 148.15q-29.39 69.06-80.84 120.49-51.44 51.44-120.98 81.45-69.55 30-148.62 30Zm-.17-54q136.51 0 231.26-94.74Q806-343.49 806-480t-94.74-231.26Q616.51-806 480-806t-231.26 94.74Q154-616.51 154-480t94.74 231.26Q343.49-154 480-154Zm0-326Z"
+              />
+            </svg>
+          </span>
+        </li>
+        }
+      </ul>
+    </div>
+    <div class="flex mt-2">
+      <input
+        #descriptionRef
+        [(ngModel)]="descriptionValue"
+        autocomplete="off"
+        type="text"
+        class="flex-1 rounded-l-lg border outline-none py-1 px-3 leading-8 -mr-1"
+        (focus)="onFocus()"
+        (input)="onChangeInput($event)"
+        (compositionupdate)="onChangeInput($event)"
+        (compositionend)="onChangeInput($event)"
+        (blur)="onBlur()"
+      />
+      <button class="bg-blue-600 text-white px-5 py-2 rounded-r-lg" (click)="onClickSubmit()">送出</button>
+    </div>
+  </div>
 </div>

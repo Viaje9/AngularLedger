@@ -71,9 +71,6 @@ export class AddExpenseComponent implements OnInit {
       this.description = description
     }
 
-    //     const bottomSheetRef = this.bottomSheet.open(this.descriptionRef(), {
-    //
-    //     });
   }
   ngAfterViewInit(): void {
     const scrollWidth = this.scrollTagsRef().nativeElement.scrollWidth;
@@ -155,7 +152,8 @@ export class AddExpenseComponent implements OnInit {
     const bottomSheetRef = this.bottomSheet.open(RemarkBottomSheetComponent, {
       data: {
         description: this.description
-      }
+      },
+      panelClass: ['max-h-96', 'relative']
     });
 
     bottomSheetRef.instance.onSubmit.subscribe((description: string) => {

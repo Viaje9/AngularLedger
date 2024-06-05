@@ -140,7 +140,8 @@ export class EditExpenseComponent implements OnInit {
     const bottomSheetRef = this.bottomSheet.open(RemarkBottomSheetComponent, {
       data: {
         description: this.description
-      }
+      },
+      panelClass: ['max-h-96', 'relative']
     });
 
     bottomSheetRef.instance.onSubmit.subscribe((description: string) => {

@@ -297,4 +297,8 @@ export class LedgerService {
 
     return [where(fieldName, '>=', startOfDay), where(fieldName, '<=', endOfDayTimestamp)]
   }
+
+  getExpenseList() {
+    return getDocs(this.expenseListCollection).then((querySnapshot) => querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))) as Promise<LedgerItem[]>;
+  }
 }

@@ -3,7 +3,6 @@
   padding: 0;
 }
 
-
-::ng-deep .cdk-overlay-container .ng-star-inserted {
-  @apply bg-gray-800;
+.optionsHeight {
+  height: 264px;
 }
