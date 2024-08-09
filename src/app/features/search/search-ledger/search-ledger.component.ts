@@ -39,8 +39,18 @@ export class SearchLedgerComponent implements OnInit {
   });
 
   selectedTagId = ''
+  selectedSortOption = 'dateDesc'
 
   searchText = ''
+
+  timeRanges = [
+    { value: '1m', label: '一個月' },
+    { value: '3m', label: '三個月' },
+    { value: '1y', label: '一年' },
+    { value: '3y', label: '三年' },
+    { value: '5y', label: '五年' }
+  ];
+  selectedTimeRange = '1m';
 
   get dayjs() {
     return dayjs
@@ -65,6 +75,36 @@ export class SearchLedgerComponent implements OnInit {
       this.range.controls.end.setValue(dayjs(endDateString, 'YYYY-MM-DD').toDate())
     }
 
+  }
+
+  onTimeRangeChange() {
+    const endDate = new Date();
+    let startDate = new Date();
+
+    switch (this.selectedTimeRange) {
+      case '1m':
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case '3m':
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case '1y':
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      case '3y':
+        startDate.setFullYear(startDate.getFullYear() - 3);
+        break;
+      case '5y':
+        startDate.setFullYear(startDate.getFullYear() - 5);
+        break;
+    }
+
+    this.range.setValue({
+      start: startDate,
+      end: endDate
+    });
+
+    this.onDateChange();
   }
 
   ngOnInit(): void {
@@ -92,34 +132,59 @@ export class SearchLedgerComponent implements OnInit {
         this.rawRangeList = list
         this.rangeList = list
         this.tagList = list.map((item) => item.tagInfo).filter((tag, index, self) => self.findIndex((t) => t.id === tag.id) === index)
+        this.applySortAndFilter()
       })
     }
   }
 
   onTagChange() {
-    if (this.selectedTagId) {
-      this.rangeList = this.rawRangeList.filter((item) => item.tagId === this.selectedTagId)
-    } else {
-      this.rangeList = this.rawRangeList
-    }
-    this.clearSearch()
+    this.applySortAndFilter()
   }
 
   onSearchChange(rawSearchText: string) {
-    const searchText = rawSearchText.trim() || ''
-    if (searchText) {
-      this.rangeList = this.rawRangeList
-        .filter((item) => item.tagId === this.selectedTagId || !this.selectedTagId)
-        .filter((item) => item.description.includes(searchText))
-    } else {
-      this.rangeList = this.rawRangeList
-        .filter((item) => item.tagId === this.selectedTagId || !this.selectedTagId)
-    }
+    this.searchText = rawSearchText.trim()
+    this.applySortAndFilter()
   }
 
   clearSearch() {
     this.searchText = ''
-    this.onSearchChange('')
+    this.applySortAndFilter()
+  }
+
+  onSortChange() {
+    this.applySortAndFilter()
+  }
+
+  applySortAndFilter() {
+    let filteredList = this.rawRangeList
+
+    // 應用標籤過濾
+    if (this.selectedTagId) {
+      filteredList = filteredList.filter((item) => item.tagId === this.selectedTagId)
+    }
+
+    // 應用搜索過濾
+    if (this.searchText) {
+      filteredList = filteredList.filter((item) => item.description.includes(this.searchText))
+    }
+
+    // 應用排序
+    switch (this.selectedSortOption) {
+      case 'dateDesc':
+        filteredList.sort((a, b) => b.date.seconds - a.date.seconds)
+        break
+      case 'dateAsc':
+        filteredList.sort((a, b) => a.date.seconds - b.date.seconds)
+        break
+      case 'priceDesc':
+        filteredList.sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
+        break
+      case 'priceAsc':
+        filteredList.sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
+        break
+    }
+
+    this.rangeList = filteredList
   }
 
   goToExpenseDate(date: Timestamp) {

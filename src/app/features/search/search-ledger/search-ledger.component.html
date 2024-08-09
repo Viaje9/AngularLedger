@@ -39,8 +39,17 @@
         </mat-date-range-picker>
         <i class="far fa-calendar-alt p-2" (click)="picker.open()"></i>
       </div>
+      <select
+        [(ngModel)]="selectedTimeRange"
+        (change)="onTimeRangeChange()"
+        class="ml-2 bg-gray-700 text-white rounded-xl px-2 mb-2 focus:outline-none"
+      >
+        @for (range of timeRanges; track range.value) {
+        <option [value]="range.value">{{ range.label }}</option>
+        }
+      </select>
     </div>
-    <div class="flex justify-center">
+    <div class="flex justify-center p-2">
       <div class="mr-2">
         <select
           [disabled]="tagList.length === 0"
@@ -48,10 +57,22 @@
           (change)="onTagChange()"
           class="min-w-20 text-lg rounded-lg block w-full p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:outline-none min-h-11 h-11"
         >
-          <option value="">All</option>
+          <option value="">全部</option>
           @for (item of tagList; track $index) {
           <option [value]="item.id">{{ item.tagName }}</option>
           }
+        </select>
+      </div>
+      <div class="mr-2">
+        <select
+          [(ngModel)]="selectedSortOption"
+          (change)="onSortChange()"
+          class="min-w-20 text-lg rounded-lg block w-full p-2 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:outline-none min-h-11 h-11"
+        >
+          <option value="dateDesc">日期大到小</option>
+          <option value="dateAsc">日期小到大</option>
+          <option value="priceDesc">金額大到小</option>
+          <option value="priceAsc">金額小到大</option>
         </select>
       </div>
       <div>
