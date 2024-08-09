@@ -45,6 +45,16 @@
       range.controls.end.hasError('required')) {
       <mat-error>請選擇日期</mat-error>
       }
+      <!-- 新增的下拉選單 -->
+      <select
+        [(ngModel)]="selectedTimeRange"
+        (change)="onTimeRangeChange()"
+        class="ml-2 bg-gray-700 text-white rounded-xl px-2 mb-2"
+      >
+        @for (range of timeRanges; track range.value) {
+        <option [value]="range.value">{{ range.label }}</option>
+        }
+      </select>
       <!-- <p>Selected range: {{ range.value | json }}</p> -->
     </div>
     <div class="flex mb-4">

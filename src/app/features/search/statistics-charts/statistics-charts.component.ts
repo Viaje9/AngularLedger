@@ -64,6 +64,15 @@ export class StatisticsChartsComponent implements OnInit {
     return dayjs
   }
 
+  timeRanges = [
+    { value: '1m', label: '一個月' },
+    { value: '3m', label: '三個月' },
+    { value: '1y', label: '一年' },
+    { value: '3y', label: '三年' },
+    { value: '5y', label: '五年' }
+  ];
+  selectedTimeRange = '1m';
+
   constructor(
     private router: Router,
     private ledgerService: LedgerService,
@@ -88,7 +97,8 @@ export class StatisticsChartsComponent implements OnInit {
 
   onDateChange() {
     if (this.range.valid) {
-      this.getRangeItems()
+      this.getRangeItems();
+      this.dateTab = DateTabsEnum.CUSTOM_TAB;
     }
   }
 
@@ -229,5 +239,35 @@ export class StatisticsChartsComponent implements OnInit {
       horizontalPosition: 'center',
       verticalPosition: 'top',
     });
+  }
+
+  onTimeRangeChange() {
+    const endDate = new Date();
+    let startDate = new Date();
+
+    switch (this.selectedTimeRange) {
+      case '1m':
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case '3m':
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case '1y':
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      case '3y':
+        startDate.setFullYear(startDate.getFullYear() - 3);
+        break;
+      case '5y':
+        startDate.setFullYear(startDate.getFullYear() - 5);
+        break;
+    }
+
+    this.range.setValue({
+      start: startDate,
+      end: endDate
+    });
+
+    this.onDateChange();
   }
 }
