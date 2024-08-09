@@ -16,3 +16,24 @@
   overflow-y: auto;
   touch-action: pan-y !important;
 }
+
+
+.mat-custom > .mat-date-range-input {
+  display: flex;
+}
+
+
+::ng-deep .mat-custom .mat-date-range-input-separator {
+  transition: none;
+  color: white;
+}
+
+::ng-deep .mat-custom.disable .mat-date-range-input-inner {
+  color: white;
+  opacity: 0.5;
+}
+
+::ng-deep .mat-custom.disable .mat-date-range-input-separator {
+  color: white;
+  opacity: 0.5;
+}

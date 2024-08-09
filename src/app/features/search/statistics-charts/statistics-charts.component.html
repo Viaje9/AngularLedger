@@ -11,8 +11,12 @@
         </div>
       </div>
     </div>
-    <div class="w-full text-center">
-      <mat-form-field>
+
+    <div class="flex justify-center">
+      <div
+        class="mat-custom inline-flex py-2 px-2 border border-spacing-1 rounded-xl mb-2 min-w-64 w-64 text-white"
+        [ngClass]="{ disable: dateTab === DateTabsEnum.Range_TAB }"
+      >
         <mat-date-range-input
           #rangeInput
           [disabled]="dateTab === DateTabsEnum.Range_TAB"
@@ -22,12 +26,8 @@
           <input matStartDate formControlName="start" placeholder="起日" />
           <input matEndDate formControlName="end" placeholder="訖日" />
         </mat-date-range-input>
-        <mat-datepicker-toggle
-          matIconSuffix
-          [for]="picker"
-        ></mat-datepicker-toggle>
         <mat-date-range-picker touchUi #picker>
-          <mat-datepicker-actions>
+          <mat-datepicker-actions class="pb-10">
             <button class="btn" mat-button matDatepickerCancel>取消</button>
             <button
               class="btn"
@@ -39,12 +39,12 @@
             </button>
           </mat-datepicker-actions>
         </mat-date-range-picker>
-        @if(range.controls.start.hasError('required') ||
-        range.controls.end.hasError('required')) {
-        <mat-error>請選擇日期</mat-error>
-        }
-      </mat-form-field>
-
+        <i class="far fa-calendar-alt p-2" (click)="picker.open()"></i>
+      </div>
+      @if(range.controls.start.hasError('required') ||
+      range.controls.end.hasError('required')) {
+      <mat-error>請選擇日期</mat-error>
+      }
       <!-- <p>Selected range: {{ range.value | json }}</p> -->
     </div>
     <div class="flex mb-4">
@@ -104,7 +104,12 @@
         {{ dayjs(item.date.toDate()).format("MM/DD") }}
       </span>
       <span class="flex-1">$ {{ item.price }}</span>
-      <span class="flex-1 flex justify-end" (click)="copyDesc(item.description)"> {{ item.description }}</span>
+      <span
+        class="flex-1 flex justify-end"
+        (click)="copyDesc(item.description)"
+      >
+        {{ item.description }}</span
+      >
     </div>
     }
   </div>
