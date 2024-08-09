@@ -11,6 +11,7 @@ import { Timestamp, query } from '@angular/fire/firestore';
 import dayjs from 'dayjs';
 import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-sheet';
 import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bottom-sheet/remark-bottom-sheet.component';
+import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
 
 @Component({
   selector: 'app-edit-expense',
@@ -18,6 +19,7 @@ import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bo
   imports: [
     SharedModule,
     MatBottomSheetModule,
+    AngularMaterialDatepickerModule
   ],
   templateUrl: './edit-expense.component.html',
   styleUrl: './edit-expense.component.css',
@@ -40,6 +42,7 @@ export class EditExpenseComponent implements OnInit {
   selectedTagId = '';
   description = '';
   date!: Timestamp;
+  expenseDate: Date = new Date();
 
   constructor(
     private route: ActivatedRoute,
@@ -55,6 +58,7 @@ export class EditExpenseComponent implements OnInit {
     this.selectedTagId = expenseData.tagId
     this.description = expenseData.description
     this.date = expenseData.date
+    this.expenseDate = this.date.toDate();
   }
   ngOnInit(): void {
 
@@ -97,7 +101,7 @@ export class EditExpenseComponent implements OnInit {
   onClickBack() {
     this.router.navigate(['/'], {
       queryParams: {
-        date: dayjs(this.date.toDate()).format('YYYY-MM-DD')
+        date: dayjs(this.expenseDate).format('YYYY-MM-DD')
       }
     });
   }
@@ -110,7 +114,7 @@ export class EditExpenseComponent implements OnInit {
     this.loaderService.start()
     await this.ledgerService.updateExpense({
       docId: this.route.snapshot.data['data'].docId,
-      date: this.date,
+      date: Timestamp.fromDate(this.expenseDate),
       price: this.price.toString(),
       tagId: this.selectedTagId,
       description: this.description
