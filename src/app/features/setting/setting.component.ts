@@ -3,6 +3,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { AuthService } from '@src/app/core/services/auth.service';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
+import { version } from '@src/app/core/constants/version';
 
 @Component({
   selector: 'app-setting',
@@ -14,6 +15,8 @@ import { LedgerService } from '@src/app/core/services/ledger.service';
   styleUrl: './setting.component.css',
 })
 export class SettingComponent implements OnInit {
+
+  version = version;
 
   constructor(
     private modalService: ModalService,
