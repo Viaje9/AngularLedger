@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1727439791211,
+  "timestamp": 1727441962299,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -15,12 +15,12 @@
         "/AngularLedger/chunk-E3SPKN7C.js",
         "/AngularLedger/chunk-FIJXQ4P3.js",
         "/AngularLedger/chunk-GLGDLUNE.js",
-        "/AngularLedger/chunk-I6YVIN2V.js",
+        "/AngularLedger/chunk-GTLSBHEH.js",
         "/AngularLedger/chunk-J74UHVU3.js",
         "/AngularLedger/chunk-SH3ACJLZ.js",
         "/AngularLedger/favicon.ico",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-TWTCQAIP.js",
+        "/AngularLedger/main-6ANWM4FH.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
         "/AngularLedger/styles-HTZ66I63.css"
@@ -61,12 +61,12 @@
     "/AngularLedger/chunk-E3SPKN7C.js": "d84199bdfb9671fab947295b5b9d0debd152ee99",
     "/AngularLedger/chunk-FIJXQ4P3.js": "55560053a5345fcb6d8f67136181e17eaf6569a0",
     "/AngularLedger/chunk-GLGDLUNE.js": "ef6cf70379f194cc1fdef0b3ed61383214df8272",
-    "/AngularLedger/chunk-I6YVIN2V.js": "20104979c80bab87e6910a9f6da8a964f053c2a6",
+    "/AngularLedger/chunk-GTLSBHEH.js": "5e041fc9e9b36cd3c70e25cf7ab5cb390f99e58e",
     "/AngularLedger/chunk-J74UHVU3.js": "30cdf95cc77fe7e10fd601fc4d3d2890b7138e4d",
     "/AngularLedger/chunk-SH3ACJLZ.js": "62c85202293c2b5fe5532263d011544bbc3a69c8",
     "/AngularLedger/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/AngularLedger/index.html": "9a04d8040866d2f94d8d11fe5a0b4cc60c691463",
-    "/AngularLedger/main-TWTCQAIP.js": "868e0ed6c0e68fd0316933360974c4717f8a8851",
+    "/AngularLedger/index.html": "b9b9f6272a68ded91a856f7d8df98202797f5e40",
+    "/AngularLedger/main-6ANWM4FH.js": "3709063ebbee5bfe81f0a7d1780f56b4905c409e",
     "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
     "/AngularLedger/styles-HTZ66I63.css": "ce44930839ff86f6f09141be315ccb944f379a16"
