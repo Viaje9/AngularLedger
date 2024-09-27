@@ -5,7 +5,7 @@ import {
   Firestore,
   collection,
   doc,
-  getDocs,
+  getDocsFromCache,
   limit,
   orderBy,
   query,
@@ -59,11 +59,11 @@ export class LedgerService {
     // const userId = this.auth.userUid;
     // const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
     // const q = query(tagsCollection, where('userId', '==', userId));
-    // const querySnapshot = await getDocs(q);
+    // const querySnapshot = await getDocsFromCache(q);
     // return querySnapshot.docs.map(doc => doc.data());
     // where('transactionType', '==', type)
     // 使用collectionData
-    return getDocs(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'asc')))
+    return getDocsFromCache(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'asc')))
       .then((querySnapshot) => querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))) as Promise<TagInfo[]>;
   }
 
@@ -80,13 +80,13 @@ export class LedgerService {
     const userId = this.auth.userUid;
     const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
     const q = query(tagsCollection);
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocsFromCache(q);
     const tagList = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })).filter((tag) => tagIdList.includes(tag.id));
     return tagList
   }
 
   getTagLastSort(type: TransactionType) {
-    return getDocs(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'desc'), limit(1)))
+    return getDocsFromCache(query(this.tagsCollection, where('transactionType', '==', type), orderBy('sort', 'desc'), limit(1)))
       .then(querySnapshot => querySnapshot.docs.map(doc => doc.data()))
       .then(e => {
         if (e.length) {
@@ -172,7 +172,7 @@ export class LedgerService {
 
   getTodayExpenseList(date: Date) {
     const q = query(this.expenseListCollection, ...this.queryDate(date, 'date'))
-    return getDocs(q).then(async (querySnapshot) => {
+    return getDocsFromCache(q).then(async (querySnapshot) => {
       const expenseList = querySnapshot.docs.map(doc => ({ ...doc.data() as AddLedgerItem, id: doc.id }));
       const tagIdList = expenseList.map((e) => e['tagId']);
       const tagInfoList = await this.getTagListWithId(tagIdList)
@@ -192,7 +192,7 @@ export class LedgerService {
   /** income start */
 
   getTodayIncomeList(date: Date) {
-    return getDocs(query(this.incomeListCollection, ...this.queryDate(date, 'date')))
+    return getDocsFromCache(query(this.incomeListCollection, ...this.queryDate(date, 'date')))
       .then(querySnapshot => querySnapshot.docs.map((doc) => ({ ...doc.data() as AddLedgerItem, id: doc.id })))
       .then(async (incomeList) => {
         const tagIdList = incomeList.map((e) => e['tagId'])
@@ -246,7 +246,7 @@ export class LedgerService {
 
     const q = query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp))
 
-    return getDocs(q).then((querySnapshot) => {
+    return getDocsFromCache(q).then((querySnapshot) => {
       return querySnapshot.docs.reduce((acc, item) => acc + parseInt(item.data()['price']), 0)
     })
   }
@@ -261,11 +261,11 @@ export class LedgerService {
     endOfDay.setHours(23, 59, 59, 999);
     const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
     const q = query(this.expenseListCollection, where('date', '>=', startOfTimestamp), where('date', '<=', endOfDayTimestamp))
-    return getDocs(q).then(async (querySnapshot) => {
+    return getDocsFromCache(q).then(async (querySnapshot) => {
       return querySnapshot.docs.map((doc) => ({ ...doc.data() }))
     }).then(async (expenseList) => {
       const q = query(this.tagsCollection);
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocsFromCache(q);
       const tagList = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -299,6 +299,6 @@ export class LedgerService {
   }
 
   getExpenseList() {
-    return getDocs(this.expenseListCollection).then((querySnapshot) => querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))) as Promise<LedgerItem[]>;
+    return getDocsFromCache(this.expenseListCollection).then((querySnapshot) => querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))) as Promise<LedgerItem[]>;
   }
 }
