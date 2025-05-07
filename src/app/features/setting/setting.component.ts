@@ -72,7 +72,10 @@ export class SettingComponent implements OnInit {
 
       await setDoc(userRef, { fcmToken: token }, { merge: true });
     } catch (err) {
-      console.error('取得 FCM Token 失敗:', err);
+      this.modalService.openConfirm({
+        title: 'FCM Token 取得失敗',
+        content: `${err}`,
+      });
     }
   }
 }
