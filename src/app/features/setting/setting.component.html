@@ -38,13 +38,29 @@
         </div>
         <span> &gt; </span>
       </div>
-      <div class="flex items-center justify-between px-4 py-3 bg-gray-700" (click)="getExpenses()">
+      <div
+        class="flex items-center justify-between px-4 py-3 bg-gray-700"
+        (click)="getExpenses()"
+      >
         <div class="flex items-center">
           <span> 儲存支出備註 </span>
         </div>
         <span> &gt; </span>
       </div>
-      <div class="flex items-center justify-between px-4 py-3 bg-gray-700" (click)="logout()">
+      <div
+        class="flex items-center justify-between px-4 py-3 bg-gray-700"
+        (click)="updateFcmToken()"
+      >
+        <div class="flex items-center">
+          <span> 設定 FCM Token </span>
+        </div>
+        <span> &gt; </span>
+      </div>
+
+      <div
+        class="flex items-center justify-between px-4 py-3 bg-gray-700"
+        (click)="logout()"
+      >
         <div class="flex items-center">
           <span> 登出 </span>
         </div>

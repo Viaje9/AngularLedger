@@ -9,10 +9,9 @@ import {
   signInWithPopup,
   signOut,
 } from '@angular/fire/auth';
-import { doc, Firestore, setDoc } from '@angular/fire/firestore';
-import { getToken, Messaging } from '@angular/fire/messaging';
+import { Firestore } from '@angular/fire/firestore';
+import { Messaging } from '@angular/fire/messaging';
 import { Router } from '@angular/router';
-import { environment } from '@src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +28,6 @@ export class AuthService {
     onAuthStateChanged(this.auth, (user: any) => {
       if (user) {
         this.UserData = user;
-        this.initFCMToken();
       }
     });
   }
@@ -38,19 +36,6 @@ export class AuthService {
     const auth = getAuth();
     const user = auth.currentUser;
     return user?.uid || '';
-  }
-
-  async initFCMToken() {
-    try {
-      const token = await getToken(this.messaging, {
-        vapidKey: environment.vapidKey,
-      });
-
-      const userRef = doc(this.firestore, `users/${this.userUid}`);
-      await setDoc(userRef, { fcmToken: token }, { merge: true });
-    } catch (err) {
-      console.error('取得 FCM Token 失敗:', err);
-    }
   }
 
   //get User
