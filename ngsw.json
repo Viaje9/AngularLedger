@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1746634620824,
+  "timestamp": 1746634746632,
   "index": "/AngularLedger/index.html",
   "assetGroups": [
     {
@@ -11,7 +11,7 @@
         "ignoreVary": true
       },
       "urls": [
-        "/AngularLedger/chunk-3QXGUIW3.js",
+        "/AngularLedger/chunk-BOLLDBLS.js",
         "/AngularLedger/chunk-D254UPHH.js",
         "/AngularLedger/chunk-DL37R527.js",
         "/AngularLedger/chunk-DPXIAWB2.js",
@@ -22,7 +22,7 @@
         "/AngularLedger/favicon.ico",
         "/AngularLedger/firebase-messaging-sw.js",
         "/AngularLedger/index.html",
-        "/AngularLedger/main-XEBIL55U.js",
+        "/AngularLedger/main-5JQLELJY.js",
         "/AngularLedger/manifest.webmanifest",
         "/AngularLedger/polyfills-LZBJRJJE.js",
         "/AngularLedger/styles-HTZ66I63.css"
@@ -37,29 +37,15 @@
         "ignoreVary": true
       },
       "urls": [
-        "/AngularLedger/assets/icons/icon-128x128.png",
-        "/AngularLedger/assets/icons/icon-144x144.png",
-        "/AngularLedger/assets/icons/icon-152x152.png",
-        "/AngularLedger/assets/icons/icon-192x192.png",
-        "/AngularLedger/assets/icons/icon-384x384.png",
-        "/AngularLedger/assets/icons/icon-512x512.png",
-        "/AngularLedger/assets/icons/icon-72x72.png",
-        "/AngularLedger/assets/icons/icon-96x96.png"
+        "/AngularLedger/assets/icons/icon.png"
       ],
       "patterns": []
     }
   ],
   "dataGroups": [],
   "hashTable": {
-    "/AngularLedger/assets/icons/icon-128x128.png": "f912963bdc6d5a38d8f1dd0afbaab2ce8d657acb",
-    "/AngularLedger/assets/icons/icon-144x144.png": "b155fd5f2fd5d2ea7760721063003c4cd95fd783",
-    "/AngularLedger/assets/icons/icon-152x152.png": "eae6e0f0c8afb8aaae339e2a569b43e9238e5e6c",
-    "/AngularLedger/assets/icons/icon-192x192.png": "15c4180454633880d98674aa7394656196c91584",
-    "/AngularLedger/assets/icons/icon-384x384.png": "94a915751ef6c9282df9aea405ad679230631814",
-    "/AngularLedger/assets/icons/icon-512x512.png": "1de182f76f7329dfa8f9fcdd1fdcdd695bea6a99",
-    "/AngularLedger/assets/icons/icon-72x72.png": "aa88a6096bd973be7f6d7a5489bfa6bc2463f8c4",
-    "/AngularLedger/assets/icons/icon-96x96.png": "7fb8f59c30ce2ff12c700321a0b39e14b3dc8f95",
-    "/AngularLedger/chunk-3QXGUIW3.js": "3920c859d50627eb79790f999f82e02ff64447e9",
+    "/AngularLedger/assets/icons/icon.png": "a3a8446a4395bb086210427a71de28862d52209c",
+    "/AngularLedger/chunk-BOLLDBLS.js": "33127db1d3eadb0edf7d95c33f0d1db9184ae7bd",
     "/AngularLedger/chunk-D254UPHH.js": "3c47f0d51317c01d0a684595877b226b92b90434",
     "/AngularLedger/chunk-DL37R527.js": "a148e0b48e15a6e3687ff402ff9756d39826c14a",
     "/AngularLedger/chunk-DPXIAWB2.js": "3bc82c98bc72874ffff5b5b27017b1c122c3f50a",
@@ -69,9 +55,9 @@
     "/AngularLedger/chunk-Z3XORJVL.js": "ffbed57a146986cdb15ee564426a3e6bd24d4942",
     "/AngularLedger/favicon.ico": "a3a8446a4395bb086210427a71de28862d52209c",
     "/AngularLedger/firebase-messaging-sw.js": "f3795c4bf8e7f28640750bd8e838d70a23547493",
-    "/AngularLedger/index.html": "4fdda75706c60dac9189974c4bc5db26fc97f21f",
-    "/AngularLedger/main-XEBIL55U.js": "b46d2db6f5439aae81674625d9c94a7e5cf638da",
-    "/AngularLedger/manifest.webmanifest": "3bbe6c7cc4a4d5f54c48c53d538dd4f01cc60c5a",
+    "/AngularLedger/index.html": "b10cd59269baa2476c81df9ddf0b61e05af4941e",
+    "/AngularLedger/main-5JQLELJY.js": "016815b401e3f02092db5d4a28854dc52a9d6555",
+    "/AngularLedger/manifest.webmanifest": "a9890f85e84b387df3f6963fc649577645541b14",
     "/AngularLedger/polyfills-LZBJRJJE.js": "fda1c82c5c620f1fa442f687b3df45a037f6fcc9",
     "/AngularLedger/styles-HTZ66I63.css": "ce44930839ff86f6f09141be315ccb944f379a16"
   },
