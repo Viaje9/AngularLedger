@@ -59,8 +59,15 @@ export class SettingComponent implements OnInit {
 
   async updateFcmToken() {
     try {
+      const registration = await navigator.serviceWorker.register(
+        `${environment.baseUrl}firebase-messaging-sw.js`,
+        {
+          scope: environment.baseUrl,
+        },
+      );
       const token = await getToken(this.messaging, {
         vapidKey: environment.vapidKey,
+        serviceWorkerRegistration: registration,
       });
 
       this.modalService.openConfirm({
