@@ -7,7 +7,7 @@ import { SharedModule } from './shared/shared.module';
   standalone: true,
   imports: [SharedModule, LayoutComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   title = 'angular-ledger';
