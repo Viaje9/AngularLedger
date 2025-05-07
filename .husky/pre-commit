@@ -1,1 +1,4 @@
+node pre-script/update-version.js
+git add .
+
 npx pretty-quick --staged
