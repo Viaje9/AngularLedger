@@ -26,6 +26,10 @@ import { provideServiceWorker } from '@angular/service-worker';
 import 'hammerjs';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 /**
  * https://github.com/angular/angular/issues/50447#issuecomment-1561531221
@@ -37,21 +41,22 @@ export function initData(auth: Auth) {
       onAuthStateChanged(
         auth,
         () => resolve(true),
-        (err) => reject(err),
-      ),
+        (err) => reject(err)
+      )
     );
 }
 
 export const appConfig: ApplicationConfig = {
   providers: [
     { provide: APP_BASE_HREF, useValue: environment.baseUrl },
+    provideHttpClient(withInterceptorsFromDi()),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() =>
       initializeFirestore(getApp(), {
         localCache: persistentLocalCache({
           tabManager: persistentMultipleTabManager(),
         }),
-      }),
+      })
     ),
     provideAuth(() => getAuth()),
     {

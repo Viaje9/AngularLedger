@@ -72,6 +72,26 @@
         </div>
         <span> {{ version }} </span>
       </div>
+
+      <!-- 輸入自訂匯出 API Endpoint -->
+      <div class="px-4 py-3 bg-gray-700">
+        <input
+          [(ngModel)]="exportEndpoint"
+          type="text"
+          placeholder="請輸入匯出 API Endpoint"
+          class="w-full bg-gray-600 text-white p-2 rounded"
+        />
+      </div>
+
+      <div
+        class="flex items-center justify-between px-4 py-3 bg-gray-700"
+        (click)="exportLocalData()"
+      >
+        <div class="flex items-center">
+          <span> 匯出本地資料 </span>
+        </div>
+        <span> &gt; </span>
+      </div>
     </div>
   </div>
 </div>
