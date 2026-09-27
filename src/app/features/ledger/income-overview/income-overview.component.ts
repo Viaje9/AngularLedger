@@ -13,17 +13,17 @@ import { take } from 'rxjs';
 import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { isValidDate } from '@src/app/utils/validator';
+import { PreferencesService } from '@src/app/core/services/preferences.service';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-income-overview',
-  standalone: true,
-  imports: [
-    SharedModule,
-    AngularMaterialDatepickerModule,
-  ],
-  templateUrl: './income-overview.component.html',
-  styleUrl: './income-overview.component.css',
+    selector: 'app-income-overview',
+    imports: [
+        SharedModule,
+        AngularMaterialDatepickerModule,
+    ],
+    templateUrl: './income-overview.component.html',
+    styleUrl: './income-overview.component.css'
 })
 export class IncomeOverviewComponent implements OnInit {
 
@@ -36,9 +36,9 @@ export class IncomeOverviewComponent implements OnInit {
   currentDate = new Date()
 
   ledgerItems: LedgerItem[] = []
+  private listRequestId = 0
 
-  showBudget = localStorage.getItem('showBudget') === '1'
-  budgetAmount = parseInt(localStorage.getItem('budgetAmount') || '0')
+  showBudget = false
   currentRangeBudget = 0
   startDate = ''
   endDate = ''
@@ -48,7 +48,8 @@ export class IncomeOverviewComponent implements OnInit {
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
     private modalService: ModalService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private preferences: PreferencesService,
   ) {
     const dateString = this.activatedRoute.snapshot.queryParams['date']
     if (isValidDate(dateString)) {
@@ -59,8 +60,13 @@ export class IncomeOverviewComponent implements OnInit {
 
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.getIncomeList()
+    try {
+      this.showBudget = (await this.preferences.getBudget())?.showBudget ?? false
+    } catch {
+      this.showBudget = false
+    }
   }
 
   onSwipeLeft() {
@@ -90,21 +96,25 @@ export class IncomeOverviewComponent implements OnInit {
       state: {
         incomeStatus: StatusEnum.Add,
         date: this.currentDate
-      }
+      },
+      queryParams: { date: dayjs(this.currentDate).format('YYYY-MM-DD') }
     })
   }
 
   getIncomeList() {
+    const requestId = ++this.listRequestId
     this.loaderService.start()
     this.ledgerService.getTodayIncomeList(this.currentDate).then((incomeList) => {
-      this.ledgerItems = incomeList
+      if (requestId === this.listRequestId) this.ledgerItems = incomeList
+    }).catch(() => {
+      this.modalService.openConfirm({ content: '載入收入失敗', showCancelBtn: false })
     }).finally(() => {
       this.loaderService.stop()
     })
   }
 
   totalAmount() {
-    return this.ledgerItems.reduce((acc, item) => acc + parseInt(item.price), 0)
+    return this.ledgerItems.reduce((acc, item) => acc + parseFloat(item.price), 0)
   }
 
   goToEditTag(item: LedgerItem) {
@@ -118,7 +128,8 @@ export class IncomeOverviewComponent implements OnInit {
 
     }
     this.router.navigate(['/addIncome'], {
-      state: stateData
+      state: stateData,
+      queryParams: { id: item.id },
     })
   }
 
@@ -131,7 +142,7 @@ export class IncomeOverviewComponent implements OnInit {
   }
 
   onClickStatistics() {
-    if (localStorage.getItem('showBudget') === '1') {
+    if (this.showBudget) {
       this.router.navigate(['/search/statisticsCharts'], {
         state: {
           date: this.currentDate

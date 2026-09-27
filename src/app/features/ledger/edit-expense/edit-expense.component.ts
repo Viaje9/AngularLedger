@@ -7,23 +7,20 @@ import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
 import { EditExpenseInitData } from './edit-expense.model';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
-import { Timestamp, query } from '@angular/fire/firestore';
 import dayjs from 'dayjs';
 import { MatBottomSheetModule, MatBottomSheet } from '@angular/material/bottom-sheet';
 import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bottom-sheet/remark-bottom-sheet.component';
 import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
 
 @Component({
-  selector: 'app-edit-expense',
-  standalone: true,
-  imports: [
-    SharedModule,
-    MatBottomSheetModule,
-    AngularMaterialDatepickerModule
-  ],
-  templateUrl: './edit-expense.component.html',
-  styleUrl: './edit-expense.component.css',
-
+    selector: 'app-edit-expense',
+    imports: [
+        SharedModule,
+        MatBottomSheetModule,
+        AngularMaterialDatepickerModule
+    ],
+    templateUrl: './edit-expense.component.html',
+    styleUrl: './edit-expense.component.css'
 })
 export class EditExpenseComponent implements OnInit {
   @ViewChild('scrollTags') scrollTagsRef!: ElementRef;
@@ -41,7 +38,7 @@ export class EditExpenseComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
-  date!: Timestamp;
+  date!: Date;
   expenseDate: Date = new Date();
 
   constructor(
@@ -54,11 +51,11 @@ export class EditExpenseComponent implements OnInit {
   ) {
     this.tagsGroup = this.route.snapshot.data['tagListGroup'];
     const expenseData = this.route.snapshot.data['data'] as EditExpenseInitData
-    this.price = parseInt(expenseData.price)
+    this.price = parseFloat(expenseData.price)
     this.selectedTagId = expenseData.tagId
     this.description = expenseData.description
     this.date = expenseData.date
-    this.expenseDate = this.date.toDate();
+    this.expenseDate = this.date;
   }
   ngOnInit(): void {
 
@@ -112,23 +109,29 @@ export class EditExpenseComponent implements OnInit {
     }
 
     this.loaderService.start()
-    await this.ledgerService.updateExpense({
+    try {
+      await this.ledgerService.updateExpense({
       docId: this.route.snapshot.data['data'].docId,
-      date: Timestamp.fromDate(this.expenseDate),
+      date: this.expenseDate,
       price: this.price.toString(),
       tagId: this.selectedTagId,
       description: this.description
-    }).catch((error) => {
-      this.showError()
-    }).then(() => {
+      })
       this.onClickBack()
-    }).finally(() => this.loaderService.stop())
+    } catch {
+      this.showError()
+    } finally {
+      this.loaderService.stop()
+    }
   }
 
   saveCheck() {
     const checkTag = this.tagsGroup.some(tags => tags.some(tagInfo => tagInfo.id === this.selectedTagId))
 
-    if (!this.selectedTagId || !this.price?.toString() || !checkTag) {
+    const originalPrice = Number(this.route.snapshot.data['data'].price)
+    const validPrice = Number.isFinite(this.price) &&
+      (this.price > 0 || (this.price === 0 && originalPrice === 0))
+    if (!this.selectedTagId || !validPrice || !checkTag) {
       this.modalService.openConfirm({
         content: '請輸入金額與選擇標籤',
         okText: '確認',
@@ -167,12 +170,10 @@ export class EditExpenseComponent implements OnInit {
   doDelete() {
     this.loaderService.start()
     this.ledgerService.deleteExpense(this.route.snapshot.data['data'].docId)
-      .catch((error) => {
-        this.showError()
-      })
       .then(() => {
         this.onClickBack()
       })
+      .catch(() => this.showError())
       .finally(() => this.loaderService.stop())
   }
 

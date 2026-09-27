@@ -1,356 +1,130 @@
 import { Injectable } from '@angular/core';
 import {
-  CollectionReference,
-  DocumentData,
-  Firestore,
-  Timestamp,
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  getDocsFromCache,
-  limit,
-  orderBy,
-  query,
-  updateDoc,
-  where,
-  writeBatch,
-} from '@angular/fire/firestore';
+  archiveTag, createEntry, createTag, deleteEntry, getEntriesSummary, getEntry,
+  getTag, listEntries, listTags, restoreTag, setTagOrder, updateEntry, updateTag,
+} from '../../api/generated/sdk.gen';
+import type { EntriesResponse, Entry, EntryKind, Tag } from '../../api/generated/types.gen';
 import { AddLedgerItem, LedgerItem } from '../models/ledger-item.model';
 import { TagInfo } from '../models/tag.model';
 import { TransactionType } from '../models/transaction-type.model';
-import { AuthService } from './auth.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+const toTag = (tag: Tag): TagInfo => ({
+  id: tag.id, tagName: tag.name, tagIconName: tag.iconName,
+  transactionType: tag.kind, sort: tag.sortOrder, archivedAtMs: tag.archivedAtMs,
+});
+
+const toItem = (entry: Entry): LedgerItem => ({
+  id: entry.id, date: new Date(entry.occurredAtMs),
+  price: (entry.amountMinor / 10 ** entry.currencyScale).toString(),
+  tagId: entry.tagId, description: entry.description, tagInfo: toTag(entry.tag),
+});
+
+const amountMinor = (price: string): number => {
+  if (!/^\d+(?:\.\d{1,2})?$/.test(price)) throw new Error('金額格式錯誤');
+  const [units, fraction = ''] = price.split('.');
+  const result = Number(units) * 100 + Number(fraction.padEnd(2, '0'));
+  if (!Number.isSafeInteger(result)) throw new Error('金額超出範圍');
+  return result;
+};
+
+const dayRange = (start: Date, end: Date) => {
+  const from = new Date(start); from.setHours(0, 0, 0, 0);
+  const to = new Date(end); to.setHours(0, 0, 0, 0); to.setDate(to.getDate() + 1);
+  return { fromMs: from.getTime(), toMs: to.getTime() };
+};
+
+@Injectable({ providedIn: 'root' })
 export class LedgerService {
-  tagsCollection!: CollectionReference<DocumentData, DocumentData>;
-  expenseListCollection!: CollectionReference<DocumentData, DocumentData>;
-  incomeListCollection!: CollectionReference<DocumentData, DocumentData>;
-  constructor(
-    private firestore: Firestore,
-    private auth: AuthService,
-  ) {
-    this.tagsCollection = collection(this.firestore, this.tagsPath);
-    this.expenseListCollection = collection(
-      this.firestore,
-      this.expenseListPath,
-    );
-    this.incomeListCollection = collection(this.firestore, this.incomeListPath);
+  async getTagList(type: TransactionType, includeArchived = false): Promise<TagInfo[]> {
+    const { data } = await listTags({ query: { kind: type, includeArchived }, throwOnError: true });
+    return data.items.map(toTag);
   }
 
-  get tagsPath() {
-    return `users/${this.auth.userUid}/tags`;
+  async getTagInfo(id: string): Promise<TagInfo> {
+    const { data } = await getTag({ path: { id }, throwOnError: true });
+    return toTag(data);
   }
 
-  get expenseListPath() {
-    return `users/${this.auth.userUid}/expenseList`;
+  async getTagLastSort(type: TransactionType): Promise<number> {
+    const tags = await this.getTagList(type);
+    return tags.length ? Math.max(...tags.map(tag => tag.sort)) + 1 : 0;
   }
 
-  get incomeListPath() {
-    return `users/${this.auth.userUid}/incomeList`;
+  async addTagDoc(data: { tagIconName: string; tagName: string; sort: number; transactionType: TransactionType }) {
+    const { data: tag } = await createTag({ body: { kind: data.transactionType, name: data.tagName, iconName: data.tagIconName }, throwOnError: true });
+    return toTag(tag);
   }
 
-  /** tags start */
-
-  getTagList(type: TransactionType) {
-    // 使用Snapshot快照
-    // const userId = this.auth.userUid;
-    // const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
-    // const q = query(tagsCollection, where('userId', '==', userId));
-    // const querySnapshot = await getDocsFromCache(q);
-    // return querySnapshot.docs.map(doc => doc.data());
-    // where('transactionType', '==', type)
-    // 使用collectionData
-    return getDocsFromCache(
-      query(
-        this.tagsCollection,
-        where('transactionType', '==', type),
-        orderBy('sort', 'asc'),
-      ),
-    ).then((querySnapshot) =>
-      querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })),
-    ) as Promise<TagInfo[]>;
+  async updateTagDoc(id: string, tagIconName: string, tagName: string) {
+    const { data } = await updateTag({ path: { id }, body: { name: tagName, iconName: tagIconName }, throwOnError: true });
+    return toTag(data);
   }
 
-  getTagInfo(docId: string) {
-    const docRef = doc(this.firestore, this.tagsPath, docId);
-    return getDoc(docRef);
+  async removeTagDoc(id: string) {
+    await archiveTag({ path: { id }, throwOnError: true });
   }
 
-  /**
-   * 取得所有tag並過濾出指定的tagIdList
-   */
-  private async getTagListWithId(tagIdList: string[]) {
-    if (!tagIdList.length) return [];
-    const userId = this.auth.userUid;
-    const tagsCollection = collection(this.firestore, `users/${userId}/tags`);
-    const q = query(tagsCollection);
-    const querySnapshot = await getDocs(q);
-    const tagList = querySnapshot.docs
-      .map((doc) => ({ ...doc.data(), id: doc.id }))
-      .filter((tag) => tagIdList.includes(tag.id));
-    return tagList;
+  async restoreTagDoc(id: string) {
+    await restoreTag({ path: { id }, throwOnError: true });
   }
 
-  getTagLastSort(type: TransactionType) {
-    return getDocsFromCache(
-      query(
-        this.tagsCollection,
-        where('transactionType', '==', type),
-        orderBy('sort', 'desc'),
-        limit(1),
-      ),
-    )
-      .then((querySnapshot) => querySnapshot.docs.map((doc) => doc.data()))
-      .then((e) => {
-        if (e.length) {
-          return e[0]['sort'];
-        }
-        return 0;
-      });
+  async updateTagsSort(tags: TagInfo[]) {
+    if (!tags.length) return;
+    await setTagOrder({ body: { kind: tags[0].transactionType, tagIds: tags.map(tag => tag.id) }, throwOnError: true });
   }
 
-  addTagDoc(data: {
-    tagIconName: string;
-    tagName: string;
-    sort: number;
-    transactionType: TransactionType;
-  }) {
-    return addDoc(this.tagsCollection, data);
+  private async listRange(kind: EntryKind, start: Date, end: Date): Promise<LedgerItem[]> {
+    const items: LedgerItem[] = [];
+    const range = dayRange(start, end);
+    let cursor: string | null = null;
+    do {
+      const { data }: { data: EntriesResponse } = await listEntries({ query: { kind, ...range, limit: 100, ...(cursor ? { cursor } : {}) }, throwOnError: true });
+      items.push(...data.items.map(toItem));
+      cursor = data.nextCursor;
+    } while (cursor);
+    return items;
   }
 
-  updateTagDoc(docId: string, tagIconName: string, tagName: string) {
-    const docRef = doc(this.firestore, this.tagsPath, docId);
-    return updateDoc(docRef, {
-      tagName,
-      tagIconName,
-    });
+  private async entry(kind: EntryKind, id: string): Promise<LedgerItem> {
+    const { data } = await getEntry({ path: { kind, id }, throwOnError: true });
+    return toItem(data);
   }
 
-  removeTagDoc(docId: string) {
-    const docRef = doc(this.firestore, this.tagsPath, docId);
-    return deleteDoc(docRef);
+  private async add(kind: EntryKind, value: AddLedgerItem) {
+    const { data } = await createEntry({ body: {
+      kind, occurredAtMs: value.date.getTime(), amountMinor: amountMinor(value.price),
+      currencyCode: 'TWD', currencyScale: 2, tagId: value.tagId, description: value.description,
+    }, throwOnError: true });
+    return toItem(data);
   }
 
-  updateTagsSort(newTags: TagInfo[]) {
-    const batch = writeBatch(this.firestore);
-    newTags.forEach((tag) => {
-      const docRef = doc(this.firestore, this.tagsPath, tag.id);
-      batch.update(docRef, { sort: tag.sort });
-    });
-    return batch.commit();
+  private async update(kind: EntryKind, value: AddLedgerItem & { docId: string }) {
+    const { data } = await updateEntry({ path: { kind, id: value.docId }, body: {
+      occurredAtMs: value.date.getTime(), amountMinor: amountMinor(value.price),
+      currencyCode: 'TWD', currencyScale: 2, tagId: value.tagId, description: value.description,
+    }, throwOnError: true });
+    return toItem(data);
   }
 
-  update(newTags: TagInfo[]) {
-    const batch = writeBatch(this.firestore);
-    newTags.forEach((tag) => {
-      const docRef = doc(this.firestore, this.tagsPath, tag.id);
-      batch.update(docRef, {
-        sort: tag.sort,
-        tagName: tag.tagName,
-        tagIconName: tag.tagIconName,
-        transactionType: tag.transactionType,
-      });
-    });
-    return batch.commit();
+  private async remove(kind: EntryKind, id: string) {
+    await deleteEntry({ path: { kind, id }, throwOnError: true });
   }
 
-  /** tags end */
-
-  /** expense start */
-
-  getExpenseInfo(docId: string) {
-    const docRef = doc(this.firestore, this.expenseListPath, docId);
-    return getDoc(docRef);
-  }
-
-  addExpense(data: AddLedgerItem) {
-    return addDoc(this.expenseListCollection, data);
-  }
-
-  updateExpense(data: AddLedgerItem & { docId: string }) {
-    const docRef = doc(this.firestore, this.expenseListPath, data.docId);
-    return updateDoc(docRef, {
-      date: data.date,
-      price: data.price,
-      tagId: data.tagId,
-      description: data.description,
-    });
-  }
-
-  deleteExpense(docId: string) {
-    const docRef = doc(this.firestore, this.expenseListPath, docId);
-    return deleteDoc(docRef);
-  }
-
-  getTodayExpenseList(date: Date) {
-    const q = query(
-      this.expenseListCollection,
-      ...this.queryDate(date, 'date'),
-    );
-    return getDocs(q).then(async (querySnapshot) => {
-      const expenseList = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as AddLedgerItem),
-        id: doc.id,
-      }));
-      const tagIdList = expenseList.map((e) => e['tagId']);
-      const tagInfoList = await this.getTagListWithId(tagIdList);
-      const list = expenseList.map((expenseItem) => {
-        const tagInfo = tagInfoList.find(
-          (tag) => tag.id === expenseItem.tagId,
-        ) as TagInfo;
-        return {
-          ...expenseItem,
-          tagInfo,
-        };
-      });
-      return list;
-    }) as Promise<LedgerItem[]>;
-  }
-
-  /** expense end */
-
-  /** income start */
-
-  getTodayIncomeList(date: Date) {
-    return getDocsFromCache(
-      query(this.incomeListCollection, ...this.queryDate(date, 'date')),
-    )
-      .then((querySnapshot) =>
-        querySnapshot.docs.map((doc) => ({
-          ...(doc.data() as AddLedgerItem),
-          id: doc.id,
-        })),
-      )
-      .then(async (incomeList) => {
-        const tagIdList = incomeList.map((e) => e['tagId']);
-        const tagInfoList = await this.getTagListWithId(tagIdList);
-        const list = incomeList.map((incomeItem) => {
-          const tagInfo = tagInfoList.find(
-            (tag) => tag.id === incomeItem.tagId,
-          ) as TagInfo;
-          return {
-            ...incomeItem,
-            tagInfo,
-          };
-        });
-        return list;
-      }) as Promise<LedgerItem[]>;
-  }
-
-  getIncomeInfo(docId: string) {
-    const docRef = doc(this.firestore, this.incomeListPath, docId);
-    return getDoc(docRef);
-  }
-
-  addIncome(data: AddLedgerItem) {
-    return addDoc(this.incomeListCollection, data);
-  }
-
-  updateIncome(data: AddLedgerItem & { docId: string }) {
-    const docRef = doc(this.firestore, this.incomeListPath, data.docId);
-    return updateDoc(docRef, {
-      date: data.date,
-      price: data.price,
-      tagId: data.tagId,
-      description: data.description,
-    });
-  }
-
-  deleteIncome(docId: string) {
-    const docRef = doc(this.firestore, this.incomeListPath, docId);
-    return deleteDoc(docRef);
-  }
-
-  /** income end */
-
-  getBudgetAmount(startDate: Date, endDate: Date) {
-    const startOfDate = structuredClone(startDate);
-    startOfDate.setHours(0, 0, 0, 0);
-
-    const startOfTimestamp = Timestamp.fromDate(startOfDate);
-
-    const endOfDay = structuredClone(endDate);
-    endOfDay.setHours(23, 59, 59, 999);
-    const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
-
-    const q = query(
-      this.expenseListCollection,
-      where('date', '>=', startOfTimestamp),
-      where('date', '<=', endOfDayTimestamp),
-    );
-
-    return getDocsFromCache(q).then((querySnapshot) => {
-      return querySnapshot.docs.reduce(
-        (acc, item) => acc + parseInt(item.data()['price']),
-        0,
-      );
-    });
-  }
-
-  getRangeItems(startDate: Date, endDate: Date) {
-    const startOfDate = structuredClone(startDate);
-    startOfDate.setHours(0, 0, 0, 0);
-
-    const startOfTimestamp = Timestamp.fromDate(startOfDate);
-
-    const endOfDay = structuredClone(endDate);
-    endOfDay.setHours(23, 59, 59, 999);
-    const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
-    const q = query(
-      this.expenseListCollection,
-      where('date', '>=', startOfTimestamp),
-      where('date', '<=', endOfDayTimestamp),
-    );
-    return getDocsFromCache(q)
-      .then(async (querySnapshot) => {
-        return querySnapshot.docs.map((doc) => ({ ...doc.data() }));
-      })
-      .then(async (expenseList) => {
-        const q = query(this.tagsCollection);
-        const querySnapshot = await getDocsFromCache(q);
-        const tagList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        const list = [];
-        for (const expenseItem of expenseList) {
-          const item = expenseItem as AddLedgerItem;
-          const tagInfo = tagList.find((tag) => tag.id === item.tagId);
-          expenseItem['tagInfo'] = tagInfo || {};
-          list.push(expenseItem);
-        }
-        return list;
-      }) as Promise<LedgerItem[]>;
-  }
-
-  queryDate(date: Date, fieldName: string) {
-    // 定義您想要搜索的日期
-    const specificDate = structuredClone(date);
-    specificDate.setHours(0, 0, 0, 0); // 將時間設定為該日的開始
-
-    // 創建開始時間戳（該日的00:00:00）
-    const startOfDay = Timestamp.fromDate(specificDate);
-
-    // 計算結束時間戳（該日的23:59:59）
-    const endOfDay = structuredClone(date);
-    endOfDay.setHours(23, 59, 59, 999); // 將時間設定為該日的結束
-    const endOfDayTimestamp = Timestamp.fromDate(endOfDay);
-
-    return [
-      where(fieldName, '>=', startOfDay),
-      where(fieldName, '<=', endOfDayTimestamp),
-    ];
-  }
-
-  getExpenseList() {
-    return getDocsFromCache(this.expenseListCollection).then((querySnapshot) =>
-      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-    ) as Promise<LedgerItem[]>;
+  getExpenseInfo(id: string) { return this.entry('expense', id); }
+  getIncomeInfo(id: string) { return this.entry('income', id); }
+  addExpense(value: AddLedgerItem) { return this.add('expense', value); }
+  addIncome(value: AddLedgerItem) { return this.add('income', value); }
+  updateExpense(value: AddLedgerItem & { docId: string }) { return this.update('expense', value); }
+  updateIncome(value: AddLedgerItem & { docId: string }) { return this.update('income', value); }
+  deleteExpense(id: string) { return this.remove('expense', id); }
+  deleteIncome(id: string) { return this.remove('income', id); }
+  getTodayExpenseList(date: Date) { return this.listRange('expense', date, date); }
+  getTodayIncomeList(date: Date) { return this.listRange('income', date, date); }
+  getRangeItems(start: Date, end: Date) { return this.listRange('expense', start, end); }
+  async getBudgetAmount(start: Date, end: Date): Promise<number> {
+    const { data } = await getEntriesSummary({ query: {
+      kind: 'expense', ...dayRange(start, end), currencyCode: 'TWD',
+    }, throwOnError: true });
+    return data.totalMinor / 100;
   }
 }

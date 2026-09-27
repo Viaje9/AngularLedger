@@ -1,9 +1,8 @@
-import { Timestamp } from "@angular/fire/firestore";
 
 
 export interface EditExpenseInitData {
   docId: string;
-  date: Timestamp;
+  date: Date;
   price: string;
   tagId: string;
   description: string;

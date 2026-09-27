@@ -33,6 +33,19 @@
         </button>
       </div>
     </div>
+    <button class="px-4 py-3 text-sm text-gray-200" (click)="showArchived = !showArchived">
+      {{ showArchived ? '隱藏已封存標籤' : '查看已封存標籤' }}
+    </button>
+    @if (showArchived) {
+      <div class="space-y-2">
+        @for (item of archivedTagList; track item.id) {
+          <div class="flex justify-between items-center px-4 py-3 bg-gray-700">
+            <span><i [ngClass]="item.tagIconName" class="mr-2"></i>{{ item.tagName }}</span>
+            <button (click)="restoreTag(item.id)" class="underline">恢復</button>
+          </div>
+        }
+      </div>
+    }
     <div class="space-y-2" cdkDropList (cdkDropListDropped)="dropTag($event)">
       @for (item of tagList ; track item.id) {
       <div

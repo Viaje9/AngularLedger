@@ -5,7 +5,6 @@ import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LoaderService } from '@src/app/core/services/loader.service';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
-import { Timestamp } from '@angular/fire/firestore';
 import dayjs from 'dayjs';
 import { isValidDate } from '@src/app/utils/validator';
 import {
@@ -15,15 +14,13 @@ import {
 import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bottom-sheet/remark-bottom-sheet.component';
 
 @Component({
-  selector: 'app-add-expense',
-  standalone: true,
-  imports: [
-    SharedModule,
-    MatBottomSheetModule,
-  ],
-  templateUrl: './add-expense.component.html',
-  styleUrl: './add-expense.component.css',
-
+    selector: 'app-add-expense',
+    imports: [
+        SharedModule,
+        MatBottomSheetModule,
+    ],
+    templateUrl: './add-expense.component.html',
+    styleUrl: './add-expense.component.css'
 })
 export class AddExpenseComponent implements OnInit {
   scrollTagsRef = viewChild.required<ElementRef>('scrollTags');
@@ -39,7 +36,7 @@ export class AddExpenseComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
-  date!: Timestamp;
+  date!: Date;
 
   constructor(
     private route: ActivatedRoute,
@@ -55,14 +52,14 @@ export class AddExpenseComponent implements OnInit {
 
 
     if (isValidDate(dateString)) {
-      this.date = Timestamp.fromDate(dayjs(dateString, 'YYYY-MM-DD').toDate())
+      this.date = dayjs(dateString, 'YYYY-MM-DD').toDate()
     } else {
       this.router.navigate(['/'])
     }
   }
   ngOnInit(): void {
     const { price, description } = this.route.snapshot.queryParams;
-    const priceNum = parseInt(price)
+    const priceNum = parseFloat(price)
     if (priceNum > 0) {
       this.price = priceNum
     }
@@ -110,7 +107,7 @@ export class AddExpenseComponent implements OnInit {
   onClickBack() {
     this.router.navigate(['/'], {
       queryParams: {
-        date: dayjs(this.date.toDate()).format('YYYY-MM-DD')
+        date: dayjs(this.date).format('YYYY-MM-DD')
       }
     });
   }
@@ -121,22 +118,25 @@ export class AddExpenseComponent implements OnInit {
     }
 
     this.loaderService.start()
-    await this.ledgerService.addExpense({
+    try {
+      await this.ledgerService.addExpense({
       date: this.date,
       price: this.price.toString(),
       tagId: this.selectedTagId,
       description: this.description
-    }).catch((error) => {
-      this.showError()
-    }).then(() => {
+      })
       this.onClickBack()
-    }).finally(() => this.loaderService.stop())
+    } catch {
+      this.showError()
+    } finally {
+      this.loaderService.stop()
+    }
   }
 
   saveCheck() {
     const checkTag = this.tagsGroup.some(tags => tags.some(tagInfo => tagInfo.id === this.selectedTagId))
 
-    if (!this.selectedTagId || !this.price?.toString() || !checkTag) {
+    if (!this.selectedTagId || !Number.isFinite(this.price) || this.price <= 0 || !checkTag) {
       this.modalService.openConfirm({
         content: '請輸入金額與選擇標籤',
         okText: '確認',

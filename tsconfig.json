@@ -27,7 +27,8 @@
     "useDefineForClassFields": false,
     "lib": [
       "ES2022",
-      "dom"
+      "dom",
+      "DOM.Iterable"
     ]
   },
   "angularCompilerOptions": {

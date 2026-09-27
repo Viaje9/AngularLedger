@@ -10,27 +10,30 @@ import { take } from 'rxjs';
 import { AngularMaterialDatepickerModule } from '@src/app/shared/angular-material-datepicker.module';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { isValidDate } from '@src/app/utils/validator';
+import { PreferencesService } from '@src/app/core/services/preferences.service';
 
 
 @UntilDestroy()
 @Component({
-  selector: 'app-expense-overview',
-  standalone: true,
-  imports: [
-    SharedModule,
-    AngularMaterialDatepickerModule,
-  ],
-  templateUrl: './expense-overview.component.html',
-  styleUrl: './expense-overview.component.css',
+    selector: 'app-expense-overview',
+    imports: [
+        SharedModule,
+        AngularMaterialDatepickerModule,
+    ],
+    templateUrl: './expense-overview.component.html',
+    styleUrl: './expense-overview.component.css'
 })
 export class ExpenseOverviewComponent implements OnInit {
 
   currentDate = new Date()
 
   ledgerItems: LedgerItem[] = []
+  private listRequestId = 0
+  private budgetRequestId = 0
 
-  showBudget = localStorage.getItem('showBudget') === '1'
-  budgetAmount = parseInt(localStorage.getItem('budgetAmount') || '0')
+  showBudget = false
+  budgetAmount = 0
+  selectedDate = 0
   currentRangeBudget = 0
   startDate = ''
   endDate = ''
@@ -40,7 +43,8 @@ export class ExpenseOverviewComponent implements OnInit {
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
     private modalService: ModalService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private preferences: PreferencesService,
   ) {
     const dateString = this.activatedRoute.snapshot.queryParams['date']
 
@@ -51,13 +55,21 @@ export class ExpenseOverviewComponent implements OnInit {
     this.currentDate.setHours(0, 0, 0, 0);
   }
 
-  ngOnInit() {
-    this.countBudget()
+  async ngOnInit() {
     this.getExpenseList()
+    try {
+      const budget = await this.preferences.getBudget()
+      this.showBudget = budget?.showBudget ?? false
+      this.budgetAmount = (budget?.amountMinor ?? 0) / 100
+      this.selectedDate = budget?.cycleDay ?? 0
+      this.countBudget()
+    } catch {
+      this.showBudget = false
+    }
   }
 
   countBudget() {
-    const selectedDate = parseInt(localStorage.getItem('selectedDate') || '0')
+    const selectedDate = this.selectedDate
     if (selectedDate) {
       const inputDate = dayjs(this.currentDate);
       let startDateOfDay, endDateOfDay
@@ -75,9 +87,14 @@ export class ExpenseOverviewComponent implements OnInit {
       if (startDate !== this.startDate && endDate !== this.endDate) {
         this.startDate = startDate
         this.endDate = endDate
-        this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate()).then((amount) => {
-          this.currentRangeBudget = this.budgetAmount - amount
-        })
+        const requestId = ++this.budgetRequestId
+        this.ledgerService.getBudgetAmount(startDateOfDay.toDate(), endDateOfDay.toDate())
+          .then(amount => {
+            if (requestId === this.budgetRequestId) this.currentRangeBudget = this.budgetAmount - amount
+          })
+          .catch(() => this.modalService.openConfirm({
+            content: '載入預算統計失敗', showCancelBtn: false,
+          }))
       }
     }
   }
@@ -125,25 +142,26 @@ export class ExpenseOverviewComponent implements OnInit {
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
   }
 
-  getExpenseList(retry = 0) {
-    if (retry < 2) {
-      this.loaderService.start()
-      this.ledgerService.getTodayExpenseList(this.currentDate).then((expenseList) => {
-        this.ledgerItems = expenseList
-      }).finally(() => {
-        this.loaderService.stop()
-      }).catch(() => {
-        this.getExpenseList(retry + 1)
+  getExpenseList() {
+    const requestId = ++this.listRequestId
+    this.loaderService.start()
+    this.ledgerService.getTodayExpenseList(this.currentDate)
+      .then(expenseList => {
+        if (requestId === this.listRequestId) this.ledgerItems = expenseList
       })
-    }
+      .catch(() => this.modalService.openConfirm({
+        content: '載入支出失敗', showCancelBtn: false,
+      }))
+      .finally(() => this.loaderService.stop())
   }
 
   totalAmount() {
-    return this.ledgerItems.reduce((acc, item) => acc + parseInt(item.price), 0)
+    return this.ledgerItems.reduce((acc, item) => acc + parseFloat(item.price), 0)
   }
 
   goToEditExpense(item: LedgerItem) {
     this.router.navigate(['/editExpense'], {
+      queryParams: { id: item.id },
       state: {
         docId: item.id,
       }
@@ -167,7 +185,7 @@ export class ExpenseOverviewComponent implements OnInit {
   }
 
   onClickStatistics() {
-    if (localStorage.getItem('showBudget') === '1') {
+    if (this.showBudget) {
       this.router.navigate(['/search/statisticsCharts'], {
         state: {
           date: this.currentDate
@@ -191,5 +209,3 @@ export class ExpenseOverviewComponent implements OnInit {
 
   }
 }
-
-

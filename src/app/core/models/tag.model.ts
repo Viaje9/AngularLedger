@@ -5,4 +5,5 @@ export interface TagInfo {
   tagName: string;
   sort: number;
   id: string;
+  archivedAtMs?: number | null;
 }

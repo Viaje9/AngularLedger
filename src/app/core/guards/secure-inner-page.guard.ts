@@ -6,11 +6,8 @@ export const secureInnerPageGuard: CanActivateChildFn = () => {
   const auth = inject(AuthService)
   const router = inject(Router)
 
-  if (!auth.isSignedIn()) {
-    router.navigateByUrl('/signIn')
-    return false;
-  }
-  return true;
+  return auth.isSignedIn().then(signedIn =>
+    signedIn ? true : router.createUrlTree(['/signIn'])
+  );
 };
-
 

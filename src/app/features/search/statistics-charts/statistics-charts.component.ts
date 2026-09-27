@@ -14,22 +14,21 @@ import { PieChartItem } from '@src/app/core/models/pie-chart-item.model';
 import { MatDateRangeInput } from '@angular/material/datepicker';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { ModalService } from '@src/app/core/services/modal.service';
-import { Timestamp } from '@angular/fire/firestore';
 import { ModalComponent } from '@src/app/core/components/modal/modal.component';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { PreferencesService } from '@src/app/core/services/preferences.service';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-statistics-charts',
-  standalone: true,
-  imports: [
-    SharedModule,
-    AngularMaterialDatepickerModule,
-    PieChartComponent
-  ],
-  templateUrl: './statistics-charts.component.html',
-  styleUrl: './statistics-charts.component.css',
+    selector: 'app-statistics-charts',
+    imports: [
+        SharedModule,
+        AngularMaterialDatepickerModule,
+        PieChartComponent
+    ],
+    templateUrl: './statistics-charts.component.html',
+    styleUrl: './statistics-charts.component.css'
 })
 export class StatisticsChartsComponent implements OnInit {
   @ViewChild('rangeInput') rangeInput!: MatDateRangeInput<any>;
@@ -53,6 +52,7 @@ export class StatisticsChartsComponent implements OnInit {
   totalPriceText = ''
 
   groupItems: LedgerItem[] = []
+  private rangeRequestId = 0
 
   dialogRef!: MatDialogRef<ModalComponent, any> | null
 
@@ -78,21 +78,30 @@ export class StatisticsChartsComponent implements OnInit {
     private ledgerService: LedgerService,
     private loaderService: LoaderService,
     private modalService: ModalService,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    private preferences: PreferencesService,
   ) {
     const perviousDate = this.router?.getCurrentNavigation()?.extras.state?.['date'] as Date || new Date()
     if (perviousDate) {
       this.previousDate = perviousDate
-      this.setRange()
-      this.getRangeItems()
     } else {
       this.dateTab = DateTabsEnum.CUSTOM_TAB
     }
 
   }
 
-  ngOnInit(): void {
-
+  async ngOnInit() {
+    try {
+      this.selectedDate = (await this.preferences.getBudget())?.cycleDay ?? 0
+      if (this.selectedDate) {
+        this.setRange()
+        this.getRangeItems()
+      } else {
+        this.dateTab = DateTabsEnum.CUSTOM_TAB
+      }
+    } catch {
+      this.dateTab = DateTabsEnum.CUSTOM_TAB
+    }
   }
 
   onDateChange() {
@@ -102,8 +111,11 @@ export class StatisticsChartsComponent implements OnInit {
     }
   }
 
+  selectedDate = 0
+
   setRange() {
-    const selectedDate = parseInt(localStorage.getItem('selectedDate') || '0')
+    const selectedDate = this.selectedDate
+    if (!selectedDate) return
     const inputDate = dayjs(this.previousDate);
     let startDateOfDay, endDateOfDay
     if (inputDate.date() >= selectedDate) {
@@ -149,24 +161,25 @@ export class StatisticsChartsComponent implements OnInit {
     const startDate = this.range.getRawValue().start
     const endDate = this.range.getRawValue().end
     if (startDate && endDate) {
+      const requestId = ++this.rangeRequestId
       this.loaderService.start()
       this.ledgerService.getRangeItems(startDate, endDate).then((list) => {
-        this.loaderService.stop()
+        if (requestId !== this.rangeRequestId) return
         const groupList = list.reduce((acc, item: LedgerItem) => {
           const group = acc.find((groupInfo: RangeGroupItem) => groupInfo.tagId === item.tagId)
           if (!group) {
             const groupItem: RangeGroupItem = {
               tagId: item.tagId,
-              price: parseInt(item.price),
+              price: parseFloat(item.price),
               tagName: item.tagInfo.tagName,
               items: [item]
             }
             acc.push(groupItem)
           } else {
             const index = acc.findIndex((groupInfo: any) => groupInfo.tagId === item.tagId)
-            acc[index].price += parseInt(item.price)
+            acc[index].price += parseFloat(item.price)
             acc[index].items.push(item)
-            acc[index].items.sort((a, b) => a.date.seconds - b.date.seconds)
+            acc[index].items.sort((a, b) => a.date.getTime() - b.date.getTime())
           }
           return acc
         }, [] as RangeGroupItem[]).sort((a, b) => b.price - a.price)
@@ -180,7 +193,10 @@ export class StatisticsChartsComponent implements OnInit {
             value: e.price
           }
         })
+      }).catch(() => {
+        if (requestId === this.rangeRequestId) this._snackBar.open('載入統計資料失敗', '', { duration: 3000 })
       })
+        .finally(() => this.loaderService.stop())
     }
   }
 
@@ -196,7 +212,7 @@ export class StatisticsChartsComponent implements OnInit {
   }
 
   async onClickTagGroup(tagName: string, ledgerItems: LedgerItem[]) {
-    this.groupItems = ledgerItems.sort((a, b) => a.date.seconds - b.date.seconds)
+    this.groupItems = ledgerItems.sort((a, b) => a.date.getTime() - b.date.getTime())
     this.dialogRef = await this.modalService.openConfirm({
       title: tagName,
       okText: '確認',
@@ -207,12 +223,12 @@ export class StatisticsChartsComponent implements OnInit {
     });
   }
 
-  goToExpenseDate(date: Timestamp) {
+  goToExpenseDate(date: Date) {
     if (this.dialogRef) {
       this.dialogRef.componentInstance.ok()
       this.router.navigate(['/expenseOverview'], {
         queryParams: {
-          date: dayjs(date.toDate()).format('YYYY-MM-DD')
+          date: dayjs(date).format('YYYY-MM-DD')
         }
       });
     }

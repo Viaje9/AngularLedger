@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, type OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CollectionReference, DocumentData } from '@angular/fire/firestore';
 import { FormsModule } from '@angular/forms';
 import { LoaderService } from 'src/app/core/services/loader.service';
+import { ModalService } from '@src/app/core/services/modal.service';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { UntilDestroy } from '@ngneat/until-destroy';
 import { TransactionType } from '@src/app/core/models/transaction-type.model';
@@ -11,15 +11,14 @@ import { AddTagStatus, AddTagStatusEnum } from './add-tag.model';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-add-tag',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    FormsModule
-  ],
-  templateUrl: './add-tag.component.html',
-  styleUrl: './add-tag.component.css',
+    selector: 'app-add-tag',
+    imports: [
+        CommonModule,
+        RouterModule,
+        FormsModule
+    ],
+    templateUrl: './add-tag.component.html',
+    styleUrl: './add-tag.component.css'
 })
 export class AddTagComponent implements OnInit {
 
@@ -55,19 +54,20 @@ export class AddTagComponent implements OnInit {
     'fas fa-store',
   ]
 
-  tagListCollection!: CollectionReference<DocumentData, DocumentData>
 
   constructor(
     private router: Router,
     private loaderService: LoaderService,
     private route: ActivatedRoute,
-    private ledgerService: LedgerService
+    private ledgerService: LedgerService,
+    private modalService: ModalService,
   ) {
     const initData = this.route.snapshot.data['data']
     this.tagStatus = initData.tagStatus
     if (initData.tagStatus === AddTagStatusEnum.Edit) {
       this.docId = initData.docId
       this.lastSort = initData.lastSort
+      this.transactionType = initData.transactionType
       this.selectedTag = initData.selectedTag
       this.tagname = initData.tagName
     } else if (initData.tagStatus === AddTagStatusEnum.Add) {
@@ -106,39 +106,51 @@ export class AddTagComponent implements OnInit {
     this.loaderService.start()
 
     if (this.tagStatus === AddTagStatusEnum.Add) {
-      await this.ledgerService.addTagDoc({
+      try {
+        await this.ledgerService.addTagDoc({
         tagName,
         tagIconName,
         sort: this.lastSort,
         transactionType: this.transactionType
-      }).catch((error) => {
-        console.error("Error adding document: ", error);
-      }).then(() => {
+        })
         this.router.navigateByUrl('/setting/tagsManage', {
           state: {
             transactionType: this.transactionType
           }
-        });
-      }).finally(() => this.loaderService.stop())
+        })
+      } catch {
+        alert('新增標籤失敗')
+      } finally {
+        this.loaderService.stop()
+      }
 
     } else if (this.tagStatus === AddTagStatusEnum.Edit) {
-      await this.ledgerService
-        .updateTagDoc(this.docId, tagIconName, tagName)
-        .catch((error) => {
-          console.error("Error adding document: ", error);
-        }).then(() => {
+      try {
+        await this.ledgerService.updateTagDoc(this.docId, tagIconName, tagName)
           this.router.navigateByUrl('/setting/tagsManage', {
             state: {
               transactionType: this.transactionType
             }
-          });
-        }).finally(() => this.loaderService.stop())
+          })
+      } catch {
+        alert('修改標籤失敗')
+      } finally {
+        this.loaderService.stop()
+      }
     } else {
       this.loaderService.stop()
     }
   }
 
-  async onClickRemoveTag() {
+  onClickRemoveTag() {
+    if (this.tagStatus !== AddTagStatusEnum.Edit) return
+    this.modalService.openConfirm({
+      content: '封存後不會刪除舊記帳，確定封存這個標籤嗎？',
+      onOk: () => { void this.archiveTag() },
+    })
+  }
+
+  private async archiveTag() {
     if (this.tagStatus === AddTagStatusEnum.Add) {
       return
     } else if (this.tagStatus === AddTagStatusEnum.Edit) {
@@ -150,10 +162,8 @@ export class AddTagComponent implements OnInit {
           }
         });
       }).catch(error => {
-        console.error('Error removing document: ', error);
+        alert('封存標籤失敗');
       }).finally(() => this.loaderService.stop())
     }
   }
 }
-
-

@@ -13,15 +13,14 @@ import { AddTagStatusEnum } from '../add-tag/add-tag.model';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-tags-manage',
-  standalone: true,
-  imports: [
-    SharedModule,
-    CdkDropList,
-    CdkDrag
-  ],
-  templateUrl: './tags-manage.component.html',
-  styleUrl: './tags-manage.component.css',
+    selector: 'app-tags-manage',
+    imports: [
+        SharedModule,
+        CdkDropList,
+        CdkDrag
+    ],
+    templateUrl: './tags-manage.component.html',
+    styleUrl: './tags-manage.component.css'
 })
 export class TagsManageComponent implements OnInit {
 
@@ -35,6 +34,8 @@ export class TagsManageComponent implements OnInit {
   tagList$!: Observable<TagInfo[]>
 
   tagList: TagInfo[] = [];
+  archivedTagList: TagInfo[] = [];
+  showArchived = false;
   keepTagList: TagInfo[] = [];
   isDrop = false;
 
@@ -55,17 +56,33 @@ export class TagsManageComponent implements OnInit {
     this.destroy$.next(true);
     this.transactionType = type
 
-    this.ledgerService.getTagList(this.transactionType).then((data) => {
+    this.ledgerService.getTagList(this.transactionType, true).then((data) => {
       this.loaderService.stop()
-      this.tagList = data
+      this.tagList = data.filter(tag => tag.archivedAtMs === null)
+      this.archivedTagList = data.filter(tag => tag.archivedAtMs !== null)
+    }).catch(() => {
+      alert('載入標籤失敗')
     }).finally(() => {
       this.loaderService.stop()
     })
   }
 
+  async restoreTag(id: string) {
+    this.loaderService.start()
+    try {
+      await this.ledgerService.restoreTagDoc(id)
+      this.onChangeTransactionType(this.transactionType)
+    } catch {
+      alert('恢復標籤失敗')
+    } finally {
+      this.loaderService.stop()
+    }
+  }
+
 
   goToEditTag(id: string) {
     this.router.navigate(['/setting/addTag'], {
+      queryParams: { id },
       state: {
         docId: id,
         transactionType: this.transactionType,
@@ -76,6 +93,7 @@ export class TagsManageComponent implements OnInit {
 
   onClickAddTag() {
     this.router.navigate(['/setting/addTag'], {
+      queryParams: { kind: this.transactionType },
       state: {
         transactionType: this.transactionType,
         tagStatus: AddTagStatusEnum.Add

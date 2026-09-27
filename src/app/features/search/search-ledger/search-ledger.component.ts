@@ -11,25 +11,24 @@ import { SharedModule } from '@src/app/shared/shared.module';
 import { take } from 'rxjs';
 import dayjs from 'dayjs';
 import { TagInfo } from '@src/app/core/models/tag.model';
-import { Timestamp } from '@angular/fire/firestore';
 import { isValidDate } from '@src/app/utils/validator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-search-ledger',
-  standalone: true,
-  imports: [
-    SharedModule,
-    AngularMaterialDatepickerModule,
-  ],
-  templateUrl: './search-ledger.component.html',
-  styleUrl: './search-ledger.component.scss',
+    selector: 'app-search-ledger',
+    imports: [
+        SharedModule,
+        AngularMaterialDatepickerModule,
+    ],
+    templateUrl: './search-ledger.component.html',
+    styleUrl: './search-ledger.component.scss'
 })
 export class SearchLedgerComponent implements OnInit {
 
   rangeList: LedgerItem[] = []
   rawRangeList: LedgerItem[] = []
+  private rangeRequestId = 0
 
   tagList: TagInfo[] = []
 
@@ -126,14 +125,18 @@ export class SearchLedgerComponent implements OnInit {
     const startDate = this.range.getRawValue().start
     const endDate = this.range.getRawValue().end
     if (startDate && endDate) {
+      const requestId = ++this.rangeRequestId
       this.loaderService.start()
       this.ledgerService.getRangeItems(startDate, endDate).then((list) => {
-        this.loaderService.stop()
+        if (requestId !== this.rangeRequestId) return
         this.rawRangeList = list
         this.rangeList = list
         this.tagList = list.map((item) => item.tagInfo).filter((tag, index, self) => self.findIndex((t) => t.id === tag.id) === index)
         this.applySortAndFilter()
+      }).catch(() => {
+        if (requestId === this.rangeRequestId) this._snackBar.open('載入記帳資料失敗', '', { duration: 3000 })
       })
+        .finally(() => this.loaderService.stop())
     }
   }
 
@@ -171,10 +174,10 @@ export class SearchLedgerComponent implements OnInit {
     // 應用排序
     switch (this.selectedSortOption) {
       case 'dateDesc':
-        filteredList.sort((a, b) => b.date.seconds - a.date.seconds)
+        filteredList.sort((a, b) => b.date.getTime() - a.date.getTime())
         break
       case 'dateAsc':
-        filteredList.sort((a, b) => a.date.seconds - b.date.seconds)
+        filteredList.sort((a, b) => a.date.getTime() - b.date.getTime())
         break
       case 'priceDesc':
         filteredList.sort((a, b) => parseFloat(b.price) - parseFloat(a.price))
@@ -187,10 +190,10 @@ export class SearchLedgerComponent implements OnInit {
     this.rangeList = filteredList
   }
 
-  goToExpenseDate(date: Timestamp) {
+  goToExpenseDate(date: Date) {
     this.router.navigate(['/expenseOverview'], {
       queryParams: {
-        date: dayjs(date.toDate()).format('YYYY-MM-DD')
+        date: dayjs(date).format('YYYY-MM-DD')
       }
     });
   }

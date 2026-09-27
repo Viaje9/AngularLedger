@@ -5,11 +5,10 @@ import { ModalData } from './modal.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-modal',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './modal.component.html',
-  styleUrls: ['./modal.component.scss'],
+    selector: 'app-modal',
+    imports: [CommonModule],
+    templateUrl: './modal.component.html',
+    styleUrls: ['./modal.component.scss']
 })
 export class ModalComponent implements OnInit {
   doConfirm = output<void>();

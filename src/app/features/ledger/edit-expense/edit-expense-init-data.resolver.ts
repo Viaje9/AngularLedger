@@ -5,14 +5,12 @@ import { LedgerItem } from '@src/app/core/models/ledger-item.model';
 import { EditExpenseInitData } from './edit-expense.model';
 
 export const EditExpenseInitDataResolver: ResolveFn<EditExpenseInitData | void> =
-  () => {
+  (route) => {
     const ledgerService = inject(LedgerService)
     const router = inject(Router)
 
-    const docId = router?.getCurrentNavigation()?.extras.state?.['docId']
-    return ledgerService.getExpenseInfo(docId).then(docSnap => {
-      if (docSnap.exists()) {
-        const result = docSnap.data() as LedgerItem
+    const docId = router?.getCurrentNavigation()?.extras.state?.['docId'] || route.queryParamMap.get('id') || ''
+    return ledgerService.getExpenseInfo(docId).then(result => {
         return {
           docId: docId,
           date: result.date,
@@ -20,9 +18,8 @@ export const EditExpenseInitDataResolver: ResolveFn<EditExpenseInitData | void> 
           tagId: result.tagId,
           description: result.description,
         }
-      } else {
-        router.navigate(['/'])
-      }
+    }).catch(() => {
+      router.navigate(['/'])
       return
     })
   };

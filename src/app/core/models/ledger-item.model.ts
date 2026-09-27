@@ -1,18 +1,16 @@
-import { Timestamp } from '@angular/fire/firestore';
-import { TagInfo } from '@src/app/core/models/tag.model';
+import { TagInfo } from './tag.model';
 
 export interface LedgerItem {
   id: string;
-  date: Timestamp;
+  date: Date;
   price: string;
   tagId: string;
   description: string;
   tagInfo: TagInfo;
 }
 
-
 export interface AddLedgerItem {
-  date: Timestamp;
+  date: Date;
   price: string;
   tagId: string;
   description: string;

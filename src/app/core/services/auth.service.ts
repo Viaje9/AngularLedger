@@ -1,110 +1,28 @@
-import { Injectable, NgZone } from '@angular/core';
-import {
-  Auth,
-  createUserWithEmailAndPassword,
-  getAuth,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-} from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Messaging } from '@angular/fire/messaging';
-import { Router } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { getMe } from '../../api/generated/sdk.gen';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  UserData: any;
-  constructor(
-    private auth: Auth,
-    private messaging: Messaging,
-    private firestore: Firestore,
-    public ngZone: NgZone,
-    public router: Router,
-  ) {
-    onAuthStateChanged(this.auth, (user: any) => {
-      if (user) {
-        this.UserData = user;
-      }
-    });
+  message = '請透過 Cloudflare Access 登入並連結帳本。';
+
+  async isSignedIn(): Promise<boolean> {
+    try {
+      const { data } = await getMe({ throwOnError: true });
+      return Boolean(data.account.id);
+    } catch (reason) {
+      const code = (reason as { error?: { code?: string } })?.error?.code;
+      this.message = code === 'ACCOUNT_NOT_LINKED'
+        ? 'Access 已登入，但尚未連結帳本。請先設定帳本身分對應。'
+        : '尚未通過 Access 驗證，請重新登入。';
+      return false;
+    }
   }
 
-  get userUid() {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    return user?.uid || '';
-  }
-
-  //get User
-  //get Authenticated user from firebase
-  getAuthFire() {
-    return this.auth.currentUser;
-  }
-
-  //Register Method
-  Register(email: string, password: string) {
-    return createUserWithEmailAndPassword(this.auth, email, password)
-      .then((result) => {
-        this.UserData = result.user;
-        this.ngZone.run(() => {
-          /* Call the SendVerificaitonMail() function when new user sign
-       up and returns promise */
-          this.sendEmailVerification();
-          this.router.navigate(['/signIn']);
-        });
-      })
-      .catch((error) => {
-        window.alert(error.message);
-      });
-  }
-  sendEmailVerification() {
-    throw new Error('Method not implemented.');
-  }
-
-  //Login Method
-  Login(email: string, password: string) {
-    return signInWithEmailAndPassword(this.auth, email, password)
-      .then((result: any) => {
-        this.UserData = result.user;
-        this.ngZone.run(() => {
-          this.router.navigate(['/']);
-        });
-      })
-      .catch((error) => {
-        window.alert(error.message);
-      });
-  }
-
-  googleSignIn() {
-    return this.loginWithPopup(new GoogleAuthProvider());
-  }
-
-  loginWithPopup(provider: any) {
-    return signInWithPopup(this.auth, provider)
-      .then((res) => {
-        console.log('logged in', res);
-        return res;
-        // this.router.navigateByUrl('/');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  login() {
+    window.location.assign('/?ngsw-bypass');
   }
 
   logout() {
-    signOut(this.auth).then(() => this.router.navigate(['/signIn']));
-  }
-
-  isSignedIn() {
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (user !== null) {
-      return true;
-    }
-    return false;
+    window.location.assign('/cdn-cgi/access/logout?ngsw-bypass');
   }
 }

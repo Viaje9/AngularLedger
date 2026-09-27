@@ -1,14 +1,13 @@
-import { Timestamp } from "@angular/fire/firestore";
 
 export interface AddIncomeInitData {
   incomeStatus: StatusType;
-  date: Timestamp;
+  date: Date;
 }
 
 export interface EditIncomeInitData {
   incomeStatus: StatusType;
   docId: string;
-  date: Timestamp;
+  date: Date;
   price: string;
   tagId: string;
   description: string;

@@ -33,6 +33,7 @@ yarn-error.log
 .sass-cache/
 /connect.lock
 /coverage
+.wrangler/
 /libpeerconnection.log
 testem.log
 /typings
@@ -47,4 +48,3 @@ Thumbs.db
 .runtimeconfig.json
 
 src/environments
-

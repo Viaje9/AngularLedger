@@ -12,6 +12,7 @@ export interface EditTagInitData {
   lastSort: number;
   selectedTag: string;
   tagName: string;
+  transactionType: TransactionType;
 }
 
 export enum AddTagStatusEnum {

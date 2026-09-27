@@ -8,16 +8,15 @@ import { LoaderService } from '@src/app/core/services/loader.service';
 import { ModalService } from '@src/app/core/services/modal.service';
 import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 import { EditIncomeInitData } from './add-income.model';
-import { Timestamp } from '@angular/fire/firestore';
+import dayjs from 'dayjs';
 
 @Component({
-  selector: 'app-add-income',
-  standalone: true,
-  imports: [
-    SharedModule,
-  ],
-  templateUrl: './add-income.component.html',
-  styleUrl: './add-income.component.css',
+    selector: 'app-add-income',
+    imports: [
+        SharedModule,
+    ],
+    templateUrl: './add-income.component.html',
+    styleUrl: './add-income.component.css'
 })
 export class AddIncomeComponent implements OnInit {
   @ViewChild('scrollTags') scrollTagsRef!: ElementRef;
@@ -38,7 +37,7 @@ export class AddIncomeComponent implements OnInit {
 
   selectedTagId = '';
   description = '';
-  date!: Timestamp
+  date!: Date
   incomeStatus!: StatusType;
 
   constructor(
@@ -52,7 +51,7 @@ export class AddIncomeComponent implements OnInit {
     this.incomeStatus = this.route.snapshot.data['data'].incomeStatus;
     if (this.incomeStatus === StatusEnum.Edit) {
       const incomeData = this.route.snapshot.data['data'] as EditIncomeInitData
-      this.price = parseInt(incomeData.price)
+      this.price = parseFloat(incomeData.price)
       this.selectedTagId = incomeData.tagId
       this.description = incomeData.description
       this.date = incomeData.date
@@ -99,11 +98,8 @@ export class AddIncomeComponent implements OnInit {
   }
 
   onClickBack() {
-    this.router.navigateByUrl('/', {
-      state: {
-        transactionType: TransactionTypeEnum.Income,
-        date: this.date.toDate()
-      }
+    this.router.navigate(['/incomeOverview'], {
+      queryParams: { date: dayjs(this.date).format('YYYY-MM-DD') },
     });
   }
 
@@ -114,21 +110,19 @@ export class AddIncomeComponent implements OnInit {
     }
 
     this.loaderService.start()
-    await this.ledgerService.addIncome({
+    try {
+      await this.ledgerService.addIncome({
       date: this.date,
       price: this.price.toString(),
       tagId: this.selectedTagId,
       description: this.description
-    }).catch((error) => {
-      console.error("Error adding document: ", error);
-    }).then(() => {
-      this.router.navigateByUrl('/', {
-        state: {
-          transactionType: TransactionTypeEnum.Income,
-          date: this.date.toDate()
-        }
-      });
-    }).finally(() => this.loaderService.stop())
+      })
+      this.onClickBack()
+    } catch {
+      this.showError()
+    } finally {
+      this.loaderService.stop()
+    }
   }
 
   async onClickEdit() {
@@ -137,26 +131,27 @@ export class AddIncomeComponent implements OnInit {
     }
 
     this.loaderService.start()
-    await this.ledgerService.updateIncome({
+    try {
+      await this.ledgerService.updateIncome({
       docId: this.route.snapshot.data['data'].docId,
       date: this.date,
       price: this.price.toString(),
       tagId: this.selectedTagId,
       description: this.description
-    }).catch((error) => {
-      console.error("Error updating document: ", error);
-    }).then(() => {
-      this.router.navigateByUrl('/', {
-        state: {
-          transactionType: TransactionTypeEnum.Income,
-          date: this.date.toDate()
-        }
-      });
-    }).finally(() => this.loaderService.stop())
+      })
+      this.onClickBack()
+    } catch {
+      this.showError()
+    } finally {
+      this.loaderService.stop()
+    }
   }
 
   saveCheck() {
-    if (!this.selectedTagId || !this.price) {
+    const originalPrice = Number(this.route.snapshot.data['data']?.price)
+    const validPrice = Number.isFinite(this.price) &&
+      (this.price > 0 || (this.incomeStatus === StatusEnum.Edit && this.price === 0 && originalPrice === 0))
+    if (!this.selectedTagId || !validPrice) {
       this.modalService.openConfirm({
         content: '請輸入金額與選擇標籤',
         okText: '確認',
@@ -190,14 +185,16 @@ export class AddIncomeComponent implements OnInit {
 
   doDelete() {
     this.loaderService.start()
-    this.ledgerService.deleteIncome(this.route.snapshot.data['data'].docId).then(() => {
-      this.router.navigateByUrl('/', {
-        state: {
-          transactionType: TransactionTypeEnum.Income,
-          date: this.date.toDate()
-        }
-      });
-    }).finally(() => this.loaderService.stop())
+    this.ledgerService.deleteIncome(this.route.snapshot.data['data'].docId)
+      .then(() => this.onClickBack())
+      .catch(() => this.showError())
+      .finally(() => this.loaderService.stop())
+  }
+
+  showError() {
+    this.modalService.openConfirm({
+      content: '操作失敗', showCancelBtn: false, outsideClose: true,
+    })
   }
 
 }

@@ -4,13 +4,12 @@ import { RouterModule } from '@angular/router';
 import { LoaderComponent } from '../loader/loader.component';
 
 @Component({
-  selector: 'app-layout',
-  standalone: true,
-  imports: [
-    CommonModule, RouterModule, LoaderComponent
-  ],
-  templateUrl: './layout.component.html',
-  styleUrl: './layout.component.css',
+    selector: 'app-layout',
+    imports: [
+        CommonModule, RouterModule, LoaderComponent
+    ],
+    templateUrl: './layout.component.html',
+    styleUrl: './layout.component.css'
 })
 export class LayoutComponent implements OnInit {
 

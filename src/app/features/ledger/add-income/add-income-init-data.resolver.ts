@@ -3,19 +3,17 @@ import { ActivatedRouteSnapshot, ResolveFn, Router, RouterStateSnapshot } from '
 import { AddIncomeInitDataType, StatusEnum, StatusType } from './add-income.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
 import { LedgerItem } from '@src/app/core/models/ledger-item.model';
-import { Timestamp } from '@angular/fire/firestore';
+import dayjs from 'dayjs';
 
 export const AddIncomeInitDataResolver: ResolveFn<AddIncomeInitDataType> =
-  () => {
+  (route) => {
     const ledgerService = inject(LedgerService)
     const router = inject(Router)
-    const incomeStatus = router?.getCurrentNavigation()?.extras.state?.['incomeStatus'] as StatusType
+    const incomeStatus = (route.queryParamMap.has('id') ? StatusEnum.Edit : router?.getCurrentNavigation()?.extras.state?.['incomeStatus'] || (route.queryParamMap.has('date') ? StatusEnum.Add : undefined)) as StatusType
 
     if (incomeStatus === StatusEnum.Edit) {
-      const docId = router?.getCurrentNavigation()?.extras.state?.['docId']
-      return ledgerService.getIncomeInfo(docId).then(docSnap => {
-        if (docSnap.exists()) {
-          const result = docSnap.data() as LedgerItem
+      const docId = route.queryParamMap.get('id') || router?.getCurrentNavigation()?.extras.state?.['docId'] || ''
+      return ledgerService.getIncomeInfo(docId).then(result => {
           return {
             incomeStatus: incomeStatus,
             docId: docId,
@@ -24,17 +22,16 @@ export const AddIncomeInitDataResolver: ResolveFn<AddIncomeInitDataType> =
             tagId: result.tagId,
             description: result.description,
           }
-        } else {
-          router.navigate(['/'])
-        }
+      }).catch(() => {
+        router.navigate(['/'])
         return
       })
     } else if (incomeStatus === StatusEnum.Add) {
-      const date = router?.getCurrentNavigation()?.extras.state?.['date']
+      const date = router?.getCurrentNavigation()?.extras.state?.['date'] || route.queryParamMap.get('date')
       if (date) {
         return {
           incomeStatus: incomeStatus,
-          date: Timestamp.fromDate(date),
+          date: typeof date === 'string' ? dayjs(date).toDate() : new Date(date),
         }
       }
     }

@@ -1,0 +1,856 @@
+openapi: 3.1.0
+info:
+  title: AngularLedger API
+  version: 1.0.0-draft
+  description: >-
+    Cloudflare Worker 提供的個人記帳 API。Angular 與 API 使用同一網域；
+    Cloudflare Access 檢查瀏覽器的 CF_Authorization Cookie，Worker 驗證
+    Cf-Access-Jwt-Assertion JWT 後才查詢 D1。Cookie 由瀏覽器自行傳送，
+    前端不得讀取或手動加入 JWT，也不得傳入帳本 ID 作為授權依據。
+    所有 API 回應均須設定 Cache-Control: no-store。
+servers:
+  - url: /
+    description: 與 Angular 網站相同來源
+security:
+  - accessCookie: []
+tags:
+  - name: Identity
+  - name: Tags
+  - name: Entries
+  - name: Budget
+  - name: SavedDescriptions
+paths:
+  /api/v1/me:
+    get:
+      operationId: getMe
+      tags: [Identity]
+      summary: 確認 Access 身分已綁定帳本
+      responses:
+        '200':
+          description: 已綁定帳本
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/tags:
+    get:
+      operationId: listTags
+      tags: [Tags]
+      summary: 列出同類型標籤
+      description: >-
+        預設只列未封存標籤，依 sortOrder、id 升冪。includeArchived=true 時
+        先列未封存，再列已封存標籤。
+      parameters:
+        - $ref: '#/components/parameters/KindQuery'
+        - name: includeArchived
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: 標籤清單
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagsResponse' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      operationId: createTag
+      tags: [Tags]
+      summary: 新增標籤
+      description: 名稱去除前後空白後不可為空；sortOrder 由伺服器設為同類型最後。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TagCreate' }
+      responses:
+        '201':
+          description: 新標籤
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tag' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/tags/order:
+    put:
+      operationId: setTagOrder
+      tags: [Tags]
+      summary: 批次更新未封存標籤順序
+      description: >-
+        tagIds 必須恰好包含目前帳本同類型的所有未封存標籤，且不得重複。
+        伺服器在單一交易中依陣列順序設定 sortOrder = 0, 1, ...；
+        清單過期或不完整回 409 TAG_ORDER_CONFLICT。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TagOrderRequest' }
+      responses:
+        '200':
+          description: 排序後標籤
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagsResponse' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/tags/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      operationId: getTag
+      tags: [Tags]
+      summary: 取得標籤，包含已封存者
+      responses:
+        '200':
+          description: 標籤
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tag' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    patch:
+      operationId: updateTag
+      tags: [Tags]
+      summary: 修改標籤名稱或圖示
+      description: 至少提供一個欄位；id 與 kind 不可修改。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TagPatch' }
+      responses:
+        '200':
+          description: 修改後標籤
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tag' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/tags/{id}/archive:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      operationId: archiveTag
+      tags: [Tags]
+      summary: 封存標籤
+      description: 重複封存回既有結果；既有記帳仍可連到此標籤。
+      responses:
+        '200':
+          description: 封存後標籤
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tag' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/tags/{id}/restore:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    post:
+      operationId: restoreTag
+      tags: [Tags]
+      summary: 還原標籤
+      description: 還原時排到同類型未封存標籤最後；重複還原回既有結果。
+      responses:
+        '200':
+          description: 還原後標籤
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tag' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/entries:
+    get:
+      operationId: listEntries
+      tags: [Entries]
+      summary: 查詢記帳
+      description: >-
+        fromMs 含起點、toMs 不含終點，且 fromMs < toMs。q 去除前後空白後
+        對備註做區分大小寫的包含搜尋。相同金額或時間以 id 固定排序。
+        cursor 只能搭配產生它時相同的篩選與排序條件；否則回 400 INVALID_CURSOR。
+        第一版查詢資料均為 TWD；日後多幣別時金額排序須先限定幣別。
+      parameters:
+        - $ref: '#/components/parameters/KindQuery'
+        - $ref: '#/components/parameters/FromMs'
+        - $ref: '#/components/parameters/ToMs'
+        - name: tagId
+          in: query
+          schema: { $ref: '#/components/schemas/Id' }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [dateDesc, dateAsc, amountDesc, amountAsc]
+            default: dateDesc
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: cursor
+          in: query
+          schema: { type: string, minLength: 1 }
+      responses:
+        '200':
+          description: 分頁記帳清單
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EntriesResponse' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      operationId: createEntry
+      tags: [Entries]
+      summary: 新增收入或支出
+      description: >-
+        amountMinor 必須大於 0。標籤必須屬於目前帳本、同 kind 且未封存。
+        舊資料匯入直接寫 D1，不使用此端點。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntryCreate' }
+      responses:
+        '201':
+          description: 新記帳
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Entry' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/entries/summary:
+    get:
+      operationId: getEntriesSummary
+      tags: [Entries]
+      summary: 取得期間總額與各標籤加總
+      description: 沒有資料時 totalMinor、count 為 0，byTag 為空陣列。
+      parameters:
+        - $ref: '#/components/parameters/KindQuery'
+        - $ref: '#/components/parameters/FromMs'
+        - $ref: '#/components/parameters/ToMs'
+        - name: currencyCode
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/TwdCode' }
+      responses:
+        '200':
+          description: 期間加總
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EntriesSummary' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/entries/{kind}/{id}:
+    parameters:
+      - $ref: '#/components/parameters/KindPath'
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      operationId: getEntry
+      tags: [Entries]
+      summary: 取得單筆記帳
+      responses:
+        '200':
+          description: 記帳與標籤資訊
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Entry' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    put:
+      operationId: updateEntry
+      tags: [Entries]
+      summary: 完整更新單筆記帳
+      description: >-
+        kind 不可修改。原本為零元的舊記帳若金額未變，可修改其他欄位；
+        其他更新要求金額大於 0。原標籤已封存且 tagId 未變時仍可更新；
+        換標籤時必須選未封存標籤。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntryUpdate' }
+      responses:
+        '200':
+          description: 修改後記帳
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Entry' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      operationId: deleteEntry
+      tags: [Entries]
+      summary: 永久刪除單筆記帳
+      responses:
+        '204':
+          description: 已刪除，沒有回應本文
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/budget:
+    get:
+      operationId: getBudget
+      tags: [Budget]
+      summary: 取得預算設定
+      responses:
+        '200':
+          description: 尚未設定時 budget 為 null
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BudgetResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    put:
+      operationId: putBudget
+      tags: [Budget]
+      summary: 建立或完整覆蓋預算設定
+      description: showBudget=true 時，amountMinor 必須大於 0 且 cycleDay 不為 null。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Budget' }
+      responses:
+        '200':
+          description: 更新後預算
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BudgetResponse' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    delete:
+      operationId: deleteBudget
+      tags: [Budget]
+      summary: 清除預算設定
+      description: 重複清除也回 204。
+      responses:
+        '204':
+          description: 已清除，沒有回應本文
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/saved-descriptions:
+    get:
+      operationId: listSavedDescriptions
+      tags: [SavedDescriptions]
+      summary: 列出常用備註
+      description: 依 createdAtMs、id 由新到舊排序。
+      responses:
+        '200':
+          description: 常用備註清單
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedDescriptionsResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    post:
+      operationId: createSavedDescription
+      tags: [SavedDescriptions]
+      summary: 新增常用備註
+      description: 去除前後空白後不得為空；相同文字已存在時回 200 與原物件。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SavedDescriptionCreate' }
+      responses:
+        '200':
+          description: 相同文字已存在
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedDescription' }
+        '201':
+          description: 新常用備註
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedDescription' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/saved-descriptions/from-entries:
+    post:
+      operationId: saveDescriptionsFromEntries
+      tags: [SavedDescriptions]
+      summary: 從目前帳本的支出備註補入常用清單
+      description: >-
+        不需請求本文。只讀非空白支出備註，去除前後空白、排除重複，
+        只新增尚不存在的文字，不刪除原有清單；重複執行不建立重複資料。
+      responses:
+        '200':
+          description: 補入結果
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavedDescriptionsImportResponse' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/saved-descriptions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    delete:
+      operationId: deleteSavedDescription
+      tags: [SavedDescriptions]
+      summary: 移除常用備註
+      description: 不更動既有記帳；再次刪除回 404。
+      responses:
+        '204':
+          description: 已移除，沒有回應本文
+          headers:
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccountNotLinked' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+components:
+  securitySchemes:
+    accessCookie:
+      type: apiKey
+      in: cookie
+      name: CF_Authorization
+      description: >-
+        Cloudflare Access 管理的 HttpOnly Cookie。瀏覽器同網域請求會自行傳送；
+        Worker 驗證 Access 轉送的 Cf-Access-Jwt-Assertion，不讀取前端提供的身分欄位。
+  headers:
+    NoStore:
+      description: API 回應不得被快取。
+      schema: { type: string, const: no-store }
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      description: 不透明 ID，呼叫端須做 URL 編碼。
+      schema: { $ref: '#/components/schemas/Id' }
+    KindPath:
+      name: kind
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/EntryKind' }
+    KindQuery:
+      name: kind
+      in: query
+      required: true
+      schema: { $ref: '#/components/schemas/EntryKind' }
+    FromMs:
+      name: fromMs
+      in: query
+      required: true
+      description: UTC Unix epoch 毫秒，含起點。
+      schema: { $ref: '#/components/schemas/EpochMs' }
+    ToMs:
+      name: toMs
+      in: query
+      required: true
+      description: UTC Unix epoch 毫秒，不含終點；必須大於 fromMs。
+      schema: { $ref: '#/components/schemas/EpochMs' }
+  schemas:
+    Id:
+      type: string
+      minLength: 1
+      description: 伺服器產生或搬遷時保留的不透明 ID。
+    EntryKind:
+      type: string
+      enum: [expense, income]
+    EpochMs:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 9007199254740991
+      description: UTC Unix epoch 毫秒，以 JavaScript 安全整數傳輸。
+    AmountMinor:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 9007199254740991
+      description: 幣別最小單位的非負 JavaScript 安全整數。
+    CurrencyCode:
+      type: string
+      pattern: '^[A-Z]{3}$'
+    TwdCode:
+      type: string
+      const: TWD
+    CurrencyScale:
+      type: integer
+      minimum: 0
+      maximum: 6
+    TwdScale:
+      type: integer
+      const: 2
+    MeResponse:
+      type: object
+      additionalProperties: false
+      required: [account]
+      properties:
+        account:
+          type: object
+          additionalProperties: false
+          required: [id]
+          properties:
+            id: { $ref: '#/components/schemas/Id' }
+    Tag:
+      type: object
+      additionalProperties: false
+      required: [id, kind, name, iconName, sortOrder, archivedAtMs]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        kind: { $ref: '#/components/schemas/EntryKind' }
+        name: { type: string, minLength: 1 }
+        iconName: { type: string }
+        sortOrder: { type: integer, minimum: 0 }
+        archivedAtMs:
+          anyOf:
+            - { $ref: '#/components/schemas/EpochMs' }
+            - { type: 'null' }
+    TagsResponse:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Tag' }
+    TagCreate:
+      type: object
+      additionalProperties: false
+      required: [kind, name, iconName]
+      properties:
+        kind: { $ref: '#/components/schemas/EntryKind' }
+        name: { type: string, minLength: 1, description: 去除前後空白後不可為空。 }
+        iconName: { type: string }
+    TagPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 1, description: 去除前後空白後不可為空。 }
+        iconName: { type: string }
+    TagOrderRequest:
+      type: object
+      additionalProperties: false
+      required: [kind, tagIds]
+      properties:
+        kind: { $ref: '#/components/schemas/EntryKind' }
+        tagIds:
+          type: array
+          uniqueItems: true
+          items: { $ref: '#/components/schemas/Id' }
+    Entry:
+      type: object
+      additionalProperties: false
+      required: [id, kind, occurredAtMs, amountMinor, currencyCode, currencyScale, tagId, description, tag]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        kind: { $ref: '#/components/schemas/EntryKind' }
+        occurredAtMs: { $ref: '#/components/schemas/EpochMs' }
+        amountMinor: { $ref: '#/components/schemas/AmountMinor' }
+        currencyCode: { $ref: '#/components/schemas/CurrencyCode' }
+        currencyScale: { $ref: '#/components/schemas/CurrencyScale' }
+        tagId: { $ref: '#/components/schemas/Id' }
+        description: { type: string }
+        tag: { $ref: '#/components/schemas/Tag' }
+    EntryCreate:
+      type: object
+      additionalProperties: false
+      required: [kind, occurredAtMs, amountMinor, currencyCode, currencyScale, tagId, description]
+      properties:
+        kind: { $ref: '#/components/schemas/EntryKind' }
+        occurredAtMs: { $ref: '#/components/schemas/EpochMs' }
+        amountMinor: { type: integer, format: int64, minimum: 1, maximum: 9007199254740991 }
+        currencyCode: { $ref: '#/components/schemas/TwdCode' }
+        currencyScale: { $ref: '#/components/schemas/TwdScale' }
+        tagId: { $ref: '#/components/schemas/Id' }
+        description: { type: string }
+    EntryUpdate:
+      type: object
+      additionalProperties: false
+      required: [occurredAtMs, amountMinor, currencyCode, currencyScale, tagId, description]
+      description: 零元只允許原本已是零元且 amountMinor 未變的舊資料。
+      properties:
+        occurredAtMs: { $ref: '#/components/schemas/EpochMs' }
+        amountMinor: { $ref: '#/components/schemas/AmountMinor' }
+        currencyCode: { $ref: '#/components/schemas/TwdCode' }
+        currencyScale: { $ref: '#/components/schemas/TwdScale' }
+        tagId: { $ref: '#/components/schemas/Id' }
+        description: { type: string }
+    EntriesResponse:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Entry' }
+        nextCursor:
+          anyOf:
+            - { type: string, minLength: 1 }
+            - { type: 'null' }
+    EntryTagSummary:
+      type: object
+      additionalProperties: false
+      required: [tagId, tagName, archivedAtMs, totalMinor, count]
+      properties:
+        tagId: { $ref: '#/components/schemas/Id' }
+        tagName: { type: string }
+        archivedAtMs:
+          anyOf:
+            - { $ref: '#/components/schemas/EpochMs' }
+            - { type: 'null' }
+        totalMinor: { $ref: '#/components/schemas/AmountMinor' }
+        count: { type: integer, minimum: 0 }
+    EntriesSummary:
+      type: object
+      additionalProperties: false
+      required: [kind, currencyCode, currencyScale, totalMinor, count, byTag]
+      properties:
+        kind: { $ref: '#/components/schemas/EntryKind' }
+        currencyCode: { $ref: '#/components/schemas/TwdCode' }
+        currencyScale: { $ref: '#/components/schemas/TwdScale' }
+        totalMinor: { $ref: '#/components/schemas/AmountMinor' }
+        count: { type: integer, minimum: 0 }
+        byTag:
+          type: array
+          items: { $ref: '#/components/schemas/EntryTagSummary' }
+    Budget:
+      type: object
+      additionalProperties: false
+      required: [amountMinor, currencyCode, currencyScale, cycleDay, showBudget]
+      properties:
+        amountMinor: { $ref: '#/components/schemas/AmountMinor' }
+        currencyCode: { $ref: '#/components/schemas/TwdCode' }
+        currencyScale: { $ref: '#/components/schemas/TwdScale' }
+        cycleDay:
+          anyOf:
+            - { type: integer, minimum: 1, maximum: 31 }
+            - { type: 'null' }
+        showBudget: { type: boolean }
+    BudgetResponse:
+      type: object
+      additionalProperties: false
+      required: [budget]
+      properties:
+        budget:
+          anyOf:
+            - { $ref: '#/components/schemas/Budget' }
+            - { type: 'null' }
+    SavedDescription:
+      type: object
+      additionalProperties: false
+      required: [id, description, createdAtMs]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        description: { type: string, minLength: 1 }
+        createdAtMs: { $ref: '#/components/schemas/EpochMs' }
+    SavedDescriptionCreate:
+      type: object
+      additionalProperties: false
+      required: [description]
+      properties:
+        description: { type: string, minLength: 1, description: 去除前後空白後不可為空。 }
+    SavedDescriptionsResponse:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SavedDescription' }
+    SavedDescriptionsImportResponse:
+      type: object
+      additionalProperties: false
+      required: [added, alreadyPresent]
+      properties:
+        added: { type: integer, minimum: 0 }
+        alreadyPresent: { type: integer, minimum: 0 }
+    ErrorCode:
+      type: string
+      enum:
+        - INVALID_INPUT
+        - INVALID_CURSOR
+        - UNAUTHENTICATED
+        - ACCOUNT_NOT_LINKED
+        - NOT_FOUND
+        - TAG_ORDER_CONFLICT
+        - DUPLICATE_RESOURCE
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - INTERNAL_ERROR
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: { $ref: '#/components/schemas/ErrorCode' }
+            message: { type: string }
+            details:
+              type: object
+              additionalProperties: true
+              description: 可選的欄位錯誤資訊；不得包含敏感資料。
+  responses:
+    InvalidInput:
+      description: INVALID_INPUT 或 INVALID_CURSOR
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Unauthenticated:
+      description: UNAUTHENTICATED；Access 也可能在請求到達 Worker 前導向登入頁。
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    AccountNotLinked:
+      description: ACCOUNT_NOT_LINKED
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: NOT_FOUND；資源不存在或不屬於目前帳本。
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Conflict:
+      description: TAG_ORDER_CONFLICT 或 DUPLICATE_RESOURCE
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    PayloadTooLarge:
+      description: PAYLOAD_TOO_LARGE
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    UnsupportedMediaType:
+      description: UNSUPPORTED_MEDIA_TYPE
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    InternalError:
+      description: INTERNAL_ERROR；不包含堆疊或資料庫細節。
+      headers:
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }

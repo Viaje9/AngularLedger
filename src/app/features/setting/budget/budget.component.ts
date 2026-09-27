@@ -1,78 +1,90 @@
-import { CommonModule } from '@angular/common';
-import { Component, ViewChild, type OnInit, TemplateRef } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ModalService } from '@src/app/core/services/modal.service';
+import { PreferencesService } from '@src/app/core/services/preferences.service';
 import { SharedModule } from '@src/app/shared/shared.module';
 
 @Component({
   selector: 'app-budget',
-  standalone: true,
-  imports: [
-    SharedModule,
-  ],
+  imports: [SharedModule],
   templateUrl: './budget.component.html',
-  styleUrl: './budget.component.css',
+  styleUrl: './budget.component.css'
 })
 export class BudgetComponent implements OnInit {
-  @ViewChild('templateRef') templateRef!: TemplateRef<any> | undefined;
-
-  dateNumList = Array.from({ length: 31 }).map((_, i) => i + 1)
-
-  selectedDate = parseInt(localStorage.getItem('selectedDate') || '0')
-
-  showBudget = localStorage.getItem('showBudget') === '1'
-  showBudgetDisabled = false
-
-  budgetAmount = parseInt(localStorage.getItem('budgetAmount') || '0')
+  @ViewChild('templateRef') templateRef!: TemplateRef<unknown>;
+  dateNumList = Array.from({ length: 31 }, (_, i) => i + 1);
+  selectedDate = 0;
+  showBudget = false;
+  showBudgetDisabled = true;
+  budgetAmount = 0;
+  private saveQueue: Promise<unknown> = Promise.resolve();
 
   constructor(
     private modalService: ModalService,
-  ) { }
+    private preferences: PreferencesService,
+  ) {}
 
-  ngOnInit(): void {
-    this.showBudgetDisabled = !this.selectedDate
+  async ngOnInit() {
+    try {
+      const budget = await this.preferences.getBudget();
+      this.selectedDate = budget?.cycleDay ?? 0;
+      this.budgetAmount = (budget?.amountMinor ?? 0) / 100;
+      this.showBudget = budget?.showBudget ?? false;
+      this.showBudgetDisabled = !this.selectedDate || !this.budgetAmount;
+    } catch {
+      this.showError();
+    }
+  }
+
+  async save() {
+    try {
+      const amountMinor = this.budgetAmount * 100;
+      if (!Number.isFinite(this.budgetAmount) || this.budgetAmount < 0 ||
+          !Number.isSafeInteger(Math.round(amountMinor)) ||
+          Math.abs(amountMinor - Math.round(amountMinor)) > 0.000001) {
+        throw new Error('invalid amount');
+      }
+      const value = {
+        amountMinor: Math.round(amountMinor),
+        currencyCode: 'TWD',
+        currencyScale: 2,
+        cycleDay: this.selectedDate || null,
+        showBudget: this.showBudget && Boolean(this.selectedDate && this.budgetAmount),
+      } as const;
+      this.saveQueue = this.saveQueue.catch(() => {}).then(() => this.preferences.saveBudget(value));
+      await this.saveQueue;
+    } catch {
+      this.showError();
+    }
   }
 
   onChangeBudgetAmount() {
-    localStorage.setItem('budgetAmount', `${this.budgetAmount}`)
-    if (!this.budgetAmount || this.budgetAmount === 0) {
-      this.showBudget = false
-      this.showBudgetDisabled = true
-      this.onChangeShowBudget()
-    } else {
-      this.showBudgetDisabled = false
-    }
+    if (!this.budgetAmount) this.showBudget = false;
+    this.showBudgetDisabled = !this.selectedDate || !this.budgetAmount;
+    void this.save();
   }
 
-  onChangeShowBudget() {
-    localStorage.setItem('showBudget', this.showBudget ? "1" : "0")
-
-  }
+  onChangeShowBudget() { void this.save(); }
 
   onClickDate(num: number) {
-    if (num === this.selectedDate) {
-      this.selectedDate = 0
-      localStorage.setItem('selectedDate', '')
-      this.showBudgetDisabled = true
-    } else {
-      this.selectedDate = num
-      localStorage.setItem('selectedDate', `${num}`)
-      this.showBudgetDisabled = false
-    }
+    this.selectedDate = num === this.selectedDate ? 0 : num;
+    this.showBudgetDisabled = !this.selectedDate || !this.budgetAmount;
   }
 
   onSelectDate() {
     this.modalService.openConfirm({
-      title: "選擇日期",
+      title: '選擇日期',
       okText: '確認',
       showCancelBtn: false,
       outsideClose: false,
       contentTemplateRef: this.templateRef,
       onOk: () => {
-        this.showBudget = this.selectedDate !== 0
-        this.onChangeShowBudget()
-      }
+        this.showBudget = Boolean(this.selectedDate && this.budgetAmount);
+        void this.save();
+      },
     });
   }
 
+  private showError() {
+    this.modalService.openConfirm({ content: '儲存預算失敗', showCancelBtn: false });
+  }
 }
