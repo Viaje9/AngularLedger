@@ -105,7 +105,10 @@ export class IncomeOverviewComponent implements OnInit {
     const requestId = ++this.listRequestId
     this.loaderService.start()
     this.ledgerService.getTodayIncomeList(this.currentDate).then((incomeList) => {
-      if (requestId === this.listRequestId) this.ledgerItems = incomeList
+      if (requestId === this.listRequestId) {
+        this.ledgerItems = incomeList
+        this.ledgerService.prefetchTagList(TransactionTypeEnum.Income)
+      }
     }).catch(() => {
       this.modalService.openConfirm({ content: '載入收入失敗', showCancelBtn: false })
     }).finally(() => {

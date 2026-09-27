@@ -147,7 +147,10 @@ export class ExpenseOverviewComponent implements OnInit {
     this.loaderService.start()
     this.ledgerService.getTodayExpenseList(this.currentDate)
       .then(expenseList => {
-        if (requestId === this.listRequestId) this.ledgerItems = expenseList
+        if (requestId === this.listRequestId) {
+          this.ledgerItems = expenseList
+          this.ledgerService.prefetchTagList('expense')
+        }
       })
       .catch(() => this.modalService.openConfirm({
         content: '載入支出失敗', showCancelBtn: false,

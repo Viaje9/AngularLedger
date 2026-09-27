@@ -7,6 +7,12 @@ import type { EntriesResponse, Entry, EntryKind, Tag } from '../../api/generated
 import { AddLedgerItem, LedgerItem } from '../models/ledger-item.model';
 import { TagInfo } from '../models/tag.model';
 import { TransactionType } from '../models/transaction-type.model';
+import { AuthService } from './auth.service';
+
+interface TagListCache {
+  fetchedAtMs: number;
+  items: TagInfo[];
+}
 
 const toTag = (tag: Tag): TagInfo => ({
   id: tag.id, tagName: tag.name, tagIconName: tag.iconName,
@@ -35,9 +41,125 @@ const dayRange = (start: Date, end: Date) => {
 
 @Injectable({ providedIn: 'root' })
 export class LedgerService {
-  async getTagList(type: TransactionType, includeArchived = false): Promise<TagInfo[]> {
+  private readonly tagCachePrefix = 'angular-ledger:tags:v1:';
+  private readonly tagCacheMaxAgeMs = 24 * 60 * 60 * 1000;
+  private tagCache = new Map<string, TagListCache>();
+  private tagRefreshes = new Map<string, Promise<TagInfo[]>>();
+  private tagCacheVersions = new Map<string, number>();
+  private scheduledTagPrefetches = new Set<string>();
+
+  constructor(private auth: AuthService) {}
+
+  private tagCacheKey(type: TransactionType): string | null {
+    return this.auth.accountId ? `${this.tagCachePrefix}${this.auth.accountId}:${type}` : null;
+  }
+
+  private copyTags(items: TagInfo[]): TagInfo[] {
+    return items.map(item => ({ ...item }));
+  }
+
+  private readTagCache(key: string, type: TransactionType): TagListCache | null {
+    const inMemory = this.tagCache.get(key);
+    if (inMemory) return inMemory;
+    if (typeof localStorage === 'undefined') return null;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return null;
+      const cache: unknown = JSON.parse(raw);
+      if (!cache || typeof cache !== 'object' ||
+          !('fetchedAtMs' in cache) || typeof cache.fetchedAtMs !== 'number' ||
+          !Number.isFinite(cache.fetchedAtMs) ||
+          !('items' in cache) || !Array.isArray(cache.items) ||
+          !cache.items.every((item: unknown) =>
+            item !== null && typeof item === 'object' &&
+            'id' in item && typeof item.id === 'string' &&
+            'tagName' in item && typeof item.tagName === 'string' &&
+            'tagIconName' in item && typeof item.tagIconName === 'string' &&
+            'transactionType' in item && item.transactionType === type &&
+            'sort' in item && typeof item.sort === 'number' && Number.isFinite(item.sort) &&
+            'archivedAtMs' in item && item.archivedAtMs === null)) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      const valid = cache as TagListCache;
+      this.tagCache.set(key, valid);
+      return valid;
+    } catch {
+      return null;
+    }
+  }
+
+  private writeTagCache(key: string, items: TagInfo[]): void {
+    const cache = { fetchedAtMs: Date.now(), items: this.copyTags(items) };
+    this.tagCache.set(key, cache);
+    if (typeof localStorage === 'undefined') return;
+    try { localStorage.setItem(key, JSON.stringify(cache)); } catch { /* Cache is optional. */ }
+  }
+
+  private async loadTagList(type: TransactionType, includeArchived = false): Promise<TagInfo[]> {
     const { data } = await listTags({ query: { kind: type, includeArchived }, throwOnError: true });
     return data.items.map(toTag);
+  }
+
+  private refreshActiveTags(type: TransactionType, key: string): Promise<TagInfo[]> {
+    const pending = this.tagRefreshes.get(key);
+    if (pending) return pending;
+
+    const version = this.tagCacheVersions.get(key) ?? 0;
+    const refresh = this.loadTagList(type).then(items => {
+      if (this.tagCacheKey(type) === key && version === (this.tagCacheVersions.get(key) ?? 0)) {
+        this.writeTagCache(key, items);
+      }
+      return items;
+    }).finally(() => {
+      if (this.tagRefreshes.get(key) === refresh) this.tagRefreshes.delete(key);
+    });
+    this.tagRefreshes.set(key, refresh);
+    return refresh;
+  }
+
+  private invalidateTagCache(type: TransactionType): void {
+    const key = this.tagCacheKey(type);
+    if (!key) return;
+    this.tagCacheVersions.set(key, (this.tagCacheVersions.get(key) ?? 0) + 1);
+    this.tagRefreshes.delete(key);
+    this.tagCache.delete(key);
+    if (typeof localStorage === 'undefined') return;
+    try { localStorage.removeItem(key); } catch { /* Cache is optional. */ }
+  }
+
+  async getTagList(type: TransactionType, includeArchived = false): Promise<TagInfo[]> {
+    if (includeArchived) return this.loadTagList(type, true);
+    const key = this.tagCacheKey(type);
+    if (!key) return this.loadTagList(type);
+
+    const cached = this.readTagCache(key, type);
+    if (cached) {
+      if (cached.fetchedAtMs > Date.now() ||
+          Date.now() - cached.fetchedAtMs >= this.tagCacheMaxAgeMs) {
+        void this.refreshActiveTags(type, key).catch(() => { /* Keep the cached list. */ });
+      }
+      return this.copyTags(cached.items);
+    }
+    return this.copyTags(await this.refreshActiveTags(type, key));
+  }
+
+  prefetchTagList(type: TransactionType): void {
+    const key = this.tagCacheKey(type);
+    if (!key || this.readTagCache(key, type) || this.scheduledTagPrefetches.has(key)) return;
+
+    this.scheduledTagPrefetches.add(key);
+    const prefetch = () => {
+      this.scheduledTagPrefetches.delete(key);
+      if (this.tagCacheKey(type) !== key || this.readTagCache(key, type)) return;
+      void this.refreshActiveTags(type, key).catch(() => { /* Try again on demand. */ });
+    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(prefetch, { timeout: 5000 });
+    } else {
+      setTimeout(prefetch, 1000);
+    }
   }
 
   async getTagInfo(id: string): Promise<TagInfo> {
@@ -52,25 +174,30 @@ export class LedgerService {
 
   async addTagDoc(data: { tagIconName: string; tagName: string; sort: number; transactionType: TransactionType }) {
     const { data: tag } = await createTag({ body: { kind: data.transactionType, name: data.tagName, iconName: data.tagIconName }, throwOnError: true });
+    this.invalidateTagCache(tag.kind);
     return toTag(tag);
   }
 
   async updateTagDoc(id: string, tagIconName: string, tagName: string) {
     const { data } = await updateTag({ path: { id }, body: { name: tagName, iconName: tagIconName }, throwOnError: true });
+    this.invalidateTagCache(data.kind);
     return toTag(data);
   }
 
   async removeTagDoc(id: string) {
-    await archiveTag({ path: { id }, throwOnError: true });
+    const { data } = await archiveTag({ path: { id }, throwOnError: true });
+    this.invalidateTagCache(data.kind);
   }
 
   async restoreTagDoc(id: string) {
-    await restoreTag({ path: { id }, throwOnError: true });
+    const { data } = await restoreTag({ path: { id }, throwOnError: true });
+    this.invalidateTagCache(data.kind);
   }
 
   async updateTagsSort(tags: TagInfo[]) {
     if (!tags.length) return;
     await setTagOrder({ body: { kind: tags[0].transactionType, tagIds: tags.map(tag => tag.id) }, throwOnError: true });
+    this.invalidateTagCache(tags[0].transactionType);
   }
 
   private async listRange(kind: EntryKind, start: Date, end: Date): Promise<LedgerItem[]> {
