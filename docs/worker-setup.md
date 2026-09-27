@@ -23,6 +23,14 @@ npm run dev:worker
 
 ## Cloudflare 測試環境
 
+### 自動建置與部署
+
+現有的 staging Worker 已透過 Cloudflare Workers Builds 連接 GitHub 的 `Viaje9/AngularLedger`。目前只有 `codex/cloudflare-migration` 分支的推送會觸發這個 Worker 的正式建置；Cloudflare 先執行 `npm run ci:cloudflare`，成功後執行 `npx wrangler deploy`。根目錄設為 `/`，其他分支的 Preview builds 已關閉，避免預覽版與現有 D1 共用資料。
+
+建置使用儲存庫的 `.nvmrc` 指定 Node 22；Cloudflare 的自動依賴安裝會依鎖檔安裝套件。Worker 的 Access secrets 與 D1 binding 保持在 Cloudflare；建置不需要 Firebase 設定。D1 migrations 不在部署時自動執行，若將來調整資料表，須先核對備份並另行套用 migration。
+
+GitHub `master` 尚未切到這套部署；舊 GitHub Pages workflow 已在遷移分支移除，合併前不要把 `master` 的推送當成 Cloudflare 部署。
+
 先前在錯誤帳號建立的 Worker 與 D1 已刪除。核對 Cloudflare 帳號後，已建立測試 D1、套用 `0001_init.sql` 並部署測試網站。部署目標由 `wrangler.jsonc` 指定；操作前仍應確認目前的 Wrangler 登入帳號。
 
 Cloudflare Access 已保護測試 Worker 的正式與預覽網址，只允許指定帳號使用 One-time PIN 登入，工作階段為 24 小時。Worker 已設定 `ACCESS_TEAM_DOMAIN` 與 `ACCESS_AUD` secrets。未登入時，首頁和 `/api/v1/me` 均導向 Access 登入頁。實際帳號、應用程式 ID、團隊網域與秘密值不記錄在此文件。
