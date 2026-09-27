@@ -18,7 +18,8 @@ npm run dev:worker
 - `api:test` 使用 Node 22 內建 SQLite 與測試身分檢查 Hono 路由、SQL 和帳本隔離；它不是 Cloudflare Access 的真實登入測試。
 - 本機 Wrangler 預設也會驗證 Access JWT，因此沒有真實 JWT 時 `/api/v1/me` 回 `401`。靜態首頁仍可在本機開啟。
 - Angular 在本機沒有 Access JWT 時會顯示重新登入畫面；完整登入及畫面讀寫須在受 Access 保護的測試網址驗證。
-- `build:cloudflare` 使用根目錄 base href，供 Wrangler 靜態資產設定使用；既有 `npm run build` 仍保留 GitHub Pages 的 `/AngularLedger/` base href。
+- `npm run build` 與 `build:cloudflare` 都使用根目錄 base href，供 Wrangler 靜態資產設定使用。
+- `npm run ci:cloudflare` 依序檢查 Worker 型別、執行 API 測試並建置 Angular；Cloudflare Builds 會執行這個指令，成功後才部署 Worker。
 
 ## Cloudflare 測試環境
 
