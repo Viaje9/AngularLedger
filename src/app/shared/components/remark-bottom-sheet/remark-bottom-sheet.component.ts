@@ -32,15 +32,34 @@ export class RemarkBottomSheetComponent implements AfterViewInit {
   descriptionOptions = signal<DescInfo[]>([])
 
   filterOptions: DescInfo[] = [];
+  loadingDescriptions = true;
+  descriptionsLoadFailed = false;
   preventInputBlur = false;
 
   ngOnInit(): void {
     this.descriptionValue.set(this.description)
     this.processOptions(this.descriptionValue());
-    this.preferences.descriptions().then(items => {
-      this.descriptionOptions.set(items.map(item => ({ id: item.id, name: item.description })));
-      this.processOptions(this.descriptionValue());
-    }).catch(() => this.snackBar.open('載入常用備註失敗', '', { duration: 3000 }));
+    const cached = this.preferences.cachedDescriptions();
+    if (cached !== null) this.setDescriptions(cached);
+    if (!this.preferences.shouldRefreshDescriptions()) {
+      this.loadingDescriptions = false;
+      return;
+    }
+    this.preferences.refreshDescriptions().then(items => {
+      this.setDescriptions(items);
+    }).catch(() => {
+      this.descriptionsLoadFailed = !cached?.length;
+      if (this.descriptionsLoadFailed) {
+        this.snackBar.open('載入常用備註失敗', '', { duration: 3000 });
+      }
+    }).finally(() => {
+      this.loadingDescriptions = false;
+    });
+  }
+
+  private setDescriptions(items: { id: string; description: string }[]) {
+    this.descriptionOptions.set(items.map(item => ({ id: item.id, name: item.description })));
+    this.processOptions(this.descriptionValue());
   }
 
   private processOptions(desc = '') {

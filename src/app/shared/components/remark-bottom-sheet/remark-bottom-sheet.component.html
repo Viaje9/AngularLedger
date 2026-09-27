@@ -29,6 +29,11 @@
         </li>
         }
       </ul>
+      @if (!filterOptions.length) {
+        <p class="py-4 text-center text-gray-500">
+          {{ loadingDescriptions ? '載入常用備註中…' : descriptionsLoadFailed ? '常用備註載入失敗' : descriptionValue() ? '沒有符合的常用備註' : '尚無常用備註' }}
+        </p>
+      }
     </div>
     <div class="flex mt-2">
       <input
