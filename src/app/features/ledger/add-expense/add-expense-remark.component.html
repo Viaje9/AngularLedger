@@ -29,31 +29,30 @@
         {{ loading ? '載入常用備註中…' : loadFailed ? '常用備註載入失敗' : description ? '沒有符合的常用備註' : '尚無常用備註' }}
       </p>
     }
-
-    <div class="remark-input mt-auto border-t border-slate-200 bg-slate-50 py-4">
-      <label for="expenseDescription" class="mb-2 block text-sm font-medium text-slate-600">這筆支出的備註</label>
-      <div class="flex items-stretch gap-2">
-        <div class="flex min-w-0 flex-1 items-center rounded-xl border border-slate-300 bg-white px-3 shadow-sm focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100">
-          <i class="fas fa-pencil-alt mr-3 text-slate-400" aria-hidden="true"></i>
-          <input
-            id="expenseDescription"
-            type="text"
-            autocomplete="off"
-            class="min-w-0 flex-1 bg-transparent py-4 outline-none"
-            placeholder="輸入備註或選擇常用備註"
-            [(ngModel)]="description"
-            (ngModelChange)="filterOptions()"
-          />
-          @if (description) {
-            <button type="button" class="ml-2 flex h-8 w-8 items-center justify-center text-slate-500" aria-label="清除備註" (click)="description = ''; filterOptions()">
-              <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-          }
-        </div>
-        <button type="button" class="shrink-0 rounded-xl bg-red-600 px-4 font-medium text-white disabled:opacity-50" [disabled]="submitting" (click)="done()">
-          完成
-        </button>
-      </div>
-    </div>
   </main>
+
+  <footer class="remark-input border-t border-slate-200 bg-white px-4 pt-3">
+    <label for="expenseDescription" class="mb-2 block text-sm font-medium text-slate-600">這筆支出的備註</label>
+    <div class="flex items-center gap-2">
+      <div class="flex h-12 min-w-0 flex-1 items-center rounded-xl border border-slate-200 bg-slate-50 px-3 transition-colors focus-within:border-red-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-red-100">
+        <input
+          id="expenseDescription"
+          type="text"
+          autocomplete="off"
+          class="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-slate-400"
+          placeholder="輸入備註"
+          [(ngModel)]="description"
+          (ngModelChange)="filterOptions()"
+        />
+        @if (description) {
+          <button type="button" class="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 hover:text-slate-600" aria-label="清除備註" (click)="description = ''; filterOptions()">
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+      <button type="button" class="h-12 shrink-0 rounded-xl bg-red-600 px-4 font-medium text-white disabled:opacity-50" [disabled]="submitting" (click)="done()">
+        完成
+      </button>
+    </div>
+  </footer>
 </div>
