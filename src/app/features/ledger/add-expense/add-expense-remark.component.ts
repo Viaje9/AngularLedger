@@ -1,5 +1,5 @@
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Component, type OnInit } from '@angular/core';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
+import { Component, ElementRef, type AfterViewInit, type OnDestroy, type OnInit, viewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PreferencesService } from '@src/app/core/services/preferences.service';
@@ -19,8 +19,12 @@ interface DescriptionOption {
   templateUrl: './add-expense-remark.component.html',
   styleUrl: './add-expense-remark.component.css',
 })
-export class AddExpenseRemarkComponent implements OnInit {
+export class AddExpenseRemarkComponent implements OnInit, AfterViewInit, OnDestroy {
+  private page = viewChild<ElementRef<HTMLElement>>('remarkPage');
+  private input = viewChild<ElementRef<HTMLInputElement>>('descriptionInput');
+  private optionsViewport = viewChild(CdkVirtualScrollViewport);
   private date = '';
+  private resizeFrame = 0;
 
   description = '';
   options: DescriptionOption[] = [];
@@ -63,6 +67,37 @@ export class AddExpenseRemarkComponent implements OnInit {
         if (this.loadFailed) this.snackBar.open('載入常用備註失敗', '', { duration: 3000 });
       })
       .finally(() => { this.loading = false; });
+  }
+
+  ngAfterViewInit(): void {
+    this.updateVisibleViewport();
+    window.visualViewport?.addEventListener('resize', this.scheduleViewportUpdate);
+    window.visualViewport?.addEventListener('scroll', this.scheduleViewportUpdate);
+    window.addEventListener('resize', this.scheduleViewportUpdate);
+    this.input()?.nativeElement.focus({ preventScroll: true });
+  }
+
+  ngOnDestroy(): void {
+    window.visualViewport?.removeEventListener('resize', this.scheduleViewportUpdate);
+    window.visualViewport?.removeEventListener('scroll', this.scheduleViewportUpdate);
+    window.removeEventListener('resize', this.scheduleViewportUpdate);
+    cancelAnimationFrame(this.resizeFrame);
+  }
+
+  private scheduleViewportUpdate = (): void => {
+    cancelAnimationFrame(this.resizeFrame);
+    this.resizeFrame = requestAnimationFrame(() => this.updateVisibleViewport());
+  };
+
+  private updateVisibleViewport(): void {
+    const page = this.page()?.nativeElement;
+    if (!page) return;
+    const viewport = window.visualViewport;
+    page.style.top = `${viewport?.offsetTop ?? 0}px`;
+    page.style.left = `${viewport?.offsetLeft ?? 0}px`;
+    page.style.width = `${viewport?.width ?? window.innerWidth}px`;
+    page.style.height = `${viewport?.height ?? window.innerHeight}px`;
+    this.optionsViewport()?.checkViewportSize();
   }
 
   private setOptions(items: DescriptionOption[]): void {
