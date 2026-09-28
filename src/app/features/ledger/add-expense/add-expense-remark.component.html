@@ -1,0 +1,59 @@
+<div class="remark-page bg-slate-50 text-slate-900">
+  <header class="flex items-center justify-between bg-gray-800 px-4 py-4 text-white">
+    <button type="button" class="flex h-10 w-10 items-center justify-center rounded-lg" aria-label="返回新增支出" (click)="back()">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i>
+    </button>
+    <h1 class="text-lg font-medium">備註</h1>
+    <span class="w-10" aria-hidden="true"></span>
+  </header>
+
+  <main class="flex min-h-0 flex-1 flex-col px-4 pt-5">
+    <div class="mb-3 flex items-baseline justify-between">
+      <h2 class="font-medium">常用備註</h2>
+      @if (filteredOptions.length) {
+        <span class="text-sm text-slate-500">{{ filteredOptions.length }} 筆</span>
+      }
+    </div>
+
+    @if (filteredOptions.length) {
+      <cdk-virtual-scroll-viewport class="remark-options rounded-xl border border-slate-200 bg-white" [itemSize]="60">
+        <div *cdkVirtualFor="let item of filteredOptions; trackBy: trackOption" class="flex h-[60px] items-center border-b border-slate-100 last:border-b-0">
+          <button type="button" class="min-w-0 flex-1 truncate px-4 py-4 text-left" (click)="selectOption(item.description)">{{ item.description }}</button>
+          <button type="button" class="flex h-full w-12 shrink-0 items-center justify-center text-slate-400 hover:text-red-600" [attr.aria-label]="'刪除常用備註：' + item.description" (click)="removeOption(item.id)">
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    } @else {
+      <p class="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
+        {{ loading ? '載入常用備註中…' : loadFailed ? '常用備註載入失敗' : description ? '沒有符合的常用備註' : '尚無常用備註' }}
+      </p>
+    }
+
+    <div class="remark-input mt-auto border-t border-slate-200 bg-slate-50 py-4">
+      <label for="expenseDescription" class="mb-2 block text-sm font-medium text-slate-600">這筆支出的備註</label>
+      <div class="flex items-stretch gap-2">
+        <div class="flex min-w-0 flex-1 items-center rounded-xl border border-slate-300 bg-white px-3 shadow-sm focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100">
+          <i class="fas fa-pencil-alt mr-3 text-slate-400" aria-hidden="true"></i>
+          <input
+            id="expenseDescription"
+            type="text"
+            autocomplete="off"
+            class="min-w-0 flex-1 bg-transparent py-4 outline-none"
+            placeholder="輸入備註或選擇常用備註"
+            [(ngModel)]="description"
+            (ngModelChange)="filterOptions()"
+          />
+          @if (description) {
+            <button type="button" class="ml-2 flex h-8 w-8 items-center justify-center text-slate-500" aria-label="清除備註" (click)="description = ''; filterOptions()">
+              <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+        <button type="button" class="shrink-0 rounded-xl bg-red-600 px-4 font-medium text-white disabled:opacity-50" [disabled]="submitting" (click)="done()">
+          完成
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

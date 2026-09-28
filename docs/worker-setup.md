@@ -34,7 +34,7 @@ Cloudflare Access 已保護測試 Worker 的正式與預覽網址，只允許指
 
 首次登入後已核對 Access 身分並建立測試帳本，設定 `accounts.access_subject`；身分與帳本的實際 ID 不記錄在此文件。
 
-Angular Service Worker 可能從舊快取直接顯示登入畫面，使普通的 `/` 導覽沒有送到 Access。登入與登出按鈕已加入 `ngsw-bypass`，強制導覽請求經過網路與 Access。
+本分支已停用 Angular Service Worker；部署後，新版前端啟動時會移除同網域既有的 `/ngsw-worker.js` 註冊及 `ngsw:/:` 快取。這只影響離線資產快取，不會清除記帳資料。登入與登出網址暫時保留 `ngsw-bypass`，讓尚未載入新版的瀏覽器仍能經網路通過 Access。
 
 ### 最近 10 天試匯入
 

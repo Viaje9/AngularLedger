@@ -1,0 +1,14 @@
+.remark-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.remark-options {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.remark-input {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

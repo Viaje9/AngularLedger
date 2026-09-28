@@ -1,4 +1,4 @@
-import { Component, type OnInit, ElementRef, TemplateRef, ChangeDetectorRef, viewChild } from '@angular/core';
+import { Component, type OnInit, type OnDestroy, ElementRef, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TagInfo } from '@src/app/core/models/tag.model';
 import { LedgerService } from '@src/app/core/services/ledger.service';
@@ -7,24 +7,18 @@ import { ModalService } from '@src/app/core/services/modal.service';
 import { SharedModule } from '@src/app/shared/shared.module';
 import dayjs from 'dayjs';
 import { isValidDate } from '@src/app/utils/validator';
-import {
-  MatBottomSheet,
-  MatBottomSheetModule,
-} from '@angular/material/bottom-sheet';
-import { RemarkBottomSheetComponent } from '@src/app/shared/components/remark-bottom-sheet/remark-bottom-sheet.component';
+import { AddExpenseDraftService } from './add-expense-draft.service';
+import { TransactionTypeEnum } from '@src/app/core/enums/transaction-type.enum';
 
 @Component({
     selector: 'app-add-expense',
     imports: [
         SharedModule,
-        MatBottomSheetModule,
     ],
     templateUrl: './add-expense.component.html',
     styleUrl: './add-expense.component.css'
 })
-export class AddExpenseComponent implements OnInit {
-  scrollTagsRef = viewChild.required<ElementRef>('scrollTags');
-  tagGroupRef = viewChild.required<ElementRef>('tagGroup');
+export class AddExpenseComponent implements OnInit, OnDestroy {
   priceInput = viewChild.required<ElementRef>('priceInput');
 
   maxTagGroupPage = 0
@@ -33,10 +27,13 @@ export class AddExpenseComponent implements OnInit {
   price!: number;
 
   tagsGroup: TagInfo[][] = [];
+  loadingTags = true;
+  tagLoadError = false;
 
   selectedTagId = '';
   description = '';
   date!: Date;
+  private openingRemark = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -44,10 +41,8 @@ export class AddExpenseComponent implements OnInit {
     private modalService: ModalService,
     private loaderService: LoaderService,
     private ledgerService: LedgerService,
-    private changeDetectorRef: ChangeDetectorRef,
-    private bottomSheet: MatBottomSheet
+    private draft: AddExpenseDraftService,
   ) {
-    this.tagsGroup = this.route.snapshot.data['tagListGroup'];
     const dateString = this.route.snapshot.queryParamMap.get('date') || ''
 
 
@@ -58,6 +53,7 @@ export class AddExpenseComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    void this.loadTags();
     const { price, description } = this.route.snapshot.queryParams;
     const priceNum = parseFloat(price)
     if (priceNum > 0) {
@@ -68,12 +64,37 @@ export class AddExpenseComponent implements OnInit {
       this.description = description
     }
 
-  }
-  ngAfterViewInit(): void {
-    const scrollWidth = this.scrollTagsRef().nativeElement.scrollWidth;
-    const tagGroupWidth = this.tagGroupRef().nativeElement.scrollWidth;
-    this.maxTagGroupPage = Math.ceil(scrollWidth / tagGroupWidth)
+    const saved = this.draft.get(dayjs(this.date).format('YYYY-MM-DD'));
+    if (saved) {
+      this.price = saved.price!;
+      this.selectedTagId = saved.selectedTagId;
+      this.description = saved.description;
+      this.currentTagGroupPage = saved.tagGroupPage;
+      this.translateFactor = `translate(-${saved.tagGroupPage * 100}%, 0)`;
+    }
 
+  }
+  ngOnDestroy(): void {
+    if (!this.openingRemark) this.draft.clear();
+  }
+  async loadTags(): Promise<void> {
+    this.loadingTags = true;
+    this.tagLoadError = false;
+    try {
+      const tags = await this.ledgerService.getTagList(TransactionTypeEnum.Expense);
+      this.tagsGroup = (tags as TagInfo[]).reduce((groups: TagInfo[][], tag, index) => {
+        const page = Math.floor(index / 9);
+        (groups[page] ??= []).push(tag);
+        return groups;
+      }, []);
+      this.maxTagGroupPage = this.tagsGroup.length;
+      this.currentTagGroupPage = Math.min(this.currentTagGroupPage, Math.max(0, this.maxTagGroupPage - 1));
+      this.translateFactor = `translate(-${this.currentTagGroupPage * 100}%, 0)`;
+    } catch {
+      this.tagLoadError = true;
+    } finally {
+      this.loadingTags = false;
+    }
   }
 
   onSwipeRight(): void {
@@ -105,6 +126,7 @@ export class AddExpenseComponent implements OnInit {
   }
 
   onClickBack() {
+    this.draft.clear();
     this.router.navigate(['/'], {
       queryParams: {
         date: dayjs(this.date).format('YYYY-MM-DD')
@@ -149,17 +171,16 @@ export class AddExpenseComponent implements OnInit {
   }
 
   onClickDescription() {
-    const bottomSheetRef = this.bottomSheet.open(RemarkBottomSheetComponent, {
-      data: {
-        description: this.description
-      },
-      panelClass: ['max-h-96', 'relative']
+    const date = dayjs(this.date).format('YYYY-MM-DD');
+    this.draft.save({
+      date,
+      price: this.price,
+      selectedTagId: this.selectedTagId,
+      description: this.description,
+      tagGroupPage: this.currentTagGroupPage,
     });
-
-    bottomSheetRef.instance.onSubmit.subscribe((description: string) => {
-      this.description = description
-      bottomSheetRef.dismiss()
-    })
+    this.openingRemark = true;
+    void this.router.navigate(['/addExpense/remark'], { queryParams: { date } });
   }
 
   showError() {
