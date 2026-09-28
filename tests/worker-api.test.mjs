@@ -61,6 +61,37 @@ test('身分與帳本隔離', async () => {
   db.sql.close();
 });
 
+test('本機測試登入只接受明確開啟的 loopback 請求', async () => {
+  const db = makeDb();
+  db.sql.prepare('INSERT INTO accounts (id, access_subject) VALUES (?, ?)')
+    .run('local-account', 'local-dev-subject');
+  const localEnv = { DB: db, LOCAL_DEV_SUBJECT: 'local-dev-subject',
+    LOCAL_DEV_ORIGIN: 'http://127.0.0.1:4200' };
+  const local = await createApp().request('http://127.0.0.1:8787/api/v1/me', {}, localEnv);
+  assert.equal(local.status, 200);
+  assert.deepEqual(await local.json(), { account: { id: 'local-account' } });
+  const missingFlag = await createApp().request('http://127.0.0.1:8787/api/v1/me', {}, { DB: db });
+  assert.equal(missingFlag.status, 401);
+  const remote = await createApp().request('https://ledger.test/api/v1/me', {}, localEnv);
+  assert.equal(remote.status, 401);
+  const allowedWrite = await createApp().request('http://127.0.0.1:8787/api/v1/tags', {
+    method: 'POST', headers: { Origin: 'http://127.0.0.1:4200', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'expense', name: '測試', iconName: 'food' }),
+  }, localEnv);
+  assert.equal(allowedWrite.status, 201);
+  const localhostWrite = await createApp().request('http://127.0.0.1:8787/api/v1/tags', {
+    method: 'POST', headers: { Origin: 'http://localhost:4200', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'expense', name: '另一個本機網址', iconName: 'food' }),
+  }, localEnv);
+  assert.equal(localhostWrite.status, 201);
+  const foreignWrite = await createApp().request('http://127.0.0.1:8787/api/v1/tags', {
+    method: 'POST', headers: { Origin: 'https://elsewhere.test', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'expense', name: '不允許', iconName: 'food' }),
+  }, localEnv);
+  assert.equal(foreignWrite.status, 400);
+  db.sql.close();
+});
+
 test('標籤新增、查詢、排序、修改、封存與還原', async () => {
   const db = makeDb();
   const first = await call(db, '/api/v1/tags', { method: 'POST',

@@ -12,7 +12,11 @@
     "build:cloudflare": "npm run build",
     "ci:cloudflare": "npm run api:check && npm run api:test && npm run build:cloudflare",
     "dev:worker": "wrangler dev",
-    "db:migrate:local": "wrangler d1 migrations apply angular-ledger-staging --local",
+    "db:migrate:local": "wrangler d1 migrations apply angular-ledger-local --config wrangler.local.jsonc --local --persist-to .wrangler/local",
+    "db:seed:local": "wrangler d1 execute angular-ledger-local --config wrangler.local.jsonc --local --persist-to .wrangler/local --file scripts/local-seed.sql",
+    "dev:api:local": "wrangler dev --config wrangler.local.jsonc --local --persist-to .wrangler/local --ip 127.0.0.1 --port 8787 --var LOCAL_DEV_SUBJECT:local-dev-subject --var LOCAL_DEV_ORIGIN:http://127.0.0.1:4200",
+    "dev:web:local": "ng serve --host 127.0.0.1 --port 4200 --proxy-config proxy.local.json",
+    "dev:local": "node scripts/dev-local.mjs",
     "test": "ng test",
     "prepare": "husky"
   },

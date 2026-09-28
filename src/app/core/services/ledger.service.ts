@@ -130,7 +130,15 @@ export class LedgerService {
   }
 
   async getTagList(type: TransactionType, includeArchived = false): Promise<TagInfo[]> {
-    if (includeArchived) return this.loadTagList(type, true);
+    if (includeArchived) {
+      const items = await this.loadTagList(type, true);
+      const key = this.tagCacheKey(type);
+      if (key) {
+        this.invalidateTagCache(type);
+        this.writeTagCache(key, items.filter(item => item.archivedAtMs === null));
+      }
+      return items;
+    }
     const key = this.tagCacheKey(type);
     if (!key) return this.loadTagList(type);
 

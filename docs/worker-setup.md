@@ -6,18 +6,15 @@
 
 ```sh
 npm ci
-npm run api:generate
-npm run api:check
-npm run api:test
-npm run build:cloudflare
-npm run db:migrate:local
-npm run dev:worker
+npm run dev:local
 ```
 
+- 開啟 `http://127.0.0.1:4200` 或 `http://localhost:4200`。這個指令會先對獨立的本機 D1 套用 migration、建立 `local-account` 測試帳號，再啟動 Angular 開發伺服器與 Hono Worker；Angular 的 `/api/**` 會代理至本機 Worker。按 `Ctrl+C` 停止兩個服務。
+- 本機資料保存在忽略版控的 `.wrangler/local/`，重開後仍在；啟動指令不會連到 Cloudflare staging D1，也不會自動複製正式或測試站的私人資料。若手動匯入資料，資料只存於本機 D1。第一次進站會由 `/api/v1/me` 直接取得本機測試帳號，無須 Cloudflare Access。這是本機測試登入，不能驗證真實 Access 登入流程。
+- 本機 API 只綁定 `127.0.0.1:8787`，Angular 只綁定 `127.0.0.1:4200`。本機測試登入只在 Worker 收到 loopback HTTP 請求，且啟動指令注入指定測試身分時啟用；部署用的 `wrangler.jsonc` 不含這項設定。
+- 需要分開啟動時，先執行 `npm run db:migrate:local` 和 `npm run db:seed:local`，再在兩個終端執行 `npm run dev:api:local`、`npm run dev:web:local`。
 - `api:generate` 由 OpenAPI 規格重建 `src/app/api/generated/`；不要手動修改產生檔。
 - `api:test` 使用 Node 22 內建 SQLite 與測試身分檢查 Hono 路由、SQL 和帳本隔離；它不是 Cloudflare Access 的真實登入測試。
-- 本機 Wrangler 預設也會驗證 Access JWT，因此沒有真實 JWT 時 `/api/v1/me` 回 `401`。靜態首頁仍可在本機開啟。
-- Angular 在本機沒有 Access JWT 時會顯示重新登入畫面；完整登入及畫面讀寫須在受 Access 保護的測試網址驗證。
 - `npm run build` 與 `build:cloudflare` 都使用根目錄 base href，供 Wrangler 靜態資產設定使用。
 - `npm run ci:cloudflare` 依序檢查 Worker 型別、執行 API 測試並建置 Angular；Cloudflare Builds 會執行這個指令，成功後才部署 Worker。
 

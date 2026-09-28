@@ -3,7 +3,15 @@ import { ApiError, type Bindings } from './common';
 
 const keySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
+export function isLocalDevRequest(request: Request, env: Bindings): boolean {
+  const url = new URL(request.url);
+  return env.LOCAL_DEV_SUBJECT === 'local-dev-subject'
+    && url.protocol === 'http:'
+    && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+}
+
 export async function accessSubject(request: Request, env: Bindings): Promise<string> {
+  if (isLocalDevRequest(request, env)) return env.LOCAL_DEV_SUBJECT!;
   const token = request.headers.get('Cf-Access-Jwt-Assertion');
   if (!token) throw new ApiError(401, 'UNAUTHENTICATED', '尚未登入');
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) {

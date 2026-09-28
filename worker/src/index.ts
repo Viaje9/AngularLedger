@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { accessSubject } from './auth';
+import { accessSubject, isLocalDevRequest } from './auth';
 import { ApiError, type AppEnv } from './common';
 import { tags } from './tags';
 import { entries } from './entries';
@@ -12,7 +12,10 @@ export function createApp(resolveSubject: typeof accessSubject = accessSubject) 
     c.header('Cache-Control', 'no-store');
     if (!['GET', 'HEAD'].includes(c.req.method)) {
       const origin = c.req.header('Origin');
-      if (!origin || origin !== new URL(c.req.url).origin) {
+      const localOrigin = isLocalDevRequest(c.req.raw, c.env) ? c.env.LOCAL_DEV_ORIGIN : undefined;
+      const localhostOrigin = localOrigin?.replace('://127.0.0.1:', '://localhost:');
+      if (!origin || (origin !== new URL(c.req.url).origin
+        && origin !== localOrigin && origin !== localhostOrigin)) {
         throw new ApiError(400, 'INVALID_INPUT', '來源網域不正確');
       }
     }

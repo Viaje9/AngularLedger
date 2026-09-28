@@ -6,6 +6,8 @@ export interface Bindings {
   ASSETS: Fetcher;
   ACCESS_TEAM_DOMAIN: string;
   ACCESS_AUD: string;
+  LOCAL_DEV_SUBJECT?: string;
+  LOCAL_DEV_ORIGIN?: string;
 }
 
 export type AppEnv = {

@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "angular-ledger-local",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2026-09-27",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "angular-ledger-local",
+      "database_id": "00000000-0000-4000-8000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
