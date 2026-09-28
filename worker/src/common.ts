@@ -12,7 +12,7 @@ export interface Bindings {
 
 export type AppEnv = {
   Bindings: Bindings;
-  Variables: { accountId: string };
+  Variables: { accountId: string; accessSubject: string };
 };
 
 export type ApiCode =

@@ -22,6 +22,11 @@ function makeDb() {
   sql.prepare('INSERT INTO accounts (id, access_subject) VALUES (?, ?)').run('account-b', 'subject-b');
   return {
     sql,
+    async batch(statements) {
+      const results = [];
+      for (const statement of statements) results.push(await statement.all());
+      return results;
+    },
     prepare(query) {
       return {
         bind(...params) {
@@ -138,6 +143,8 @@ test('記帳增查改刪、分頁、搜尋與加總', async () => {
   assert.equal((await call(db, `${query}&limit=1&cursor=${page.data.nextCursor}`)).data.items.length, 1);
   assert.equal((await call(db, `${query}&limit=1&q=x&cursor=${page.data.nextCursor}`)).data.error.code, 'INVALID_CURSOR');
   assert.equal((await call(db, `${query}&q=午餐`)).data.items.length, 1);
+  assert.deepEqual((await call(db, query, { subject: 'subject-b' })).data.items, []);
+  assert.equal((await call(db, query, { subject: 'unlinked' })).data.error.code, 'ACCOUNT_NOT_LINKED');
   assert.equal((await call(db, `/api/v1/entries/expense/${first.data.id}`)).data.tag.name, '飲食');
   assert.equal((await call(db, `/api/v1/entries/expense/${first.data.id}`, { subject: 'subject-b' })).status, 404);
   const summary = await call(db, `${query.replace('/entries?', '/entries/summary?')}&currencyCode=TWD`);

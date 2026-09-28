@@ -113,19 +113,29 @@ entries.get('/entries', async (c) => {
   const field = sort.startsWith('amount') ? 'e.amount_minor' : 'e.occurred_at_ms';
   const direction = sort.endsWith('Asc') ? 'ASC' : 'DESC';
   const comparator = direction === 'ASC' ? '>' : '<';
-  const where = ['e.account_id = ?', 'e.kind = ?', 'e.occurred_at_ms >= ?', 'e.occurred_at_ms < ?'];
-  const args: (string | number)[] = [c.get('accountId'), kind, fromMs, toMs];
+  const subject = c.get('accessSubject');
+  const where = [
+    'e.account_id = (SELECT id FROM accounts WHERE access_subject = ?)',
+    'e.kind = ?', 'e.occurred_at_ms >= ?', 'e.occurred_at_ms < ?',
+  ];
+  const args: (string | number)[] = [subject, kind, fromMs, toMs];
   if (tagId) { where.push('e.tag_id = ?'); args.push(tagId); }
   if (q) { where.push('instr(e.description, ?) > 0'); args.push(q); }
   if (cursor) {
     where.push(`(${field} ${comparator} ? OR (${field} = ? AND e.id > ?))`);
     args.push(cursor.value, cursor.value, cursor.id);
   }
-  const rows = await c.env.DB.prepare(`${entrySelect} WHERE ${where.join(' AND ')}
-    ORDER BY ${field} ${direction}, e.id ASC LIMIT ?`)
-    .bind(...args, limit + 1).all<EntryRow>();
-  const hasMore = rows.results.length > limit;
-  const page = rows.results.slice(0, limit);
+  const [accountResult, entriesResult] = await c.env.DB.batch<EntryRow>([
+    c.env.DB.prepare('SELECT id FROM accounts WHERE access_subject = ?').bind(subject),
+    c.env.DB.prepare(`${entrySelect} WHERE ${where.join(' AND ')}
+      ORDER BY ${field} ${direction}, e.id ASC LIMIT ?`).bind(...args, limit + 1),
+  ]);
+  if (!accountResult.results.length) {
+    throw new ApiError(403, 'ACCOUNT_NOT_LINKED', '帳本尚未綁定');
+  }
+  const rows = entriesResult.results;
+  const hasMore = rows.length > limit;
+  const page = rows.slice(0, limit);
   const last = page.at(-1);
   const value = last && (field === 'e.amount_minor' ? last.amount_minor : last.occurred_at_ms);
   return c.json({

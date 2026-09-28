@@ -20,6 +20,11 @@ export function createApp(resolveSubject: typeof accessSubject = accessSubject) 
       }
     }
     const subject = await resolveSubject(c.req.raw, c.env);
+    if (c.req.method === 'GET' && c.req.path === '/api/v1/entries') {
+      c.set('accessSubject', subject);
+      await next();
+      return;
+    }
     const account = await c.env.DB.prepare('SELECT id FROM accounts WHERE access_subject = ?')
       .bind(subject).first<{ id: string }>();
     if (!account) throw new ApiError(403, 'ACCOUNT_NOT_LINKED', '帳本尚未綁定');
