@@ -29,3 +29,7 @@
   flex-shrink: 0;
   padding-bottom: max(1.75rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
 }
+
+.remark-page:focus-within .remark-input {
+  padding-bottom: 0.5rem;
+}
