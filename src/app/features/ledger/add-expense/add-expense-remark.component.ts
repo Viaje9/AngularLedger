@@ -114,6 +114,7 @@ export class AddExpenseRemarkComponent implements OnInit, AfterViewInit, OnDestr
   selectOption(description: string): void {
     this.description = description;
     this.filterOptions();
+    this.input()?.nativeElement.focus({ preventScroll: true });
   }
 
   trackOption(_index: number, item: DescriptionOption): string {
