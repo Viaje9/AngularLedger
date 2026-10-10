@@ -8,7 +8,7 @@
     "MCP_ORIGIN": "https://angular-ledger-mcp.h99y5246cv.workers.dev",
     "LEDGER_ORIGIN": "https://angular-ledger-staging.h99y5246cv.workers.dev",
     "MCP_CLIENT_ID": "angular-ledger-chatgpt",
-    "MCP_REDIRECT_URIS": "[]"
+    "MCP_REDIRECT_URIS": "[\"https://chatgpt.com/connector_platform_oauth_redirect\"]"
   },
   "assets": {
     "directory": "./dist/angular-ledger/browser",

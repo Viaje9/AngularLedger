@@ -1,6 +1,6 @@
 # ChatGPT 記帳查詢 MCP 第一版
 
-狀態：已實作並通過本機 SDK、SQLite、Wrangler HTTP、瀏覽器授權與打包驗證。2026-10-10 已套用遠端 0002／0003 migration，部署 MCP Worker；網站部署隨部署設定提交執行。ChatGPT 新增自訂 MCP 畫面目前無法載入 callback，允許清單維持 `[]`，因此不能完成授權或安裝。
+狀態：已實作並通過本機 SDK、SQLite、Wrangler HTTP、瀏覽器授權與打包驗證。2026-10-10 已套用遠端 0002／0003 migration，部署 MCP Worker；網站 Worker 也已部署。Chrome 的 ChatGPT 設定頁已確認 callback 為 `https://chatgpt.com/connector_platform_oauth_redirect`，允許清單已設定此單一網址；實際授權與安裝待完成。
 
 ## 結構
 
@@ -71,7 +71,7 @@ npm run dev:mcp:local
 5. 在 ChatGPT 的 [Plugins](https://chatgpt.com/plugins) 加入 custom MCP server，輸入實際 HTTPS `/mcp` URL，選 OAuth，設定上述 client ID，使用 public client（無 secret）。取得連接頁顯示的 callback，更新允許清單後再完成連接。帳號／workspace 政策需允許 custom MCP。
 6. 透過 MCP Inspector 與 ChatGPT 實際驗證登入及同意、四個工具、撤銷後拒絕，再建立私人 Plugin。第一版無須公開上架或另做聊天 UI；ChatGPT 可直接呈現工具結果。
 
-MCP 遠端網址為 `https://angular-ledger-mcp.h99y5246cv.workers.dev/mcp`；discovery 已驗證 200、未授權 MCP 已驗證 401。ChatGPT callback、遠端 Access 登入與 Plugin 安裝尚未驗證，callback 清單取得實際網址後才啟用。
+MCP 遠端網址為 `https://angular-ledger-mcp.h99y5246cv.workers.dev/mcp`；discovery 已驗證 200、未授權 MCP 已驗證 401。ChatGPT callback 已從 Chrome 設定頁確認；遠端 Access 登入與 Plugin 安裝尚待驗證。
 
 ## 驗收提問
 
