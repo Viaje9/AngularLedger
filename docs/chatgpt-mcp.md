@@ -1,6 +1,6 @@
 # ChatGPT 記帳查詢 MCP 第一版
 
-狀態：已實作，已通過本機 SDK、SQLite、Wrangler HTTP、瀏覽器授權與打包驗證。尚未部署 MCP Worker、套用遠端 migration 或在 ChatGPT 安裝私人 Plugin。
+狀態：已實作並通過本機 SDK、SQLite、Wrangler HTTP、瀏覽器授權與打包驗證。2026-10-10 已套用遠端 0002／0003 migration，部署 MCP Worker；網站部署隨部署設定提交執行。ChatGPT 新增自訂 MCP 畫面目前無法載入 callback，允許清單維持 `[]`，因此不能完成授權或安裝。
 
 ## 結構
 
@@ -65,13 +65,13 @@ npm run dev:mcp:local
    | `MCP_CLIENT_ID` | 固定的 public client ID，例如 `angular-ledger-chatgpt` |
    | `MCP_REDIRECT_URIS` | JSON 陣列，放 ChatGPT 連接管理頁實際顯示的完整 callback URI |
 
-   未設定 MCP_ORIGIN 時，新 OAuth 路由回 503；既有網站 API 不受影響。設定錯誤的 origin/client 不會退回未驗證模式。不能猜 callback；本伺服器有 issuer identification，仍需複製該連接頁顯示的確切 URI。
+   未設定 MCP_ORIGIN 時，新 OAuth 路由回 503；既有網站 API 不受影響。設定錯誤的 origin/client 不會退回未驗證模式。允許清單可先設為 `[]` 以供 discovery；此時所有授權要求都會被拒絕。不能猜 callback；本伺服器有 issuer identification，仍需複製該連接頁顯示的確切 URI。
 
 4. 建置／部署網站 Worker，使 `/oauth/authorize` 與 `/oauth/connections` 生效；依 `wrangler.mcp.jsonc` 部署獨立 MCP Worker。GitHub 原有建置只部署網站 Worker，不會自動部署 MCP Worker。此處沒有把遠端 migration 放進 CI。
 5. 在 ChatGPT 的 [Plugins](https://chatgpt.com/plugins) 加入 custom MCP server，輸入實際 HTTPS `/mcp` URL，選 OAuth，設定上述 client ID，使用 public client（無 secret）。取得連接頁顯示的 callback，更新允許清單後再完成連接。帳號／workspace 政策需允許 custom MCP。
 6. 透過 MCP Inspector 與 ChatGPT 實際驗證登入及同意、四個工具、撤銷後拒絕，再建立私人 Plugin。第一版無須公開上架或另做聊天 UI；ChatGPT 可直接呈現工具結果。
 
-遠端網址、ChatGPT callback、遠端 Access 登入與 Plugin 安裝尚未驗證，因此本次不產生包含猜測網址的安裝包。
+MCP 遠端網址為 `https://angular-ledger-mcp.h99y5246cv.workers.dev/mcp`；discovery 已驗證 200、未授權 MCP 已驗證 401。ChatGPT callback、遠端 Access 登入與 Plugin 安裝尚未驗證，callback 清單取得實際網址後才啟用。
 
 ## 驗收提問
 
@@ -84,7 +84,7 @@ npm run dev:mcp:local
 
 ## 已驗證與待驗證
 
-22 組本機測試（16 組 MCP／OAuth、6 組既有 API）覆蓋官方 SDK 初始化、工具 schema／annotation、四個工具、台北日期邊界、分頁、完整／篩選統計、跨帳本隔離、PKCE、單次換碼、拒絕授權、Origin、到期／撤銷／重新綁定、輸入大小與限流；續期測試涵蓋官方 MCP 客戶端遇到 401 自動續期、輪替、重用、併發、撤銷、閒置到期與交易回滾。另以 Wrangler 真實本機 HTTP 驗證 OAuth → MCP → 撤銷，以 Playwright 驗證授權表單到 callback，並通過 Angular 建置及 Cloudflare dry-run 打包。Angular 建置仍有 500 kB 初始 bundle budget 與既有 CommonJS 套件警告。
+23 組本機測試（17 組 MCP／OAuth、6 組既有 API）覆蓋官方 SDK 初始化、工具 schema／annotation、四個工具、台北日期邊界、分頁、完整／篩選統計、跨帳本隔離、PKCE、單次換碼、拒絕授權、Origin、到期／撤銷／重新綁定、輸入大小與限流；續期測試涵蓋官方 MCP 客戶端遇到 401 自動續期、輪替、重用、併發、撤銷、閒置到期與交易回滾。另以 Wrangler 真實本機 HTTP 驗證 OAuth → MCP → 撤銷，以 Playwright 驗證授權表單到 callback，並通過 Angular 建置及 Cloudflare dry-run 打包。Angular 建置仍有 500 kB 初始 bundle budget 與既有 CommonJS 套件警告。
 
 尚待遠端部署後驗證：Cloudflare Access 的真實登入／POST 身分標頭、ChatGPT OAuth callback 與工具選擇、ChatGPT 實際自動續期，以及私人 Plugin 安裝。SQLite 單元測試與本機 loopback 身分不代表這些遠端驗收已完成。
 

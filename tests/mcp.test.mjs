@@ -422,3 +422,14 @@ test('續期交易中途失敗會回滾，不會消耗原本 refresh token', asy
   assert.equal((await refresh(env, initial.refresh_token)).status, 200);
   sql.close();
 });
+
+ test('empty callback allowlist allows discovery but rejects authorization', async () => {
+  const { env, sql } = fixture();
+  env.MCP_REDIRECT_URIS = '[]';
+  const metadata = await mcp.request(`${origin}/.well-known/oauth-authorization-server`, {}, env);
+  assert.equal(metadata.status, 200);
+  const pending = await consent(env);
+  assert.equal(pending.response.status, 400);
+  assert.equal(sql.prepare('SELECT count(*) AS n FROM mcp_oauth_grants').get().n, 0);
+  sql.close();
+});

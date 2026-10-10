@@ -24,7 +24,7 @@ export function oauthConfig(env: Bindings) {
       || url.username || url.password) throw new Error('Invalid OAuth origin');
   }
   const redirects: unknown = JSON.parse(env.MCP_REDIRECT_URIS ?? '[]');
-  if (!env.MCP_CLIENT_ID || !Array.isArray(redirects) || !redirects.length
+  if (!env.MCP_CLIENT_ID || !Array.isArray(redirects)
     || !redirects.every((value) => {
       if (typeof value !== 'string') return false;
       const url = new URL(value);

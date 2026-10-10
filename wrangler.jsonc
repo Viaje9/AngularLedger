@@ -4,6 +4,12 @@
   "account_id": "80c54a9294e508bb1f92c6b4f58be37f",
   "main": "worker/src/index.ts",
   "compatibility_date": "2026-09-27",
+  "vars": {
+    "MCP_ORIGIN": "https://angular-ledger-mcp.h99y5246cv.workers.dev",
+    "LEDGER_ORIGIN": "https://angular-ledger-staging.h99y5246cv.workers.dev",
+    "MCP_CLIENT_ID": "angular-ledger-chatgpt",
+    "MCP_REDIRECT_URIS": "[]"
+  },
   "assets": {
     "directory": "./dist/angular-ledger/browser",
     "binding": "ASSETS",
