@@ -4,9 +4,11 @@ import { ApiError, type AppEnv } from './common';
 import { tags } from './tags';
 import { entries } from './entries';
 import { settings } from './settings';
+import { authorizationRoutes } from './mcp-oauth';
 
 export function createApp(resolveSubject: typeof accessSubject = accessSubject) {
   const app = new Hono<AppEnv>();
+  app.route('/', authorizationRoutes(resolveSubject));
 
   app.use('/api/v1/*', async (c, next) => {
     c.header('Cache-Control', 'no-store');

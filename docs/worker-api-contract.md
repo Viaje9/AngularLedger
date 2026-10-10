@@ -85,7 +85,7 @@ JWT 有效但尚未綁定帳本時回 `403 ACCOUNT_NOT_LINKED`。Angular 可顯�
 ```
 
 - `GET /entries` 必填 `kind`、`fromMs`、`toMs`。可選 `tagId`、`q`（備註文字，去除前後空白後做區分大小寫的包含搜尋）、`sort`（`dateDesc`、`dateAsc`、`amountDesc`、`amountAsc`；預設 `dateDesc`）、`limit`（預設 50、上限 100）、`cursor`。回 `{"items":[...記帳],"nextCursor":null}`；若仍有下一頁，`nextCursor` 為不透明字串。相同金額或時間以 `id` 固定排序；cursor 只能沿用相同篩選及排序條件，否則回 `400 INVALID_CURSOR`。第一版查詢範圍中的記帳均為 TWD；日後新增多幣別時，金額排序須先限定幣別。
-- `GET /entries/summary` 必填 `kind`、`fromMs`、`toMs`、`currencyCode`。第一版 `currencyCode` 只接受 `TWD`。回應範例：
+- `GET /entries/summary` 必填 `kind`、`fromMs`、`toMs`、`currencyCode`。可選 `tagId`、`q`，使用與明細查詢相同的分類及備註包含搜尋規則；`q` 上限 200 字元。第一版 `currencyCode` 只接受 `TWD`。回應範例：
 
 ```json
 {

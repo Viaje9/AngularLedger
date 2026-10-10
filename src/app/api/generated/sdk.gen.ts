@@ -183,7 +183,7 @@ export const createEntry = <ThrowOnError extends boolean = false>(options: Optio
 /**
  * 取得期間總額與各標籤加總
  *
- * 沒有資料時 totalMinor、count 為 0，byTag 為空陣列。
+ * 沒有資料時 totalMinor、count 為 0，byTag 為空陣列。可用 tagId 或 q 限定統計範圍；q 與明細使用相同的備註包含搜尋規則。
  */
 export const getEntriesSummary = <ThrowOnError extends boolean = false>(options: Options<GetEntriesSummaryData, ThrowOnError>): RequestResult<GetEntriesSummaryResponses, GetEntriesSummaryErrors, ThrowOnError> => (options.client ?? client).get<GetEntriesSummaryResponses, GetEntriesSummaryErrors, ThrowOnError>({
     security: [{

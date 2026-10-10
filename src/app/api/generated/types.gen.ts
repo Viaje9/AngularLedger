@@ -660,6 +660,8 @@ export type GetEntriesSummaryData = {
          */
         toMs: EpochMs;
         currencyCode: TwdCode;
+        tagId?: Id;
+        q?: string;
     };
     url: '/api/v1/entries/summary';
 };

@@ -8,6 +8,11 @@ export interface Bindings {
   ACCESS_AUD: string;
   LOCAL_DEV_SUBJECT?: string;
   LOCAL_DEV_ORIGIN?: string;
+  MCP_ORIGIN?: string;
+  LEDGER_ORIGIN?: string;
+  MCP_CLIENT_ID?: string;
+  MCP_REDIRECT_URIS?: string;
+  MCP_RATE_LIMITER?: RateLimit;
 }
 
 export type AppEnv = {

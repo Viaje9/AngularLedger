@@ -66,16 +66,24 @@ entries.get('/entries/summary', async (c) => {
   if (query.get('currencyCode') !== 'TWD') invalid('currencyCode');
   const accountId = c.get('accountId');
   const args = [accountId, kind, fromMs, toMs, 'TWD'];
+  const tagId = query.get('tagId') || undefined;
+  if (query.has('tagId') && !tagId) invalid('tagId');
+  const q = query.get('q')?.trim() || undefined;
+  if (q && q.length > 200) invalid('q');
+  const extra: string[] = [];
+  if (tagId) { extra.push('e.tag_id = ?'); args.push(tagId); }
+  if (q) { extra.push('instr(e.description, ?) > 0'); args.push(q); }
+  const filter = extra.length ? ` AND ${extra.join(' AND ')}` : '';
   const totals = await c.env.DB.prepare(`SELECT COALESCE(SUM(amount_minor), 0) AS total_minor,
-    COUNT(*) AS count FROM ledger_entries WHERE account_id = ? AND kind = ?
-    AND occurred_at_ms >= ? AND occurred_at_ms < ? AND currency_code = ?`)
+    COUNT(*) AS count FROM ledger_entries e WHERE e.account_id = ? AND e.kind = ?
+    AND e.occurred_at_ms >= ? AND e.occurred_at_ms < ? AND e.currency_code = ?${filter}`)
     .bind(...args).first<{ total_minor: number; count: number }>();
   const rows = await c.env.DB.prepare(`SELECT e.tag_id, t.name AS tag_name,
     t.archived_at_ms, SUM(e.amount_minor) AS total_minor, COUNT(*) AS count
     FROM ledger_entries e JOIN tags t ON t.account_id = e.account_id
       AND t.id = e.tag_id AND t.kind = e.kind
     WHERE e.account_id = ? AND e.kind = ? AND e.occurred_at_ms >= ?
-      AND e.occurred_at_ms < ? AND e.currency_code = ?
+      AND e.occurred_at_ms < ? AND e.currency_code = ?${filter}
     GROUP BY e.tag_id, t.name, t.archived_at_ms
     ORDER BY total_minor DESC, e.tag_id`).bind(...args).all<{
       tag_id: string; tag_name: string; archived_at_ms: number | null;

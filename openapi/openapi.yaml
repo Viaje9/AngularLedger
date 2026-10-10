@@ -282,7 +282,7 @@ paths:
       operationId: getEntriesSummary
       tags: [Entries]
       summary: 取得期間總額與各標籤加總
-      description: 沒有資料時 totalMinor、count 為 0，byTag 為空陣列。
+      description: 沒有資料時 totalMinor、count 為 0，byTag 為空陣列。可用 tagId 或 q 限定統計範圍；q 與明細使用相同的備註包含搜尋規則。
       parameters:
         - $ref: '#/components/parameters/KindQuery'
         - $ref: '#/components/parameters/FromMs'
@@ -291,6 +291,12 @@ paths:
           in: query
           required: true
           schema: { $ref: '#/components/schemas/TwdCode' }
+        - name: tagId
+          in: query
+          schema: { $ref: '#/components/schemas/Id' }
+        - name: q
+          in: query
+          schema: { type: string, maxLength: 200 }
       responses:
         '200':
           description: 期間加總

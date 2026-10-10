@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "angular-ledger-mcp",
+  "account_id": "80c54a9294e508bb1f92c6b4f58be37f",
+  "main": "worker/src/mcp-index.ts",
+  "compatibility_date": "2026-09-27",
+  "ratelimits": [
+    { "name": "MCP_RATE_LIMITER", "namespace_id": "1001001", "simple": { "limit": 120, "period": 60 } }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "angular-ledger-staging",
+      "database_id": "e66b32b4-76fe-4302-97a7-9820650dd9ad",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

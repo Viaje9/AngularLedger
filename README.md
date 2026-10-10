@@ -12,3 +12,4 @@ AngularLedger 是個人記帳網站。新版前端使用 Angular 19，透過 Hey
 - [Worker API 設計說明](docs/worker-api-contract.md)
 - [OpenAPI 規格](openapi/openapi.yaml)
 - [Worker 開發與部署準備](docs/worker-setup.md)
+- [ChatGPT 唯讀記帳 MCP](docs/chatgpt-mcp.md)

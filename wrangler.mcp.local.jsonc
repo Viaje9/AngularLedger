@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "angular-ledger-mcp-local",
+  "main": "worker/src/mcp-index.ts",
+  "compatibility_date": "2026-09-27",
+  "vars": {
+    "LOCAL_DEV_SUBJECT": "local-dev-subject",
+    "MCP_ORIGIN": "http://127.0.0.1:8788",
+    "LEDGER_ORIGIN": "http://127.0.0.1:8787",
+    "MCP_CLIENT_ID": "ledger-local",
+    "MCP_REDIRECT_URIS": "[\"http://127.0.0.1:9999/callback\"]"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "angular-ledger-local",
+      "database_id": "00000000-0000-4000-8000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

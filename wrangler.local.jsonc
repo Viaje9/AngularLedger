@@ -3,6 +3,12 @@
   "name": "angular-ledger-local",
   "main": "worker/src/index.ts",
   "compatibility_date": "2026-09-27",
+  "vars": {
+    "MCP_ORIGIN": "http://127.0.0.1:8788",
+    "LEDGER_ORIGIN": "http://127.0.0.1:8787",
+    "MCP_CLIENT_ID": "ledger-local",
+    "MCP_REDIRECT_URIS": "[\"http://127.0.0.1:9999/callback\"]"
+  },
   "d1_databases": [
     {
       "binding": "DB",
