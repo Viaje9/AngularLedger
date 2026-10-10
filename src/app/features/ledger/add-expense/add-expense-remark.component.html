@@ -44,7 +44,8 @@
           </button>
         }
       </div>
-      <button type="button" class="h-12 shrink-0 rounded-xl bg-red-600 px-4 font-medium text-white disabled:opacity-50" [disabled]="submitting" (click)="done()">
+      <!-- 保留輸入框焦點，避免鍵盤收起時按鈕移位而吃掉這次點擊。 -->
+      <button type="button" class="h-12 shrink-0 rounded-xl bg-red-600 px-4 font-medium text-white disabled:opacity-50" [disabled]="submitting" (pointerdown)="$event.preventDefault()" (click)="done()">
         完成
       </button>
     </div>
